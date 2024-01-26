@@ -1,7 +1,8 @@
 import { renderHook } from '@testing-library/react';
-import set from 'lodash/set';
 
-import { StateFormRegisterOptions, StateFormReturnType, useStateForm } from 'src/utils/stateForm/index';
+import { stateFormErrorsRequiredMessage } from '../helpers/formStateGenerateErrors';
+import { StateFormRegisterOptions, StateFormReturnType, useStateForm } from '../index';
+import { set } from '../outerDependencies';
 
 type FormValues = {
   strValue: string;
@@ -337,7 +338,7 @@ describe('useStateForm', () => {
         {
           required: true,
         },
-        'common.validation.required',
+        stateFormErrorsRequiredMessage,
       );
     });
 
@@ -356,7 +357,7 @@ describe('useStateForm', () => {
           required: true,
           errorLabel: 'customName',
         },
-        'common.validation.required',
+        stateFormErrorsRequiredMessage,
       );
     });
 
@@ -407,7 +408,7 @@ describe('useStateForm', () => {
         {
           validate: () => false,
         },
-        'common.validation.required',
+        stateFormErrorsRequiredMessage,
       );
     });
 

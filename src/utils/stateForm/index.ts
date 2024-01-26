@@ -1,5 +1,6 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import { StateFormDataTypeFieldTextType, StateFormDataTypeTextType } from './dataTypes/text';
 import { stateFormEmit } from './eventBus/stateFormEmit';
 import { stateFormClearSubscriptions } from './eventBus/stateFormClearSubscriptions';
 import { stateFormSubscribe } from './eventBus/stateFormSubscribe';
@@ -47,7 +48,7 @@ type FieldsOptions = Record<string, FieldOptionValue>;
 type StateFormErrorTypes = 'hover' | 'validate' | 'all' | string;
 
 /** --- return types --- */
-export type StateFormPossibleValue = string | number | boolean | null | undefined | [string, string];
+export type StateFormPossibleValue = StateFormDataTypeTextType | number | boolean | null | undefined | [string, string];
 
 export type StateFormErrors = { [s: string]: DefinedErrorsType };
 
@@ -161,10 +162,9 @@ export type StateFormGetSubscribeProps = (
 export type StateFormFieldsType =
   | 'checkbox'
   | 'checkboxGroup' // it only marks as this, but must not be used directly
-  | 'text'
+  | StateFormDataTypeFieldTextType
   | 'password'
   | 'email'
-  | 'textarea'
   | 'radio'
   | 'color'
   | 'dropdown'

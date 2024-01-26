@@ -1,3 +1,4 @@
+import { stateFormDataTypeTextValidators } from '../dataTypes/text';
 import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
 import { isValidEmail, SafeAnyType, isValidColor } from '../outerDependencies';
 
@@ -6,6 +7,15 @@ const i18next = {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   t: (s: string, options: SafeAnyType) => s,
 };
+
+// TODO temporary until all data types are ready
+const validators: any = {
+  ...stateFormDataTypeTextValidators,
+};
+
+export const stateFormErrorsRequiredMessage = 'common.validation.required';
+export const stateFormErrorsMinLengthMessage = 'common.validation.minLength';
+export const stateFormErrorsMaxLengthMessage = 'common.validation.maxLength';
 
 export const formStateGenerateErrors = (
   value: StateFormPossibleValue,
@@ -23,42 +33,47 @@ export const formStateGenerateErrors = (
   if (validationOptions?.required) {
     let setErr = false;
 
-    switch (fieldType) {
-      case 'masked': {
-        /** if the value isn't fully set */
-        if (!value || value.toString().includes('_')) {
-          setErr = true;
+    if (validators[fieldType]?.required) {
+      // dynamic check
+      setErr = !validators[fieldType].required(value);
+    } else {
+      switch (fieldType) {
+        case 'masked': {
+          /** if the value isn't fully set */
+          if (!value || value.toString().includes('_')) {
+            setErr = true;
+          }
+          break;
         }
-        break;
-      }
-      case 'number': {
-        if (value !== 0 && !value) {
-          setErr = true;
+        case 'number': {
+          if (value !== 0 && !value) {
+            setErr = true;
+          }
+          break;
         }
-        break;
-      }
-      case 'color': {
-        if (!isValidColor(value as SafeAnyType)) {
-          setErr = true;
+        case 'color': {
+          if (!isValidColor(value as SafeAnyType)) {
+            setErr = true;
+          }
+          break;
         }
-        break;
-      }
-      case 'tags': {
-        if (!value || (value as string[])?.length === 0) {
-          setErr = true;
+        case 'tags': {
+          if (!value || (value as string[])?.length === 0) {
+            setErr = true;
+          }
+          break;
         }
-        break;
-      }
-      default: {
-        if (!value) {
-          setErr = true;
+        default: {
+          if (!value) {
+            setErr = true;
+          }
         }
       }
     }
 
     if (setErr) {
       errorsToSet.push(
-        validationOptions.requiredMessage || i18next.t('common.validation.required', { label: errorLabel }),
+        validationOptions.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel }),
       );
 
       return errorsToSet;
@@ -73,10 +88,18 @@ export const formStateGenerateErrors = (
 
   /** minLength */
   if (validationOptions?.minLength) {
-    if ((value || '').toString().length < validationOptions.minLength) {
+    let setErr = false;
+
+    if (validators[fieldType]?.minLength) {
+      setErr = !validators[fieldType].minLength(value, validationOptions.minLength);
+    } else if ((value || '').toString().length < validationOptions.minLength) {
+      setErr = true;
+    }
+
+    if (setErr) {
       errorsToSet.push(
         validationOptions.minLengthMessage ||
-          i18next.t('common.validation.minLength', { label: errorLabel, length: validationOptions.minLength }),
+          i18next.t(stateFormErrorsMinLengthMessage, { label: errorLabel, length: validationOptions.minLength }),
       );
     }
   }
@@ -91,10 +114,18 @@ export const formStateGenerateErrors = (
 
   /** maxLength */
   if (validationOptions?.maxLength) {
-    if ((value || '').toString().length > validationOptions.maxLength) {
+    let setErr = false;
+
+    if (validators[fieldType]?.maxLength) {
+      setErr = !validators[fieldType].maxLength(value, validationOptions.maxLength);
+    } else if ((value || '').toString().length > validationOptions.maxLength) {
+      setErr = true;
+    }
+
+    if (setErr) {
       errorsToSet.push(
         validationOptions.maxLengthMessage ||
-          i18next.t('common.validation.maxLength', { label: errorLabel, length: validationOptions.maxLength }),
+          i18next.t(stateFormErrorsMaxLengthMessage, { label: errorLabel, length: validationOptions.maxLength }),
       );
     }
   }
