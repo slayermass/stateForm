@@ -1,0 +1,116 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "airbnb",
+    "eslint:recommended",
+    "plugin:react/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
+    "plugin:react-hooks/recommended"
+  ],
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "prettier"
+  ],
+  "rules": {
+    "react/jsx-uses-react": "off",
+    "react/react-in-jsx-scope": "off",
+    "import/extensions": "off",
+    "react/display-name": "off",
+    "no-shadow": "off",
+    "func-names": [
+      "error",
+      "always",
+      {
+        "generators": "never"
+      }
+    ],
+    "react/jsx-filename-extension": [
+      2,
+      {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx"
+        ]
+      }
+    ],
+    "max-len": [
+      "error",
+      {
+        "code": 120,
+        "ignorePattern": "^import .*",
+        "ignoreComments": true
+      }
+    ],
+    "react/require-default-props": "off",
+    "react/prop-types": "off",
+    // makes some probles when the type is set in TS
+    "react/jsx-one-expression-per-line": "off",
+    "react/state-in-constructor": "off",
+    "linebreak-style": "off",
+    "no-bitwise": [
+      "error",
+      {
+        "allow": [
+          "~"
+        ]
+      }
+    ],
+    "import/no-extraneous-dependencies": "off",
+    "no-use-before-define": "off",
+    "@typescript-eslint/no-use-before-define": [
+      "error"
+    ],
+    "import/no-unresolved": "off",
+    "react/jsx-curly-newline": "off",
+    // prettier
+    "implicit-arrow-linebreak": "off",
+    // prettier
+    "import/prefer-default-export": "off",
+    // prettier
+    "comma-dangle": "off",
+    // prettier
+    "indent": "off",
+    // prettier
+    "object-curly-newline": "off",
+    // prettier
+    "no-param-reassign": "off",
+    // immer.js
+    "react/function-component-definition": [
+      2,
+      {
+        "namedComponents": "arrow-function"
+      }
+    ],
+    "react/jsx-no-useless-fragment": "off",
+    "react/jsx-key": [
+      1,
+      {
+        "checkFragmentShorthand": true,
+        "warnOnDuplicates": true
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [
+          ".js",
+          ".jsx",
+          ".ts",
+          ".tsx"
+        ],
+        "moduleDirectory": [
+          "node_modules",
+          "."
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+src/stories/*
+build
+*.html
+.storybook
+*.css
+*.json
+webpack

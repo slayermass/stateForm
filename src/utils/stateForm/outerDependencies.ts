@@ -1,0 +1,44 @@
+import merge from 'lodash/merge';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
+import isFunction from 'lodash/isFunction';
+import set from 'lodash/set';
+import isPlainObject from 'lodash/isPlainObject';
+import has from 'lodash/has';
+import equal from 'fast-deep-equal';
+import isString from 'lodash/isString';
+import isArray from 'lodash/isArray';
+import unset from 'lodash/unset';
+import { diff } from 'deep-object-diff';
+
+// types
+import { DeepPartial, ChildrenPropType } from 'src/utils/types';
+import { getUniqueId } from 'src/utils/getUniqueId';
+import { SafeAnyType } from 'src/utils/safeAny';
+
+import { createArrayXLength } from 'src/utils/objects';
+import { useMemoObject } from 'src/hooks/useMemoObject';
+import { isValidEmail } from 'src/utils/email';
+import { isValidColor } from 'src/utils/validators';
+
+export {
+  getUniqueId,
+  merge,
+  get,
+  isEmpty,
+  isFunction,
+  set,
+  isPlainObject,
+  has,
+  equal,
+  isString,
+  isArray,
+  diff,
+  unset,
+  createArrayXLength,
+  useMemoObject,
+  isValidEmail,
+  isValidColor,
+};
+
+export type { DeepPartial, SafeAnyType, ChildrenPropType };
