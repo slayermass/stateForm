@@ -15,7 +15,14 @@ useStateForm
 - boolean (Boolean)
 
 ## внутренности
-- event bus: отдельная функция/класс с методами event bus у каждой стейт формы. Например: EventBus.emit(<fieldName>, <type>, <callback>),
+- event bus
+  
+  отдельная функция/класс с методами event bus у каждой стейт формы. Например:
+  ```
+  EventBus.emit(<fieldName>, <type>);
+  
+  EventBus.on(<fieldName>, <type>, <callback>);
+  ```
 
 ## прочее
 - измерить время выполнения формы
