@@ -4,22 +4,22 @@ import {
   stateFormErrorsMaxLengthMessage,
   stateFormErrorsMinLengthMessage,
   stateFormErrorsRequiredMessage,
-} from '../helpers/formStateGenerateErrors';
-import { StateFormReturnType, useStateForm } from '../index';
+} from '../../helpers/formStateGenerateErrors';
+import { StateFormReturnType, useStateForm } from '../../index';
 
-describe('text + textarea', () => {
+describe('email', () => {
   type FormValues = {
-    strValue0: string;
-    strValue1: string;
-    strValue2: string;
+    emailValue0: string;
+    emailValue1: string;
+    emailValue2: string;
   };
 
   let formProps: StateFormReturnType<FormValues>;
 
   const initialProps: FormValues = {
-    strValue0: '--------///////',
-    strValue1: '',
-    strValue2: 'GOO63463737867ty34546 GOGOGO OGO #@#%@#%@#^^#^#',
+    emailValue0: '--------///////',
+    emailValue1: '',
+    emailValue2: 'y@y.com',
   };
 
   beforeEach(() => {
@@ -42,27 +42,21 @@ describe('text + textarea', () => {
     expect(formProps.getValue()).toEqual(initialProps);
   });
 
-  it('submit the same values', () => {
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit((data) => {
-      right(data);
-    }, left)();
-
-    expect(right).toBeCalledWith(initialProps);
-    expect(left).not.toBeCalled();
-  });
-
   it('submit changed values', () => {
     const right = jest.fn();
     const left = jest.fn();
 
     const newValues = {
-      strValue0: '0',
-      strValue1: '1',
-      strValue2: '2',
+      emailValue0: 'y1@y.com',
+      emailValue1: 'y2@y.ru',
+      emailValue2: 'y3@y.oa',
     };
+
+    Object.keys(newValues).forEach((propName) => {
+      formProps.register(propName, 'email', {
+        required: true,
+      });
+    });
 
     formProps.setValue(newValues);
 
@@ -74,51 +68,11 @@ describe('text + textarea', () => {
     expect(left).not.toBeCalled();
   });
 
-  it('required empty', () => {
-    const propName = 'strValue0';
-
-    formProps.register(propName, 'text', {
-      required: true,
-    });
-
-    formProps.setValue(propName, '');
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
-
-    expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
-  });
-
-  it('required empty length', () => {
-    const propName = 'strValue1';
-
-    formProps.register(propName, 'text', {
-      required: true,
-    });
-
-    formProps.setValue(propName, '                ');
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
-
-    expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
-  });
-
   it('required empty multiple', () => {
-    const propNames = ['strValue1', 'strValue2'];
+    const propNames = ['emailValue1', 'emailValue2'];
 
     propNames.forEach((propName) => {
-      formProps.register(propName, 'text', {
+      formProps.register(propName, 'email', {
         required: true,
       });
 
@@ -141,11 +95,11 @@ describe('text + textarea', () => {
     ]);
   });
 
-  it('required minLength', () => {
-    const propName = 'strValue0';
+  it('minLength', () => {
+    const propName = 'emailValue0';
 
-    formProps.register(propName, 'text', {
-      minLength: 3,
+    formProps.register(propName, 'email', {
+      minLength: 8,
     });
 
     // set empty value
@@ -163,7 +117,7 @@ describe('text + textarea', () => {
     right.mockClear();
     left.mockClear();
 
-    formProps.setValue(propName, '               ');
+    formProps.setValue(propName, ' t@t.com ');
 
     formProps.onSubmit(right, left)();
 
@@ -174,7 +128,7 @@ describe('text + textarea', () => {
     right.mockClear();
     left.mockClear();
 
-    const validValue = '333';
+    const validValue = 'tttttt@tttt.com';
     formProps.setValue(propName, validValue);
 
     formProps.onSubmit((data) => right(data), left)();
@@ -183,15 +137,15 @@ describe('text + textarea', () => {
     expect(left).not.toBeCalled();
   });
 
-  it('required maxLength', () => {
-    const propName = 'strValue1';
+  it('maxLength', () => {
+    const propName = 'emailValue1';
 
-    formProps.register(propName, 'text', {
-      maxLength: 5,
+    formProps.register(propName, 'email', {
+      maxLength: 7,
     });
 
     // set invalid value
-    formProps.setValue(propName, '123456');
+    formProps.setValue(propName, 't@tt.com');
 
     const right = jest.fn();
     const left = jest.fn();
@@ -205,7 +159,7 @@ describe('text + textarea', () => {
     right.mockClear();
     left.mockClear();
 
-    formProps.setValue(propName, '   123456    ');
+    formProps.setValue(propName, '   t@tt@4com    ');
 
     formProps.onSubmit(right, left)();
 
@@ -216,12 +170,34 @@ describe('text + textarea', () => {
     right.mockClear();
     left.mockClear();
 
-    const validValue = '   123    ';
+    const validValue = '   t@t.com    ';
     formProps.setValue(propName, validValue);
 
     formProps.onSubmit((data) => right(data), left)();
 
     expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
     expect(left).not.toBeCalled();
+  });
+
+  it('required + maxLength', () => {
+    const propName = 'emailValue1';
+
+    formProps.register(propName, 'email', {
+      maxLength: 7,
+      required: true,
+    });
+
+    // set invalid value
+    formProps.setValue(propName, '12345678');
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+    });
   });
 });

@@ -1,4 +1,4 @@
-import { SafeAnyType, isString } from '../outerDependencies';
+import { SafeAnyType, isString } from '../../outerDependencies';
 
 export type StateFormDataTypeTextType = string;
 export type StateFormDataTypeFieldTextType = keyof typeof stateFormDataTypeTextValidators;
