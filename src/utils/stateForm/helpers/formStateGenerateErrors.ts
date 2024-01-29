@@ -1,6 +1,7 @@
-import { stateFormDataTypeTextValidators } from '../dataTypes/text';
+import { stateFormDataTypeEmailValidators } from 'src/utils/stateForm/dataTypes/email';
+import { stateFormDataTypeTextValidators } from 'src/utils/stateForm/dataTypes/text';
 import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
-import { isValidEmail, SafeAnyType, isValidColor } from '../outerDependencies';
+import { SafeAnyType, isValidColor } from '../outerDependencies';
 
 // import i18next from 'src/utils/i18n';
 const i18next = {
@@ -11,6 +12,7 @@ const i18next = {
 // TODO temporary until all data types are ready
 const validators: any = {
   ...stateFormDataTypeTextValidators,
+  ...stateFormDataTypeEmailValidators,
 };
 
 export const stateFormErrorsRequiredMessage = 'common.validation.required';
@@ -101,14 +103,6 @@ export const formStateGenerateErrors = (
         validationOptions.minLengthMessage ||
           i18next.t(stateFormErrorsMinLengthMessage, { label: errorLabel, length: validationOptions.minLength }),
       );
-    }
-  }
-
-  /** email pattern */
-  if (fieldType === 'email' && !isValidEmail(value?.toString() ?? '')) {
-    /** always set an error if required or if not but has a value */
-    if (validationOptions.required || (!validationOptions.required && value)) {
-      errorsToSet.push(i18next.t('common.validation.emailInvalid', { label: errorLabel }));
     }
   }
 
