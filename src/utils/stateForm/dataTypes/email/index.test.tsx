@@ -200,4 +200,40 @@ describe('email', () => {
       [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     });
   });
+
+  it('required + minLength', () => {
+    const propName = 'emailValue1';
+
+    formProps.register(propName, 'email', {
+      minLength: 10,
+      required: true,
+    });
+
+    formProps.onBlur(propName);
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+    });
+
+    right.mockClear();
+    left.mockClear();
+
+    // set invalid value
+    formProps.setValue(propName, 't@t.com')
+
+    formProps.onSubmit(right, left)();
+
+    console.log(formProps.getValue());
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }]
+    })
+  });
 });
