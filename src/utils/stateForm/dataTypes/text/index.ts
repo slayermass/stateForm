@@ -16,7 +16,9 @@ const validators: {
 export const stateFormDataTypeTextValidators: {
   text: typeof validators;
   textarea: typeof validators;
+  password: typeof validators;
 } = {
   text: validators,
   textarea: validators,
+  password: validators,
 };

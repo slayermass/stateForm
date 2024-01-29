@@ -170,8 +170,6 @@ export type StateFormFieldsType =
   | 'checkboxGroup' // it only marks as this, but must not be used directly
   | StateFormDataTypeFieldTextType
   | StateFormDataTypeFieldEmailType
-  | 'password'
-  | 'email'
   | 'radio'
   | 'color'
   | 'dropdown'
