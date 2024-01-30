@@ -443,6 +443,18 @@ describe('useStateForm', () => {
     });
   });
 
+  it('getDirtyFields', () => {
+    const props: (keyof FormValues)[] = ['strValue', 'fieldArrayitems', 'primitiveArray', 'booleanValue', 'nullValue'];
+
+    props.forEach((propName) => {
+      formProps.register(propName, 'text');
+
+      formProps.setValue(propName, '1');
+    });
+
+    expect(formProps.getDirtyFields()).toEqual(props);
+  });
+
   it('console errors check (should be the last test)', () => {
     expect(console.error).not.toHaveBeenCalled();
   });
