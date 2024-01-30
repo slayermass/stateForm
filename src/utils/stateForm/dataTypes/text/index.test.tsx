@@ -246,4 +246,38 @@ describe('text + textarea', () => {
       [propName]: [{ type: 'validate', message: stateFormErrorsMaxLengthMessage }],
     });
   });
+
+  it('required + minLength', () => {
+    const propName = 'strValue1';
+
+    formProps.register(propName, 'text', {
+      minLength: 3,
+      required: true,
+    });
+
+    formProps.onBlur(propName);
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+    });
+
+    right.mockClear();
+    left.mockClear();
+
+    // set invalid value
+    formProps.setValue(propName, '1')
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }]
+    })
+  });
 });
