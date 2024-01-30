@@ -8,6 +8,8 @@ import {
 import { StateFormReturnType, useStateForm } from '../../index';
 
 describe('text + textarea', () => {
+  console.error = jest.fn();
+
   type FormValues = {
     strValue0: string;
     strValue1: string;
@@ -271,13 +273,17 @@ describe('text + textarea', () => {
     left.mockClear();
 
     // set invalid value
-    formProps.setValue(propName, '1')
+    formProps.setValue(propName, '1');
 
     formProps.onSubmit(right, left)();
 
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }]
-    })
+      [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }],
+    });
+  });
+
+  it('console errors check (should be the last test)', () => {
+    expect(console.error).not.toHaveBeenCalled();
   });
 });

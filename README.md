@@ -23,7 +23,12 @@ useStateForm
   
   EventBus.on(<fieldName>, <type>, <callback>);
   ```
+- cloneDeep умеющий все (BigInt issue)
 
 ## прочее
 - измерить время выполнения формы
 - найти узкие места и улучшить их
+- previousFormState нужен??
+- отказаться от такого вида имен
+  `arrayProp[0].name`
+  и делать только такие `arrayProp.0.name`

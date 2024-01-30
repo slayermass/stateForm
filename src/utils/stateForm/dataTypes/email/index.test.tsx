@@ -4,11 +4,12 @@ import { stateFormErrorsRequiredEmailMessage } from './index';
 import {
   stateFormErrorsMaxLengthMessage,
   stateFormErrorsMinLengthMessage,
-  stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
 
 describe('email', () => {
+  console.error = jest.fn();
+
   type FormValues = {
     emailValue0: string;
     emailValue1: string;
@@ -227,14 +228,14 @@ describe('email', () => {
     left.mockClear();
 
     // set invalid value
-    formProps.setValue(propName, 't@t.com')
+    formProps.setValue(propName, 't@t.com');
 
     formProps.onSubmit(right, left)();
 
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }]
-    })
+      [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }],
+    });
 
     right.mockClear();
     left.mockClear();
@@ -247,5 +248,9 @@ describe('email', () => {
 
     expect(right).toBeCalledWith({ ...initialProps, [propName]: 'test@test.com' });
     expect(left).not.toBeCalled();
+  });
+
+  it('console errors check (should be the last test)', () => {
+    expect(console.error).not.toHaveBeenCalled();
   });
 });

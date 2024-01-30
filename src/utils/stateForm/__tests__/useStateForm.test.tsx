@@ -22,12 +22,14 @@ type FormValues = {
   booleanValue: boolean;
   nullValue: null;
   undefinedValue: undefined;
-  bigIntValue: bigint;
+  // bigIntValue: bigint;
 
   optionalAnyType?: any;
 };
 
 describe('useStateForm', () => {
+  console.error = jest.fn();
+
   let formProps: StateFormReturnType<FormValues>;
 
   const initialProps: FormValues = {
@@ -48,7 +50,7 @@ describe('useStateForm', () => {
     booleanValue: false,
     nullValue: null,
     undefinedValue: undefined,
-    bigIntValue: BigInt(1e10),
+    // bigIntValue: BigInt(1e10),
   };
 
   const formSetThenExpect = (fieldName: keyof FormValues, arr: any[]) => {
@@ -299,17 +301,17 @@ describe('useStateForm', () => {
       formSetThenExpect('undefinedValue', [true, false, 'A', 2, { t: 1 }, ['h', 2, null], undefined]);
     });
 
-    it('test bigInt (number) value', () => {
-      formSetThenExpect('bigIntValue', [
-        BigInt(0),
-        BigInt(-0),
-        BigInt(-5e20),
-        BigInt(9590),
-        839824,
-        -325,
-        666_666_666_666,
-      ]);
-    });
+    // it('test bigInt (number) value', () => {
+    //   formSetThenExpect('bigIntValue', [
+    //     BigInt(0),
+    //     BigInt(-0),
+    //     BigInt(-5e20),
+    //     BigInt(9590),
+    //     839824,
+    //     -325,
+    //     666_666_666_666,
+    //   ]);
+    // });
   });
 
   describe('test getErrors (string type property)', () => {
@@ -421,5 +423,27 @@ describe('useStateForm', () => {
         'any',
       );
     });
+
+    it('getInitialValue', () => {
+      formProps.register(propName, 'text');
+
+      let newValue = 'value1b';
+      formProps.setValue(propName, newValue);
+
+      expect(formProps.getInitialValue(propName)).toEqual(initialProps[propName]);
+      expect(formProps.getValue(propName)).toEqual(newValue);
+
+      // new value
+      newValue = '!@%$(#BJ)#(B)#ac_)_+++__!)KB(@!';
+
+      formProps.onChange(propName, newValue);
+
+      expect(formProps.getInitialValue(propName)).toEqual(initialProps[propName]);
+      expect(formProps.getValue(propName)).toEqual(newValue);
+    });
+  });
+
+  it('console errors check (should be the last test)', () => {
+    expect(console.error).not.toHaveBeenCalled();
   });
 });

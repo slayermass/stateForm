@@ -241,7 +241,9 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   const cloneDeep: <R>(value: R) => R = useCallback((value) => {
     try {
       return JSON.parse(JSON.stringify(value));
-    } catch {
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
       return value;
     }
   }, []);
@@ -639,17 +641,16 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       let fields: string[] = [];
 
       if (!names) {
-        fields = Object.entries(fieldsOptions.current)
-          .filter(([name]) => getFieldOptionsValue(name, 'type') !== 'checkboxGroup')
-          .filter(([, item]) => item.active)
-          .map(([key]) => key);
-      }
+        Object.keys(fieldsOptions.current).forEach((key) => {
+          const value = fieldsOptions.current[key];
 
-      if (isString(names)) {
+          if (getFieldOptionsValue(key, 'type') !== 'checkboxGroup' && value.active) {
+            fields.push(key);
+          }
+        });
+      } else if (isString(names)) {
         fields = [names];
-      }
-
-      if (isArray(names)) {
+      } else if (isArray(names)) {
         fields = names;
       }
 
@@ -806,18 +807,18 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
             return acc;
           }, {});
 
-      const innerGetValue: StateFormInnerGetValue = (name) => cloneDeep(get(initialValues.current, name));
+      const getInitialValue: StateFormInnerGetValue = (name) => cloneDeep(get(initialValues.current, name));
 
       if (!names) {
         return getAllValues();
       }
 
       if (isString(names)) {
-        return innerGetValue(names);
+        return getInitialValue(names);
       }
 
       if (isArray(names)) {
-        return names.map((name) => innerGetValue(name));
+        return names.map((name) => getInitialValue(name));
       }
 
       return undefined;
