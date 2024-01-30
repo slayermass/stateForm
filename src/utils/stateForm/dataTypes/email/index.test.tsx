@@ -1,5 +1,6 @@
 import { renderHook } from '@testing-library/react';
 
+import { stateFormErrorsRequiredEmailMessage } from './index';
 import {
   stateFormErrorsMaxLengthMessage,
   stateFormErrorsMinLengthMessage,
@@ -79,19 +80,20 @@ describe('email', () => {
       formProps.setValue(propName as keyof FormValues, '                ');
     });
 
-    formProps.onSubmit(
-      () => null,
-      (errors) => {
-        expect(errors).toEqual({
-          [propNames[0]]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
-          [propNames[1]]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
-        });
-      },
-    )();
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({
+      [propNames[0]]: [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
+      [propNames[1]]: [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
+    });
 
     expect(formProps.getErrors(propNames as (keyof FormValues)[])).toEqual([
-      [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
-      [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+      [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
+      [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
     ]);
   });
 
@@ -197,7 +199,7 @@ describe('email', () => {
 
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
     });
   });
 });
