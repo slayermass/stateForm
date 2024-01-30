@@ -455,6 +455,10 @@ describe('useStateForm', () => {
     expect(formProps.getDirtyFields()).toEqual(props);
   });
 
+  it('getAllValues', () => {
+    expect(formProps.getValue()).toEqual(initialProps);
+  });
+
   it('console errors check (should be the last test)', () => {
     expect(console.error).not.toHaveBeenCalled();
   });
