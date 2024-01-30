@@ -220,7 +220,7 @@ describe('email', () => {
 
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
     });
 
     right.mockClear();
