@@ -33,6 +33,16 @@ export const formStateGenerateErrors = (
 
   const isTypeMasked = fieldType === 'masked';
 
+  /* email valid pattern */
+  if (fieldType === 'email') {
+    const setErr = validators.email.pattern(value);
+
+    if (isString(setErr)) {
+      return [i18next.t(setErr, { label: errorLabel })];
+    }
+
+  }
+
   /** required */
   if (validationOptions?.required) {
     let setErr: boolean | string = false;

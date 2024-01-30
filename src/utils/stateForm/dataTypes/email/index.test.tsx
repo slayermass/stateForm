@@ -1,9 +1,10 @@
 import { renderHook } from '@testing-library/react';
 
-import { stateFormErrorsRequiredEmailMessage } from './index';
+import { stateFormErrorsPatternEmailMessage } from './index';
 import {
   stateFormErrorsMaxLengthMessage,
   stateFormErrorsMinLengthMessage,
+  stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
 
@@ -88,13 +89,13 @@ describe('email', () => {
 
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({
-      [propNames[0]]: [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
-      [propNames[1]]: [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
+      [propNames[0]]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+      [propNames[1]]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     });
 
     expect(formProps.getErrors(propNames as (keyof FormValues)[])).toEqual([
-      [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
-      [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
+      [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+      [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     ]);
   });
 
@@ -162,7 +163,7 @@ describe('email', () => {
     right.mockClear();
     left.mockClear();
 
-    formProps.setValue(propName, '   t@tt@4com    ');
+    formProps.setValue(propName, '   ttt@4.com    ');
 
     formProps.onSubmit(right, left)();
 
@@ -200,7 +201,7 @@ describe('email', () => {
 
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }],
     });
   });
 
@@ -212,8 +213,6 @@ describe('email', () => {
       required: true,
     });
 
-    formProps.onBlur(propName);
-
     const right = jest.fn();
     const left = jest.fn();
 
@@ -221,7 +220,7 @@ describe('email', () => {
 
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredEmailMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     });
 
     right.mockClear();
@@ -247,6 +246,82 @@ describe('email', () => {
     formProps.onSubmit((data) => right(data), left)();
 
     expect(right).toBeCalledWith({ ...initialProps, [propName]: 'test@test.com' });
+    expect(left).not.toBeCalled();
+  });
+
+  it('pattern email', () => {
+    const propName = 'emailValue1';
+
+    formProps.register(propName, 'email');
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    // set invalid value
+    formProps.setValue(propName, 'test.com');
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }],
+    });
+
+    right.mockClear();
+    left.mockClear();
+
+    // set valid value
+    const validValue = 'test@test.com';
+
+    formProps.setValue(propName, validValue);
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toBeCalled();
+  });
+
+  it('required + pattern email', () => {
+    const propName = 'emailValue1';
+
+    formProps.register(propName, 'email', {
+      required: true,
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+    });
+
+    right.mockClear();
+    left.mockClear();
+
+    // set invalid value
+    formProps.setValue(propName, 'test.com');
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }],
+    });
+
+    right.mockClear();
+    left.mockClear();
+
+    // set valid value
+    const validValue = 'test@test.com';
+
+    formProps.setValue(propName, validValue);
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
     expect(left).not.toBeCalled();
   });
 
