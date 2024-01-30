@@ -1,30 +1,30 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
-import { StateFormDataTypeEmailType, StateFormDataTypeFieldEmailType } from 'src/utils/stateForm/dataTypes/email';
 
-import { StateFormDataTypeFieldTextType, StateFormDataTypeTextType } from 'src/utils/stateForm/dataTypes/text';
-import { stateFormEmit } from './eventBus/stateFormEmit';
-import { stateFormClearSubscriptions } from './eventBus/stateFormClearSubscriptions';
-import { stateFormSubscribe } from './eventBus/stateFormSubscribe';
+import { StateFormDataTypeEmailType, StateFormDataTypeFieldEmailType } from './dataTypes/email';
+import { StateFormDataTypeFieldTextType, StateFormDataTypeTextType } from './dataTypes/text';
 import { StateFormEventType } from './eventBus/common';
+import { stateFormClearSubscriptions } from './eventBus/stateFormClearSubscriptions';
+import { stateFormEmit } from './eventBus/stateFormEmit';
+import { stateFormSubscribe } from './eventBus/stateFormSubscribe';
 import { formStateGenerateErrors } from './helpers/formStateGenerateErrors';
-import { StateFormPath, StateFormPathValue, StateFormPathValues } from './types/path';
 
 import {
   DeepPartial,
-  SafeAnyType,
-  getUniqueId,
-  merge,
+  diff,
+  equal,
   get,
+  getUniqueId,
+  has,
+  isArray,
   isEmpty,
   isFunction,
-  set,
   isPlainObject,
-  has,
-  equal,
   isString,
-  isArray,
-  diff,
+  merge,
+  SafeAnyType,
+  set,
 } from './outerDependencies';
+import { StateFormPath, StateFormPathValue, StateFormPathValues } from './types/path';
 
 type ErrorsType = { type: StateFormErrorTypes; message: string; initChange?: boolean }[] | null | undefined;
 
@@ -286,12 +286,13 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   const getAllValues = useCallback(
     () =>
-      Object.entries(formState.current)
-        .filter(([name]) => getFieldOptionsValue(name, 'type') !== 'checkboxGroup')
-        .reduce<SafeAnyType>((acc, [k, v]) => {
-          acc[k] = v;
-          return acc;
-        }, {}),
+      Object.keys(formState.current).reduce<SafeAnyType>((acc, key) => {
+        if (getFieldOptionsValue(key, 'type') !== 'checkboxGroup') {
+          acc[key] = formState.current[key];
+        }
+
+        return acc;
+      }, {}),
     [getFieldOptionsValue],
   );
 
@@ -760,10 +761,15 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   const getDirtyFields: StateFormGetDirtyFields = useCallback(
     () =>
-      Object.entries(fieldsOptions.current)
-        .filter(([name]) => getFieldOptionsValue(name, 'type') !== 'checkboxGroup')
-        .filter(([, value]) => value.isDirty)
-        .map(([key]) => key),
+      Object.keys(fieldsOptions.current).reduce<ReturnType<StateFormGetDirtyFields>>((acc, key) => {
+        const value = fieldsOptions.current[key];
+
+        if (getFieldOptionsValue(key, 'type') !== 'checkboxGroup' && value.isDirty) {
+          acc.push(key);
+        }
+
+        return acc;
+      }, []),
     [getFieldOptionsValue],
   );
   /** end outer API */
@@ -799,7 +805,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   /** get initial value of the form */
   const getInitialValue = useCallback(
     (names?: StateFormPath<FormValues> | StateFormPath<FormValues>[]) => {
-      const getAllValues = () =>
+      const getInitialAllValues = () =>
         Object.entries(initialValues.current)
           .filter(([name]) => getFieldOptionsValue(name, 'type') !== 'checkboxGroup')
           .reduce<SafeAnyType>((acc, [k, v]) => {
@@ -810,7 +816,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       const getInitialValue: StateFormInnerGetValue = (name) => cloneDeep(get(initialValues.current, name));
 
       if (!names) {
-        return getAllValues();
+        return getInitialAllValues();
       }
 
       if (isString(names)) {
