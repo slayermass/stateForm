@@ -1,7 +1,9 @@
-import { stateFormDataTypeEmailValidators } from 'src/utils/stateForm/dataTypes/email';
-import { stateFormDataTypeTextValidators } from 'src/utils/stateForm/dataTypes/text';
+import { isBoolean } from 'lodash';
+
+import { stateFormDataTypeEmailValidators } from '../dataTypes/email';
+import { stateFormDataTypeTextValidators } from '../dataTypes/text';
 import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
-import { SafeAnyType, isValidColor } from '../outerDependencies';
+import { SafeAnyType, isValidColor, isString } from '../outerDependencies';
 
 // import i18next from 'src/utils/i18n';
 const i18next = {
@@ -33,11 +35,13 @@ export const formStateGenerateErrors = (
 
   /** required */
   if (validationOptions?.required) {
-    let setErr = false;
+    let setErr: boolean | string = false;
 
     if (validators[fieldType]?.required) {
       // dynamic check
-      setErr = !validators[fieldType].required(value);
+      const response = validators[fieldType].required(value);
+
+      setErr = isBoolean(response) ? !response : response;
     } else {
       switch (fieldType) {
         case 'masked': {
@@ -73,14 +77,22 @@ export const formStateGenerateErrors = (
       }
     }
 
-    if (setErr) {
+    if (setErr !== false) {
+      /**
+       * 1) inner validation message
+       * 2) requiredMessage
+       * 3) common required text
+       */
       errorsToSet.push(
-        validationOptions.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel }),
+        isString(setErr)
+          ? i18next.t(setErr, { label: errorLabel })
+          : validationOptions.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel }),
       );
 
       return errorsToSet;
     }
   }
+
   if (isTypeMasked && value?.toString().includes('_')) {
     /** if the value isn't fully set */
     errorsToSet.push(

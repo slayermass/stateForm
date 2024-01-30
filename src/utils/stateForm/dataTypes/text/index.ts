@@ -1,12 +1,17 @@
-import { SafeAnyType, isString } from '../../outerDependencies';
+import {
+  StateFormValidatorRequiredType,
+  StateFormValidatorMinLengthType,
+  StateFormValidatorMaxLengthType,
+} from '../types';
+import { isString } from '../../outerDependencies';
 
 export type StateFormDataTypeTextType = string;
 export type StateFormDataTypeFieldTextType = keyof typeof stateFormDataTypeTextValidators;
 
 const validators: {
-  required: (value: SafeAnyType) => boolean;
-  minLength: (value: SafeAnyType, minLength: number) => boolean;
-  maxLength: (value: SafeAnyType, maxLength: number) => boolean;
+  required: StateFormValidatorRequiredType;
+  minLength: StateFormValidatorMinLengthType;
+  maxLength: StateFormValidatorMaxLengthType;
 } = {
   required: (value) => isString(value) && value.trim().length > 0,
   minLength: (value, minLength) => isString(value) && value.trim().length >= minLength,
