@@ -231,11 +231,21 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    console.log(formProps.getValue());
-
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }]
     })
+
+    right.mockClear();
+    left.mockClear();
+
+    // set valid value
+    const validValue = 'test@test.com';
+    formProps.setValue(propName, validValue);
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).toBeCalledWith({ ...initialProps, [propName]: 'test@test.com' });
+    expect(left).not.toBeCalled();
   });
 });
