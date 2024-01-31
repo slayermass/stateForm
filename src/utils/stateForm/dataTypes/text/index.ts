@@ -1,5 +1,5 @@
 import {
-  StateFormValidatorRequiredType,
+  StateFormValidatorIsSetType,
   StateFormValidatorMinLengthType,
   StateFormValidatorMaxLengthType,
 } from '../types';
@@ -9,11 +9,11 @@ export type StateFormDataTypeTextType = string;
 export type StateFormDataTypeFieldTextType = keyof typeof stateFormDataTypeTextValidators;
 
 const validators: {
-  required: StateFormValidatorRequiredType;
+  isSet: StateFormValidatorIsSetType;
   minLength: StateFormValidatorMinLengthType;
   maxLength: StateFormValidatorMaxLengthType;
 } = {
-  required: (value) => isString(value) && value.trim().length > 0,
+  isSet: (value) => isString(value) && value.trim().length > 0,
   minLength: (value, minLength) => isString(value) && value.trim().length >= minLength,
   maxLength: (value, maxLength) => isString(value) && value.trim().length <= maxLength,
 };

@@ -1,5 +1,3 @@
-import { isBoolean } from 'lodash';
-
 import { stateFormDataTypeEmailValidators } from '../dataTypes/email';
 import { stateFormDataTypeTextValidators } from '../dataTypes/text';
 import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
@@ -33,25 +31,13 @@ export const formStateGenerateErrors = (
 
   const isTypeMasked = fieldType === 'masked';
 
-  /* custom validation for field types */
-  if (validators[fieldType]?.customMessage) {
-    const setErr = validators[fieldType].customMessage(value);
+  const isSet = !!validators[fieldType]?.isSet(value);
 
-    if (isString(setErr)) {
-      return [i18next.t(setErr, { label: errorLabel })];
-    }
+  if (!isSet && validationOptions?.required) {
+    let setErr = false;
 
-  }
-
-  /** required */
-  if (validationOptions?.required) {
-    let setErr: boolean | string = false;
-
-    if (validators[fieldType]?.required) {
-      // dynamic check
-      const response = validators[fieldType].required(value);
-
-      setErr = isBoolean(response) ? !response : response;
+    if (validators[fieldType]?.isSet) {
+      setErr = true;
     } else {
       switch (fieldType) {
         case 'masked': {
@@ -87,19 +73,22 @@ export const formStateGenerateErrors = (
       }
     }
 
-    if (setErr !== false) {
+    if (setErr) {
       /**
        * 1) inner validation message
        * 2) requiredMessage
        * 3) common required text
        */
-      errorsToSet.push(
-        isString(setErr)
-          ? i18next.t(setErr, { label: errorLabel })
-          : validationOptions.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel }),
-      );
+      return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
+    }
+  }
 
-      return errorsToSet;
+  /* the validator that should always be called if there is a value */
+  if (isSet && validators[fieldType]?.isValidPattern) {
+    const response = validators[fieldType].isValidPattern(value);
+
+    if (isString(response)) {
+      return [i18next.t(response, { label: errorLabel })];
     }
   }
 
