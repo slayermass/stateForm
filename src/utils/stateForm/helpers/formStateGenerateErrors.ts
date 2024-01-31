@@ -1,3 +1,4 @@
+import { stateFormDataTypeRichTextValidators } from 'src/utils/stateForm/dataTypes/richText';
 import { stateFormDataTypeEmailValidators } from '../dataTypes/email';
 import { stateFormDataTypeTextValidators } from '../dataTypes/text';
 import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
@@ -13,6 +14,7 @@ const i18next = {
 const validators: any = {
   ...stateFormDataTypeTextValidators,
   ...stateFormDataTypeEmailValidators,
+  ...stateFormDataTypeRichTextValidators,
 };
 
 export const stateFormErrorsRequiredMessage = 'common.validation.required';
@@ -75,6 +77,9 @@ export const formStateGenerateErrors = (
 
     if (isString(response)) {
       return [i18next.t(response, { label: errorLabel })];
+    }
+    if (!response) {
+      return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
     }
   }
 

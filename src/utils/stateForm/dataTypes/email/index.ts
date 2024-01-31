@@ -3,7 +3,7 @@ import {
   StateFormValidatorIsValidPatternType,
   StateFormValidatorMaxLengthType,
   StateFormValidatorMinLengthType,
-  StateFormValidatorIsSetType
+  StateFormValidatorIsSetType,
 } from '../types';
 
 export type StateFormDataTypeEmailType = string;
@@ -20,7 +20,7 @@ const validators: {
   isSet: (value) => isString(value) && value.trim().length > 0,
   minLength: (value, minLength) => isString(value) && value.trim().length >= minLength,
   maxLength: (value, maxLength) => isString(value) && value.trim().length <= maxLength,
-  isValidPattern: (value) => !isValidEmail(value.trim()) && stateFormErrorsPatternEmailMessage,
+  isValidPattern: (value) => (isValidEmail(value.trim()) ? true : stateFormErrorsPatternEmailMessage),
 };
 
 export const stateFormDataTypeEmailValidators: {

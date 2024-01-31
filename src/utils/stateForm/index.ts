@@ -1,4 +1,8 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
+import {
+  StateFormDataTypeFieldRichTextType,
+  StateFormDataTypeRichTextType,
+} from 'src/utils/stateForm/dataTypes/richText';
 
 import { StateFormDataTypeEmailType, StateFormDataTypeFieldEmailType } from './dataTypes/email';
 import { StateFormDataTypeFieldTextType, StateFormDataTypeTextType } from './dataTypes/text';
@@ -52,6 +56,7 @@ type StateFormErrorTypes = 'hover' | 'validate' | 'all' | string;
 export type StateFormPossibleValue =
   | StateFormDataTypeTextType
   | StateFormDataTypeEmailType
+  | StateFormDataTypeRichTextType
   | number
   | boolean
   | null
@@ -170,6 +175,7 @@ export type StateFormFieldsType =
   | 'checkboxGroup' // it only marks as this, but must not be used directly
   | StateFormDataTypeFieldTextType
   | StateFormDataTypeFieldEmailType
+  | StateFormDataTypeFieldRichTextType
   | 'radio'
   | 'color'
   | 'dropdown'
@@ -178,7 +184,6 @@ export type StateFormFieldsType =
   | 'datepicker'
   | 'rangeDatepicker'
   | 'timepicker'
-  | 'wysiwyg'
   | 'phone'
   | 'switch'
   | 'buttonCheckbox'

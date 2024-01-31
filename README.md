@@ -5,7 +5,6 @@ useStateForm
 - number (Number)
 - date (string)
 - date (Date)
-- rich text (любой wysiwyg)
 - phone (string)
 - time (string)
 - time (Date)
@@ -13,6 +12,7 @@ useStateForm
 - files (File[])
 - image (File)
 - boolean (Boolean)
+- color
 
 ## внутренности
 - event bus
