@@ -128,6 +128,17 @@ describe('email', () => {
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }] });
 
+    // set another invalid value (not email)
+    right.mockClear();
+    left.mockClear();
+
+    formProps.setValue(propName, '12312321312312323');
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }] });
+
     // set valid value
     right.mockClear();
     left.mockClear();
@@ -169,6 +180,17 @@ describe('email', () => {
 
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMaxLengthMessage }] });
+
+    // set another invalid value (not email)
+    right.mockClear();
+    left.mockClear();
+
+    formProps.setValue(propName, '123456');
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toBeCalled();
+    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }] });
 
     // set valid value
     right.mockClear();
