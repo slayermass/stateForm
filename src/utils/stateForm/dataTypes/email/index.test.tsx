@@ -271,7 +271,7 @@ describe('email', () => {
     expect(left).not.toBeCalled();
   });
 
-  it('pattern email', () => {
+  it('valid pattern', () => {
     const propName = 'emailValue1';
 
     formProps.register(propName, 'email');
@@ -279,20 +279,28 @@ describe('email', () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    // set invalid value
-    formProps.setValue(propName, 'test.com');
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).toBeCalledWith({ ...initialProps });
+    expect(left).not.toBeCalled();
+
+    right.mockClear();
+    left.mockClear();
+
+    // set invalid pattern
+    formProps.setValue(propName, 'test text');
 
     formProps.onSubmit(right, left)();
 
     expect(right).not.toBeCalled();
     expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }],
-    });
+      [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }]
+    })
 
     right.mockClear();
     left.mockClear();
 
-    // set valid value
+    // set valid pattern
     const validValue = 'test@test.com';
 
     formProps.setValue(propName, validValue);
