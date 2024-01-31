@@ -33,9 +33,9 @@ export const formStateGenerateErrors = (
 
   const isTypeMasked = fieldType === 'masked';
 
-  /* email valid pattern */
-  if (fieldType === 'email') {
-    const setErr = validators.email.pattern(value);
+  /* custom validation for field types */
+  if (validators[fieldType]?.customMessage) {
+    const setErr = validators[fieldType].customMessage(value);
 
     if (isString(setErr)) {
       return [i18next.t(setErr, { label: errorLabel })];

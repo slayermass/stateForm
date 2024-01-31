@@ -5,3 +5,5 @@ export type StateFormValidatorRequiredType = (value: SafeAnyType) => boolean | s
 export type StateFormValidatorMinLengthType = (value: SafeAnyType, minLength: number) => boolean;
 
 export type StateFormValidatorMaxLengthType = (value: SafeAnyType, maxLength: number) => boolean;
+
+export type StateFormValidatorCustomMessageType = (value: SafeAnyType) => boolean | string;

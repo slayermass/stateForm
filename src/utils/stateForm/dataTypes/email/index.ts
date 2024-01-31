@@ -1,10 +1,10 @@
-import { isValidEmail } from '../../outerDependencies';
+import { isString, isValidEmail } from '../../outerDependencies';
 import {
+  StateFormValidatorCustomMessageType,
   StateFormValidatorMaxLengthType,
   StateFormValidatorMinLengthType,
-  StateFormValidatorRequiredType,
+  StateFormValidatorRequiredType
 } from '../types';
-import { stateFormDataTypeCommonValidators } from '../common';
 
 export type StateFormDataTypeEmailType = string;
 export type StateFormDataTypeFieldEmailType = keyof typeof stateFormDataTypeEmailValidators;
@@ -15,12 +15,12 @@ const validators: {
   required: StateFormValidatorRequiredType;
   minLength: StateFormValidatorMinLengthType;
   maxLength: StateFormValidatorMaxLengthType;
-  pattern: (value: string) => void;
+  customMessage: StateFormValidatorCustomMessageType;
 } = {
-  required: stateFormDataTypeCommonValidators.required,
-  minLength: stateFormDataTypeCommonValidators.minLength,
-  maxLength: stateFormDataTypeCommonValidators.maxLength,
-  pattern: (value) => {
+  required: (value) => isString(value) && value.trim().length > 0,
+  minLength: (value, minLength) => isString(value) && value.trim().length >= minLength,
+  maxLength: (value, maxLength) => isString(value) && value.trim().length <= maxLength,
+  customMessage: (value) => {
     const trimmedValue = value.trim();
 
     return validators.required(value) && !isValidEmail(trimmedValue) && stateFormErrorsPatternEmailMessage;

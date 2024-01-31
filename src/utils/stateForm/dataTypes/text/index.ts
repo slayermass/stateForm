@@ -3,7 +3,7 @@ import {
   StateFormValidatorMinLengthType,
   StateFormValidatorMaxLengthType,
 } from '../types';
-import { stateFormDataTypeCommonValidators } from '../common';
+import { isString } from '../../outerDependencies';
 
 export type StateFormDataTypeTextType = string;
 export type StateFormDataTypeFieldTextType = keyof typeof stateFormDataTypeTextValidators;
@@ -13,9 +13,9 @@ const validators: {
   minLength: StateFormValidatorMinLengthType;
   maxLength: StateFormValidatorMaxLengthType;
 } = {
-  required: stateFormDataTypeCommonValidators.required,
-  minLength: stateFormDataTypeCommonValidators.minLength,
-  maxLength: stateFormDataTypeCommonValidators.maxLength,
+  required: (value) => isString(value) && value.trim().length > 0,
+  minLength: (value, minLength) => isString(value) && value.trim().length >= minLength,
+  maxLength: (value, maxLength) => isString(value) && value.trim().length <= maxLength,
 };
 
 export const stateFormDataTypeTextValidators: {
