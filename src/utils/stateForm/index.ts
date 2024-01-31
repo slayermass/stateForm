@@ -173,7 +173,6 @@ export type StateFormFieldsType =
   | 'radio'
   | 'color'
   | 'dropdown'
-  | 'masked'
   | 'number'
   | 'image'
   | 'datepicker'
@@ -719,10 +718,6 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
               switch (fieldsOptions.current[name]?.type) {
                 case 'checkbox': {
                   value = false;
-                  break;
-                }
-                case 'masked': {
-                  value = '';
                   break;
                 }
                 default:

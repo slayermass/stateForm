@@ -29,24 +29,15 @@ export const formStateGenerateErrors = (
 
   const errorsToSet = []; // the array for collecting errors
 
-  const isTypeMasked = fieldType === 'masked';
+  const hasValidValue = !!validators[fieldType]?.isSet(value);
 
-  const isSet = !!validators[fieldType]?.isSet(value);
-
-  if (!isSet && validationOptions?.required) {
+  if (!hasValidValue && validationOptions?.required) {
     let setErr = false;
 
     if (validators[fieldType]?.isSet) {
       setErr = true;
     } else {
       switch (fieldType) {
-        case 'masked': {
-          /** if the value isn't fully set */
-          if (!value || value.toString().includes('_')) {
-            setErr = true;
-          }
-          break;
-        }
         case 'number': {
           if (value !== 0 && !value) {
             setErr = true;
@@ -74,29 +65,17 @@ export const formStateGenerateErrors = (
     }
 
     if (setErr) {
-      /**
-       * 1) inner validation message
-       * 2) requiredMessage
-       * 3) common required text
-       */
       return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
     }
   }
 
-  /* the validator that should always be called if there is a value */
-  if (isSet && validators[fieldType]?.isValidPattern) {
+  /** check if the fields have valid values  */
+  if (hasValidValue && validators[fieldType]?.isValidPattern) {
     const response = validators[fieldType].isValidPattern(value);
 
     if (isString(response)) {
       return [i18next.t(response, { label: errorLabel })];
     }
-  }
-
-  if (isTypeMasked && value?.toString().includes('_')) {
-    /** if the value isn't fully set */
-    errorsToSet.push(
-      validationOptions?.requiredMessage || i18next.t('common.validation.maskedNotFull', { label: errorLabel }),
-    );
   }
 
   /** minLength */
