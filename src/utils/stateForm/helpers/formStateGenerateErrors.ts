@@ -1,5 +1,3 @@
-import { isBoolean } from 'lodash';
-
 import { stateFormDataTypeEmailValidators } from '../dataTypes/email';
 import { stateFormDataTypeTextValidators } from '../dataTypes/text';
 import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
@@ -31,26 +29,15 @@ export const formStateGenerateErrors = (
 
   const errorsToSet = []; // the array for collecting errors
 
-  const isTypeMasked = fieldType === 'masked';
+  const hasValidValue = !!validators[fieldType]?.isSet(value);
 
-  /** required */
-  if (validationOptions?.required) {
-    let setErr: boolean | string = false;
+  if (!hasValidValue && validationOptions?.required) {
+    let setErr = false;
 
-    if (validators[fieldType]?.required) {
-      // dynamic check
-      const response = validators[fieldType].required(value);
-
-      setErr = isBoolean(response) ? !response : response;
+    if (validators[fieldType]?.isSet) {
+      setErr = true;
     } else {
       switch (fieldType) {
-        case 'masked': {
-          /** if the value isn't fully set */
-          if (!value || value.toString().includes('_')) {
-            setErr = true;
-          }
-          break;
-        }
         case 'number': {
           if (value !== 0 && !value) {
             setErr = true;
@@ -77,27 +64,18 @@ export const formStateGenerateErrors = (
       }
     }
 
-    if (setErr !== false) {
-      /**
-       * 1) inner validation message
-       * 2) requiredMessage
-       * 3) common required text
-       */
-      errorsToSet.push(
-        isString(setErr)
-          ? i18next.t(setErr, { label: errorLabel })
-          : validationOptions.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel }),
-      );
-
-      return errorsToSet;
+    if (setErr) {
+      return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
     }
   }
 
-  if (isTypeMasked && value?.toString().includes('_')) {
-    /** if the value isn't fully set */
-    errorsToSet.push(
-      validationOptions?.requiredMessage || i18next.t('common.validation.maskedNotFull', { label: errorLabel }),
-    );
+  /** check if the fields have valid values  */
+  if (hasValidValue && validators[fieldType]?.isValidPattern) {
+    const response = validators[fieldType].isValidPattern(value);
+
+    if (isString(response)) {
+      return [i18next.t(response, { label: errorLabel })];
+    }
   }
 
   /** minLength */
