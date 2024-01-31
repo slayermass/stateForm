@@ -6,6 +6,7 @@ import {
 
 import { StateFormDataTypeEmailType, StateFormDataTypeFieldEmailType } from './dataTypes/email';
 import { StateFormDataTypeFieldTextType, StateFormDataTypeTextType } from './dataTypes/text';
+import { StateFormDataTypeFieldNumberType, StateFormDataTypeNumberType } from './dataTypes/number';
 import { StateFormEventType } from './eventBus/common';
 import { stateFormClearSubscriptions } from './eventBus/stateFormClearSubscriptions';
 import { stateFormEmit } from './eventBus/stateFormEmit';
@@ -57,7 +58,7 @@ export type StateFormPossibleValue =
   | StateFormDataTypeTextType
   | StateFormDataTypeEmailType
   | StateFormDataTypeRichTextType
-  | number
+  | StateFormDataTypeNumberType
   | boolean
   | null
   | undefined
@@ -176,10 +177,10 @@ export type StateFormFieldsType =
   | StateFormDataTypeFieldTextType
   | StateFormDataTypeFieldEmailType
   | StateFormDataTypeFieldRichTextType
+  | StateFormDataTypeFieldNumberType
   | 'radio'
   | 'color'
   | 'dropdown'
-  | 'number'
   | 'image'
   | 'datepicker'
   | 'rangeDatepicker'

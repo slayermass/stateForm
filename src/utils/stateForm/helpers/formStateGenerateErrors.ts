@@ -1,6 +1,7 @@
 import { stateFormDataTypeRichTextValidators } from 'src/utils/stateForm/dataTypes/richText';
 import { stateFormDataTypeEmailValidators } from '../dataTypes/email';
 import { stateFormDataTypeTextValidators } from '../dataTypes/text';
+import { stateFormDataTypeNumberValidators } from '../dataTypes/number';
 import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
 import { SafeAnyType, isValidColor, isString } from '../outerDependencies';
 
@@ -15,6 +16,7 @@ const validators: any = {
   ...stateFormDataTypeTextValidators,
   ...stateFormDataTypeEmailValidators,
   ...stateFormDataTypeRichTextValidators,
+  ...stateFormDataTypeNumberValidators,
 };
 
 export const stateFormErrorsRequiredMessage = 'common.validation.required';
@@ -40,12 +42,6 @@ export const formStateGenerateErrors = (
       setErr = true;
     } else {
       switch (fieldType) {
-        case 'number': {
-          if (value !== 0 && !value) {
-            setErr = true;
-          }
-          break;
-        }
         case 'color': {
           if (!isValidColor(value as SafeAnyType)) {
             setErr = true;

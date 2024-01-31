@@ -9,6 +9,7 @@ import has from 'lodash/has';
 import equal from 'fast-deep-equal';
 import isString from 'lodash/isString';
 import isArray from 'lodash/isArray';
+import isNumber from 'lodash/isNumber';
 import unset from 'lodash/unset';
 import { diff } from 'deep-object-diff';
 
@@ -35,6 +36,7 @@ export {
   equal,
   isString,
   isArray,
+  isNumber,
   diff,
   unset,
   createArrayXLength,
