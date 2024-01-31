@@ -3,7 +3,7 @@ import {
   StateFormValidatorCustomMessageType,
   StateFormValidatorMaxLengthType,
   StateFormValidatorMinLengthType,
-  StateFormValidatorRequiredType
+  StateFormValidatorRequiredType,
 } from '../types';
 
 export type StateFormDataTypeEmailType = string;
@@ -20,11 +20,8 @@ const validators: {
   required: (value) => isString(value) && value.trim().length > 0,
   minLength: (value, minLength) => isString(value) && value.trim().length >= minLength,
   maxLength: (value, maxLength) => isString(value) && value.trim().length <= maxLength,
-  customMessage: (value) => {
-    const trimmedValue = value.trim();
-
-    return validators.required(value) && !isValidEmail(trimmedValue) && stateFormErrorsPatternEmailMessage;
-  },
+  customMessage: (value) =>
+    validators.required(value) && !isValidEmail(value.trim()) && stateFormErrorsPatternEmailMessage,
 };
 
 export const stateFormDataTypeEmailValidators: {

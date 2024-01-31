@@ -33,14 +33,13 @@ export const formStateGenerateErrors = (
 
   const isTypeMasked = fieldType === 'masked';
 
-  /* custom validation for field types */
+  /** custom validation for field types */
   if (validators[fieldType]?.customMessage) {
     const setErr = validators[fieldType].customMessage(value);
 
     if (isString(setErr)) {
       return [i18next.t(setErr, { label: errorLabel })];
     }
-
   }
 
   /** required */
