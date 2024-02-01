@@ -1,4 +1,4 @@
-import { stateFormDataTypeRichTextValidators } from 'src/utils/stateForm/dataTypes/richText';
+import { stateFormDataTypeRichTextValidators } from '../dataTypes/richText';
 import { stateFormDataTypeEmailValidators } from '../dataTypes/email';
 import { stateFormDataTypeTextValidators } from '../dataTypes/text';
 import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
