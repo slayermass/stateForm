@@ -1,17 +1,33 @@
 import React from 'react';
 import './App.css';
+import { useStateForm } from 'src/utils/stateForm';
 
-const App = () => (
-  <div className="App">
-    <header className="App-header">
-      <p>
-        Edit <code>src/App.tsx</code> and save to reload.
-      </p>
-      <a className="App-link" href="https://reactjs.org" target="_blank" rel="noopener noreferrer">
-        Learn React
-      </a>
-    </header>
-  </div>
-);
+const App = () => {
+  const formProps = useStateForm();
+
+  formProps.register('testText', 'text', {
+    required: true, // turn on validation
+  });
+
+  return (
+    <div className="App">
+      <form
+        onSubmit={formProps.onSubmit(
+          (data) => {
+            // eslint-disable-next-line no-console
+            console.log('OK', data);
+          },
+          (data) => {
+            // eslint-disable-next-line no-console
+            console.log('ERROR', data);
+          },
+        )}
+      >
+        <input type="text" name="testText" />
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  );
+};
 
 export default App;
