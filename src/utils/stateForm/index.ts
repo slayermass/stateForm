@@ -1,5 +1,10 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
+import {
+  StateFormDataTypeDateSpecificProperties,
+  StateFormDataTypeDateType,
+  StateFormDataTypeFieldDateType,
+} from './dataTypes/date';
 import { StateFormDataTypeFieldRichTextType, StateFormDataTypeRichTextType } from './dataTypes/richText';
 import { formStateInnerCloneDeep } from './helpers/cloneDeep';
 import { StateFormDataTypeEmailType, StateFormDataTypeFieldEmailType } from './dataTypes/email';
@@ -25,10 +30,13 @@ import {
   merge,
   SafeAnyType,
   set,
+  NullableUndefineable,
 } from './outerDependencies';
 import { StateFormPath, StateFormPathValue, StateFormPathValues } from './types/path';
 
-type ErrorsType = { type: StateFormErrorTypes; message: string; initChange?: boolean }[] | null | undefined;
+export type StateFormEmptyValueType = null | undefined;
+
+type ErrorsType = { type: StateFormErrorTypes; message: string; initChange?: boolean }[] | StateFormEmptyValueType;
 
 type DefinedErrorsType = NonNullable<ErrorsType>;
 
@@ -51,14 +59,15 @@ type FieldsOptions = Record<string, FieldOptionValue>;
 type StateFormErrorTypes = 'hover' | 'validate' | 'all' | string;
 
 /** --- return types --- */
+
 export type StateFormPossibleValue =
   | StateFormDataTypeTextType
   | StateFormDataTypeEmailType
   | StateFormDataTypeRichTextType
+  | StateFormDataTypeDateType
   | number
   | boolean
-  | null
-  | undefined
+  | StateFormEmptyValueType
   | [string, string];
 
 export type StateFormErrors = { [s: string]: DefinedErrorsType };
@@ -85,7 +94,7 @@ export type StateFormInputOptionsType = {
   errorLabel?: string;
 
   trigger?: boolean;
-};
+} & NullableUndefineable<StateFormDataTypeDateSpecificProperties>;
 
 export type StateFormOnChange = (
   name: string,
@@ -174,19 +183,17 @@ export type StateFormFieldsType =
   | StateFormDataTypeFieldTextType
   | StateFormDataTypeFieldEmailType
   | StateFormDataTypeFieldRichTextType
+  | StateFormDataTypeFieldDateType
   | 'radio'
   | 'color'
   | 'dropdown'
   | 'number'
   | 'image'
-  | 'datepicker'
-  | 'rangeDatepicker'
   | 'timepicker'
   | 'phone'
   | 'switch'
   | 'buttonCheckbox'
-  | 'file'
-  | 'tags';
+  | 'file';
 
 export type StateFormReset<FormValues = SafeAnyType> = (
   values?: DeepPartial<FormValues>,
@@ -475,7 +482,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
       const type = getFieldOptionsValue(name, 'type');
 
-      const omitArrayTypes: StateFormFieldsType[] = ['rangeDatepicker', 'file', 'tags'];
+      const omitArrayTypes: StateFormFieldsType[] = ['file'];
 
       if (isArray(value) && !omitArrayTypes.includes(type)) {
         (value as Record<string, StateFormPossibleValue>[]).forEach((item, index) => {

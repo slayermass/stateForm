@@ -1,3 +1,4 @@
+import { stateFormDataTypeDateValidators } from '../dataTypes/date';
 import { stateFormDataTypeRichTextValidators } from '../dataTypes/richText';
 import { stateFormDataTypeEmailValidators } from '../dataTypes/email';
 import { stateFormDataTypeTextValidators } from '../dataTypes/text';
@@ -15,9 +16,12 @@ const validators: any = {
   ...stateFormDataTypeTextValidators,
   ...stateFormDataTypeEmailValidators,
   ...stateFormDataTypeRichTextValidators,
+  ...stateFormDataTypeDateValidators,
 };
 
 export const stateFormErrorsRequiredMessage = 'common.validation.required';
+export const stateFormErrorsCommonInvalidMessage = 'common.validation.invalid';
+// only text?
 export const stateFormErrorsMinLengthMessage = 'common.validation.minLength';
 export const stateFormErrorsMaxLengthMessage = 'common.validation.maxLength';
 
@@ -29,7 +33,7 @@ export const formStateGenerateErrors = (
 ): string[] => {
   const errorLabel = validationOptions?.errorLabel || name;
 
-  const errorsToSet = []; // the array for collecting errors
+  const errorsToSet: string[] = []; // the array for collecting errors
 
   const hasValidValue = !!validators[fieldType]?.isSet(value);
 
@@ -48,12 +52,6 @@ export const formStateGenerateErrors = (
         }
         case 'color': {
           if (!isValidColor(value as SafeAnyType)) {
-            setErr = true;
-          }
-          break;
-        }
-        case 'tags': {
-          if (!value || (value as string[])?.length === 0) {
             setErr = true;
           }
           break;
@@ -83,41 +81,68 @@ export const formStateGenerateErrors = (
     }
   }
 
-  /** minLength */
-  if (validationOptions?.minLength) {
-    let setErr = false;
+  /** below are optional validators */
 
-    if (validators[fieldType]?.minLength) {
-      setErr = !validators[fieldType].minLength(value, validationOptions.minLength);
-    } else if ((value || '').toString().length < validationOptions.minLength) {
-      setErr = true;
+  // dynamically go through validators ignoring 'isSet',
+  // check if the validate property is set to form,
+  // validate and set errors if needed
+  Object.keys(validators[fieldType] || {}).forEach((key) => {
+    // types?
+    const validatorValue = (validationOptions as SafeAnyType)[key];
+
+    if (validatorValue !== undefined) {
+      const setErr = !validators[fieldType][key](value, validatorValue);
+
+      if (setErr) {
+        errorsToSet.push(
+          (validationOptions as SafeAnyType)[`${key}Message`] ||
+            i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel }),
+        );
+      }
     }
+  });
 
-    if (setErr) {
-      errorsToSet.push(
-        validationOptions.minLengthMessage ||
-          i18next.t(stateFormErrorsMinLengthMessage, { label: errorLabel, length: validationOptions.minLength }),
-      );
-    }
-  }
+  /**
+   * minLength
+   * @deprecated
+   */
+  // if (validationOptions?.minLength) {
+  //   let setErr = false;
+  //
+  //   if (validators[fieldType]?.minLength) {
+  //     setErr = !validators[fieldType].minLength(value, validationOptions.minLength);
+  //   } else if ((value || '').toString().length < validationOptions.minLength) {
+  //     setErr = true;
+  //   }
+  //
+  //   if (setErr) {
+  //     errorsToSet.push(
+  //       validationOptions.minLengthMessage ||
+  //         i18next.t(stateFormErrorsMinLengthMessage, { label: errorLabel, length: validationOptions.minLength }),
+  //     );
+  //   }
+  // }
 
-  /** maxLength */
-  if (validationOptions?.maxLength) {
-    let setErr = false;
-
-    if (validators[fieldType]?.maxLength) {
-      setErr = !validators[fieldType].maxLength(value, validationOptions.maxLength);
-    } else if ((value || '').toString().length > validationOptions.maxLength) {
-      setErr = true;
-    }
-
-    if (setErr) {
-      errorsToSet.push(
-        validationOptions.maxLengthMessage ||
-          i18next.t(stateFormErrorsMaxLengthMessage, { label: errorLabel, length: validationOptions.maxLength }),
-      );
-    }
-  }
+  /**
+   * maxLength
+   * @deprecated
+   */
+  // if (validationOptions?.maxLength) {
+  //   let setErr = false;
+  //
+  //   if (validators[fieldType]?.maxLength) {
+  //     setErr = !validators[fieldType].maxLength(value, validationOptions.maxLength);
+  //   } else if ((value || '').toString().length > validationOptions.maxLength) {
+  //     setErr = true;
+  //   }
+  //
+  //   if (setErr) {
+  //     errorsToSet.push(
+  //       validationOptions.maxLengthMessage ||
+  //         i18next.t(stateFormErrorsMaxLengthMessage, { label: errorLabel, length: validationOptions.maxLength }),
+  //     );
+  //   }
+  // }
 
   /** custom validate */
   if (validationOptions?.validate) {

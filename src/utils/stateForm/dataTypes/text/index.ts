@@ -1,8 +1,4 @@
-import {
-  StateFormValidatorIsSetType,
-  StateFormValidatorMinLengthType,
-  StateFormValidatorMaxLengthType,
-} from '../types';
+import { StateFormValidatorIsSetType, StateFormValidatorPropertyType } from '../types';
 import { isString } from '../../outerDependencies';
 
 export type StateFormDataTypeTextType = string;
@@ -10,8 +6,8 @@ export type StateFormDataTypeFieldTextType = keyof typeof stateFormDataTypeTextV
 
 const validators: {
   isSet: StateFormValidatorIsSetType;
-  minLength: StateFormValidatorMinLengthType;
-  maxLength: StateFormValidatorMaxLengthType;
+  minLength: StateFormValidatorPropertyType<number>;
+  maxLength: StateFormValidatorPropertyType<number>;
 } = {
   isSet: (value) => isString(value) && value.trim().length > 0,
   minLength: (value, minLength) => isString(value) && value.trim().length >= minLength,

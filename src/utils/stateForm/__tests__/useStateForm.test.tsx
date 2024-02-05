@@ -1,6 +1,9 @@
 import { renderHook } from '@testing-library/react';
 
-import { stateFormErrorsRequiredMessage } from '../helpers/formStateGenerateErrors';
+import {
+  stateFormErrorsCommonInvalidMessage,
+  stateFormErrorsRequiredMessage,
+} from '../helpers/formStateGenerateErrors';
 import { StateFormRegisterOptions, StateFormReturnType, useStateForm } from '../index';
 import { set } from '../outerDependencies';
 
@@ -368,7 +371,7 @@ describe('useStateForm', () => {
         {
           minLength: 2,
         },
-        'common.validation.minLength',
+        stateFormErrorsCommonInvalidMessage,
         '1',
       );
     });
@@ -389,7 +392,7 @@ describe('useStateForm', () => {
         {
           maxLength: 2,
         },
-        'common.validation.maxLength',
+        stateFormErrorsCommonInvalidMessage,
         '123',
       );
     });
