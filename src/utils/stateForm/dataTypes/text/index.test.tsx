@@ -2,8 +2,6 @@ import { renderHook } from '@testing-library/react';
 
 import {
   stateFormErrorsCommonInvalidMessage,
-  stateFormErrorsMaxLengthMessage,
-  stateFormErrorsMinLengthMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';

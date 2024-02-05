@@ -14,8 +14,8 @@ const validators: {
   maxDate: StateFormValidatorPropertyType<Date>;
 } = {
   isSet: (value) => isDate(value),
-  minDate: (value, minDate) => isDate(value) && value > new Date(minDate),
-  maxDate: (value, maxDate) => isDate(value) && value < new Date(maxDate),
+  minDate: (value, minDate) => isDate(value) && value > minDate,
+  maxDate: (value, maxDate) => isDate(value) && value < maxDate,
 };
 
 export const stateFormDataTypeDateValidators: {

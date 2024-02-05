@@ -1,14 +1,11 @@
 import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import {
-  StateFormDataTypeDateSpecificProperties,
-  StateFormDataTypeDateType,
-  StateFormDataTypeFieldDateType,
-} from './dataTypes/date';
-import { StateFormDataTypeFieldRichTextType, StateFormDataTypeRichTextType } from './dataTypes/richText';
+  StateFormDataTypesFieldsType,
+  StateFormDataTypesSpecificPropertiesType,
+  StateFormPossibleValue,
+} from './settings';
 import { formStateInnerCloneDeep } from './helpers/cloneDeep';
-import { StateFormDataTypeEmailType, StateFormDataTypeFieldEmailType } from './dataTypes/email';
-import { StateFormDataTypeFieldTextType, StateFormDataTypeTextType } from './dataTypes/text';
 import { StateFormEventType } from './eventBus/common';
 import { stateFormClearSubscriptions } from './eventBus/stateFormClearSubscriptions';
 import { stateFormEmit } from './eventBus/stateFormEmit';
@@ -30,7 +27,6 @@ import {
   merge,
   SafeAnyType,
   set,
-  NullableUndefineable,
 } from './outerDependencies';
 import { StateFormPath, StateFormPathValue, StateFormPathValues } from './types/path';
 
@@ -60,16 +56,6 @@ type StateFormErrorTypes = 'hover' | 'validate' | 'all' | string;
 
 /** --- return types --- */
 
-export type StateFormPossibleValue =
-  | StateFormDataTypeTextType
-  | StateFormDataTypeEmailType
-  | StateFormDataTypeRichTextType
-  | StateFormDataTypeDateType
-  | number
-  | boolean
-  | StateFormEmptyValueType
-  | [string, string];
-
 export type StateFormErrors = { [s: string]: DefinedErrorsType };
 
 export type StateFormOnSubmitType<FormValues> = (
@@ -82,19 +68,14 @@ export type StateFormInputOptionsType = {
 
   initChange?: true; // creates errors for every input when started; inner usage
 
-  minLength?: number;
-  maxLength?: number;
-
   requiredMessage?: string;
-  minLengthMessage?: string;
-  maxLengthMessage?: string;
   // true is OK, false is a validate error; string is a custom error
   validate?: (value: StateFormPossibleValue) => boolean | string;
   changedInitialValue?: (value: StateFormPossibleValue) => StateFormPossibleValue;
   errorLabel?: string;
 
   trigger?: boolean;
-} & NullableUndefineable<StateFormDataTypeDateSpecificProperties>;
+} & StateFormDataTypesSpecificPropertiesType;
 
 export type StateFormOnChange = (
   name: string,
@@ -178,12 +159,9 @@ export type StateFormGetSubscribeProps = (
 ) => [StateFormSubscribeFn, StateFormSubscribeDefaultValue];
 
 export type StateFormFieldsType =
+  | StateFormDataTypesFieldsType
   | 'checkbox'
   | 'checkboxGroup' // it only marks as this, but must not be used directly
-  | StateFormDataTypeFieldTextType
-  | StateFormDataTypeFieldEmailType
-  | StateFormDataTypeFieldRichTextType
-  | StateFormDataTypeFieldDateType
   | 'radio'
   | 'color'
   | 'dropdown'

@@ -3,6 +3,10 @@ import { isString } from '../../outerDependencies';
 
 export type StateFormDataTypeTextType = string;
 export type StateFormDataTypeFieldTextType = keyof typeof stateFormDataTypeTextValidators;
+export type StateFormDataTypeTextSpecificProperties = Pick<typeof validators, 'minLength' | 'maxLength'> & {
+  minLengthMessage: string;
+  maxLengthMessage: string;
+};
 
 const validators: {
   isSet: StateFormValidatorIsSetType;

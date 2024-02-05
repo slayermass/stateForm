@@ -7,6 +7,10 @@ import {
 
 export type StateFormDataTypeEmailType = string;
 export type StateFormDataTypeFieldEmailType = keyof typeof stateFormDataTypeEmailValidators;
+export type StateFormDataTypeEmailSpecificProperties = Pick<typeof validators, 'minLength' | 'maxLength'> & {
+  minLengthMessage: string;
+  maxLengthMessage: string;
+};
 
 export const stateFormErrorsPatternEmailMessage = 'common.validation.emailInvalid';
 

@@ -14,10 +14,9 @@ import isDate from 'lodash/isDate';
 import { diff } from 'deep-object-diff';
 
 // types
-import { DeepPartial, ChildrenPropType } from 'src/utils/types';
+import { DeepPartial, ChildrenPropType, NullableUndefineable } from 'src/utils/types';
 import { getUniqueId } from 'src/utils/getUniqueId';
 import { SafeAnyType } from 'src/utils/safeAny';
-import { NullableUndefineable } from 'src/utils/types';
 
 // local
 import { createArrayXLength } from 'src/utils/objects';

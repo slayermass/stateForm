@@ -3,8 +3,6 @@ import { renderHook } from '@testing-library/react';
 import { stateFormErrorsPatternEmailMessage } from './index';
 import {
   stateFormErrorsCommonInvalidMessage,
-  stateFormErrorsMaxLengthMessage,
-  stateFormErrorsMinLengthMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';

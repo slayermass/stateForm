@@ -1,8 +1,5 @@
-import { stateFormDataTypeDateValidators } from '../dataTypes/date';
-import { stateFormDataTypeRichTextValidators } from '../dataTypes/richText';
-import { stateFormDataTypeEmailValidators } from '../dataTypes/email';
-import { stateFormDataTypeTextValidators } from '../dataTypes/text';
-import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
+import { stateFormInnerValidators, StateFormPossibleValue } from '../settings';
+import { StateFormFieldsType, StateFormInputOptionsType } from '../index';
 import { SafeAnyType, isValidColor, isString } from '../outerDependencies';
 
 // import i18next from 'src/utils/i18n';
@@ -11,19 +8,8 @@ const i18next = {
   t: (s: string, options: SafeAnyType) => s,
 };
 
-// TODO temporary until all data types are ready
-const validators: any = {
-  ...stateFormDataTypeTextValidators,
-  ...stateFormDataTypeEmailValidators,
-  ...stateFormDataTypeRichTextValidators,
-  ...stateFormDataTypeDateValidators,
-};
-
 export const stateFormErrorsRequiredMessage = 'common.validation.required';
 export const stateFormErrorsCommonInvalidMessage = 'common.validation.invalid';
-// only text?
-export const stateFormErrorsMinLengthMessage = 'common.validation.minLength';
-export const stateFormErrorsMaxLengthMessage = 'common.validation.maxLength';
 
 export const formStateGenerateErrors = (
   value: StateFormPossibleValue,
@@ -35,12 +21,12 @@ export const formStateGenerateErrors = (
 
   const errorsToSet: string[] = []; // the array for collecting errors
 
-  const hasValidValue = !!validators[fieldType]?.isSet(value);
+  const hasValidValue = !!stateFormInnerValidators[fieldType]?.isSet(value);
 
   if (!hasValidValue && validationOptions?.required) {
     let setErr = false;
 
-    if (validators[fieldType]?.isSet) {
+    if (stateFormInnerValidators[fieldType]?.isSet) {
       setErr = true;
     } else {
       switch (fieldType) {
@@ -70,8 +56,8 @@ export const formStateGenerateErrors = (
   }
 
   /** check if the fields have valid values  */
-  if (hasValidValue && validators[fieldType]?.isValidPattern) {
-    const response = validators[fieldType].isValidPattern(value);
+  if (hasValidValue && stateFormInnerValidators[fieldType]?.isValidPattern) {
+    const response = stateFormInnerValidators[fieldType].isValidPattern(value);
 
     if (isString(response)) {
       return [i18next.t(response, { label: errorLabel })];
@@ -86,12 +72,12 @@ export const formStateGenerateErrors = (
   // dynamically go through validators ignoring 'isSet',
   // check if the validate property is set to form,
   // validate and set errors if needed
-  Object.keys(validators[fieldType] || {}).forEach((key) => {
+  Object.keys(stateFormInnerValidators[fieldType] || {}).forEach((key) => {
     // types?
     const validatorValue = (validationOptions as SafeAnyType)[key];
 
     if (validatorValue !== undefined) {
-      const setErr = !validators[fieldType][key](value, validatorValue);
+      const setErr = !stateFormInnerValidators[fieldType][key](value, validatorValue);
 
       if (setErr) {
         errorsToSet.push(
