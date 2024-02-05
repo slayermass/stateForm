@@ -10,12 +10,14 @@ import equal from 'fast-deep-equal';
 import isString from 'lodash/isString';
 import isArray from 'lodash/isArray';
 import unset from 'lodash/unset';
+import isDate from 'lodash/isDate';
 import { diff } from 'deep-object-diff';
 
 // types
 import { DeepPartial, ChildrenPropType } from 'src/utils/types';
 import { getUniqueId } from 'src/utils/getUniqueId';
 import { SafeAnyType } from 'src/utils/safeAny';
+import { NullableUndefineable } from 'src/utils/types';
 
 // local
 import { createArrayXLength } from 'src/utils/objects';
@@ -41,6 +43,7 @@ export {
   useMemoObject,
   isValidEmail,
   isValidColor,
+  isDate,
 };
 
-export type { DeepPartial, SafeAnyType, ChildrenPropType };
+export type { DeepPartial, SafeAnyType, ChildrenPropType, NullableUndefineable };
