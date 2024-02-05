@@ -1,5 +1,5 @@
-import { StateFormEmptyValueType } from 'src/utils/stateForm/index';
-import { NullableUndefineable } from 'src/utils/types';
+import { StateFormEmptyValueType } from './index';
+import { NullableUndefineable } from './outerDependencies';
 import {
   StateFormDataTypeDateSpecificProperties,
   StateFormDataTypeDateType,
@@ -29,6 +29,7 @@ import {
  */
 
 // TODO temporary until all data types are ready
+/** validators from each data type */
 export const stateFormInnerValidators: any = {
   ...stateFormDataTypeTextValidators,
   ...stateFormDataTypeEmailValidators,
@@ -36,6 +37,7 @@ export const stateFormInnerValidators: any = {
   ...stateFormDataTypeDateValidators,
 };
 
+/** possible values */
 export type StateFormPossibleValue =
   | StateFormDataTypeTextType
   | StateFormDataTypeEmailType
@@ -46,10 +48,12 @@ export type StateFormPossibleValue =
   | StateFormEmptyValueType
   | [string, string];
 
+/** possible properties to each data type */
 export type StateFormDataTypesSpecificPropertiesType = NullableUndefineable<StateFormDataTypeDateSpecificProperties> &
   NullableUndefineable<StateFormDataTypeTextSpecificProperties> &
   NullableUndefineable<StateFormDataTypeEmailSpecificProperties>;
 
+/** possible types of values */
 export type StateFormDataTypesFieldsType =
   | StateFormDataTypeFieldTextType
   | StateFormDataTypeFieldEmailType
