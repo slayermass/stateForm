@@ -11,10 +11,11 @@ import isString from 'lodash/isString';
 import isArray from 'lodash/isArray';
 import isNumber from 'lodash/isNumber';
 import unset from 'lodash/unset';
+import isDate from 'lodash/isDate';
 import { diff } from 'deep-object-diff';
 
 // types
-import { DeepPartial, ChildrenPropType } from 'src/utils/types';
+import { DeepPartial, ChildrenPropType, NullableUndefineable } from 'src/utils/types';
 import { getUniqueId } from 'src/utils/getUniqueId';
 import { SafeAnyType } from 'src/utils/safeAny';
 
@@ -43,6 +44,7 @@ export {
   useMemoObject,
   isValidEmail,
   isValidColor,
+  isDate,
 };
 
-export type { DeepPartial, SafeAnyType, ChildrenPropType };
+export type { DeepPartial, SafeAnyType, ChildrenPropType, NullableUndefineable };

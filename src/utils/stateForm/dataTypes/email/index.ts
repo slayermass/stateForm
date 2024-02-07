@@ -1,20 +1,23 @@
 import { isString, isValidEmail } from '../../outerDependencies';
 import {
   StateFormValidatorIsValidPatternType,
-  StateFormValidatorMaxLengthType,
-  StateFormValidatorMinLengthType,
+  StateFormValidatorPropertyType,
   StateFormValidatorIsSetType,
 } from '../types';
 
 export type StateFormDataTypeEmailType = string;
 export type StateFormDataTypeFieldEmailType = keyof typeof stateFormDataTypeEmailValidators;
+export type StateFormDataTypeEmailSpecificProperties = Pick<typeof validators, 'minLength' | 'maxLength'> & {
+  minLengthMessage: string;
+  maxLengthMessage: string;
+};
 
 export const stateFormErrorsPatternEmailMessage = 'common.validation.emailInvalid';
 
 const validators: {
   isSet: StateFormValidatorIsSetType;
-  minLength: StateFormValidatorMinLengthType;
-  maxLength: StateFormValidatorMaxLengthType;
+  minLength: StateFormValidatorPropertyType<number>;
+  maxLength: StateFormValidatorPropertyType<number>;
   isValidPattern: StateFormValidatorIsValidPatternType;
 } = {
   isSet: (value) => isString(value) && value.trim().length > 0,

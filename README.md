@@ -4,7 +4,6 @@ useStateForm
 ## типы данных (модули)
 - number (Number)
 - date (string)
-- date (Date)
 - phone (string)
 - time (string)
 - time (Date)
@@ -13,6 +12,8 @@ useStateForm
 - image (File)
 - boolean (Boolean)
 - color
+- checkbox
+- dropdown
 
 ## внутренности
 - event bus

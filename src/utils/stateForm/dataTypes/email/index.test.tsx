@@ -2,8 +2,7 @@ import { renderHook } from '@testing-library/react';
 
 import { stateFormErrorsPatternEmailMessage } from './index';
 import {
-  stateFormErrorsMaxLengthMessage,
-  stateFormErrorsMinLengthMessage,
+  stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
@@ -45,6 +44,30 @@ describe('email', () => {
     expect(formProps.getValue()).toEqual(initialProps);
   });
 
+  it('form empty values', () => {
+    const right = jest.fn();
+    const left = jest.fn();
+
+    const propName = 'emailValue1';
+
+    formProps.register(propName, 'email', {
+      required: true,
+    });
+
+    [null, undefined].forEach((value) => {
+      formProps.setValue(propName, value);
+
+      formProps.onSubmit((data) => {
+        right(data);
+      }, left)();
+
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith({
+        [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+      });
+    });
+  });
+
   it('submit changed values', () => {
     const right = jest.fn();
     const left = jest.fn();
@@ -67,8 +90,8 @@ describe('email', () => {
       right(data);
     }, left)();
 
-    expect(right).toBeCalledWith(newValues);
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith(newValues);
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('required empty multiple', () => {
@@ -87,8 +110,8 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
       [propNames[0]]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
       [propNames[1]]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     });
@@ -114,8 +137,10 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+    });
 
     // set another empty value
     right.mockClear();
@@ -125,8 +150,10 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+    });
 
     // set another invalid value (not email)
     right.mockClear();
@@ -136,8 +163,10 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }],
+    });
 
     // set valid value
     right.mockClear();
@@ -148,8 +177,8 @@ describe('email', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('maxLength', () => {
@@ -167,8 +196,10 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMaxLengthMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+    });
 
     // set another invalid value
     right.mockClear();
@@ -178,8 +209,10 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMaxLengthMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+    });
 
     // set another invalid value (not email)
     right.mockClear();
@@ -189,8 +222,10 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }],
+    });
 
     // set valid value
     right.mockClear();
@@ -201,8 +236,8 @@ describe('email', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('required + maxLength', () => {
@@ -221,8 +256,8 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }],
     });
   });
@@ -240,8 +275,8 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     });
 
@@ -253,9 +288,9 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }],
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
     });
 
     right.mockClear();
@@ -267,8 +302,8 @@ describe('email', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps, [propName]: 'test@test.com' });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: 'test@test.com' });
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('valid pattern', () => {
@@ -281,8 +316,8 @@ describe('email', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps });
+    expect(left).not.toHaveBeenCalled();
 
     right.mockClear();
     left.mockClear();
@@ -292,10 +327,10 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }]
-    })
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }],
+    });
 
     right.mockClear();
     left.mockClear();
@@ -307,8 +342,8 @@ describe('email', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('required + pattern email', () => {
@@ -323,8 +358,8 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     });
 
@@ -336,8 +371,8 @@ describe('email', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsPatternEmailMessage }],
     });
 
@@ -351,8 +386,8 @@ describe('email', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('console errors check (should be the last test)', () => {

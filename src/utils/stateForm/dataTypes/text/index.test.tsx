@@ -1,8 +1,7 @@
 import { renderHook } from '@testing-library/react';
 
 import {
-  stateFormErrorsMaxLengthMessage,
-  stateFormErrorsMinLengthMessage,
+  stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
@@ -44,6 +43,30 @@ describe('text + textarea', () => {
     expect(formProps.getValue()).toEqual(initialProps);
   });
 
+  it('form empty values', () => {
+    const right = jest.fn();
+    const left = jest.fn();
+
+    const propName = 'strValue0';
+
+    formProps.register(propName, 'text', {
+      required: true,
+    });
+
+    [null, undefined].forEach((value) => {
+      formProps.setValue(propName, value);
+
+      formProps.onSubmit((data) => {
+        right(data);
+      }, left)();
+
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith({
+        [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+      });
+    });
+  });
+
   it('submit the same values', () => {
     const right = jest.fn();
     const left = jest.fn();
@@ -52,8 +75,8 @@ describe('text + textarea', () => {
       right(data);
     }, left)();
 
-    expect(right).toBeCalledWith(initialProps);
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith(initialProps);
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('submit changed values', () => {
@@ -72,8 +95,8 @@ describe('text + textarea', () => {
       right(data);
     }, left)();
 
-    expect(right).toBeCalledWith(newValues);
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith(newValues);
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('required empty', () => {
@@ -90,8 +113,8 @@ describe('text + textarea', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
 
     expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
   });
@@ -110,8 +133,8 @@ describe('text + textarea', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
 
     expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
   });
@@ -158,8 +181,10 @@ describe('text + textarea', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+    });
 
     // set another empty value
     right.mockClear();
@@ -169,8 +194,10 @@ describe('text + textarea', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+    });
 
     // set valid value
     right.mockClear();
@@ -181,8 +208,8 @@ describe('text + textarea', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('maxLength', () => {
@@ -200,8 +227,10 @@ describe('text + textarea', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMaxLengthMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+    });
 
     // set another invalid value
     right.mockClear();
@@ -211,8 +240,10 @@ describe('text + textarea', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsMaxLengthMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+    });
 
     // set valid value
     right.mockClear();
@@ -223,8 +254,8 @@ describe('text + textarea', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('required + maxLength', () => {
@@ -243,9 +274,9 @@ describe('text + textarea', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsMaxLengthMessage }],
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
     });
   });
 
@@ -264,8 +295,8 @@ describe('text + textarea', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     });
 
@@ -277,9 +308,9 @@ describe('text + textarea', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsMinLengthMessage }],
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
     });
   });
 

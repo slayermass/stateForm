@@ -32,6 +32,30 @@ describe('richText', () => {
     formProps = current;
   });
 
+  it('form empty values', () => {
+    const right = jest.fn();
+    const left = jest.fn();
+
+    const propName = 'richTextValue';
+
+    formProps.register(propName, 'richText', {
+      required: true,
+    });
+
+    [null, undefined].forEach((value) => {
+      formProps.setValue(propName, value);
+
+      formProps.onSubmit((data) => {
+        right(data);
+      }, left)();
+
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith({
+        [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+      });
+    });
+  });
+
   it('submit the same values', () => {
     const right = jest.fn();
     const left = jest.fn();
@@ -40,8 +64,8 @@ describe('richText', () => {
       right(data);
     }, left)();
 
-    expect(right).toBeCalledWith(initialProps);
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith(initialProps);
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('submit changed values', () => {
@@ -58,8 +82,8 @@ describe('richText', () => {
       right(data);
     }, left)();
 
-    expect(right).toBeCalledWith(newValues);
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith(newValues);
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('required empty', () => {
@@ -76,8 +100,8 @@ describe('richText', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
 
     expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
   });
@@ -96,8 +120,8 @@ describe('richText', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
 
     expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
   });
@@ -118,8 +142,10 @@ describe('richText', () => {
 
       formProps.onSubmit(right, left)();
 
-      expect(right).not.toBeCalled();
-      expect(left).toBeCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith({
+        [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+      });
     });
 
     // valid again
@@ -135,8 +161,8 @@ describe('richText', () => {
       right(data);
     }, left)();
 
-    expect(right).toBeCalledWith(newValues);
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith(newValues);
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('console errors check (should be the last test)', () => {

@@ -1,8 +1,5 @@
-import { stateFormDataTypeRichTextValidators } from 'src/utils/stateForm/dataTypes/richText';
-import { stateFormDataTypeEmailValidators } from '../dataTypes/email';
-import { stateFormDataTypeTextValidators } from '../dataTypes/text';
-import { stateFormDataTypeNumberValidators } from '../dataTypes/number';
-import { StateFormFieldsType, StateFormInputOptionsType, StateFormPossibleValue } from '../index';
+import { stateFormInnerValidators, StateFormPossibleValue } from '../settings';
+import { StateFormFieldsType, StateFormInputOptionsType } from '../index';
 import { SafeAnyType, isValidColor, isString } from '../outerDependencies';
 
 // import i18next from 'src/utils/i18n';
@@ -11,17 +8,8 @@ const i18next = {
   t: (s: string, options: SafeAnyType) => s,
 };
 
-// TODO temporary until all data types are ready
-const validators: any = {
-  ...stateFormDataTypeTextValidators,
-  ...stateFormDataTypeEmailValidators,
-  ...stateFormDataTypeRichTextValidators,
-  ...stateFormDataTypeNumberValidators,
-};
-
 export const stateFormErrorsRequiredMessage = 'common.validation.required';
-export const stateFormErrorsMinLengthMessage = 'common.validation.minLength';
-export const stateFormErrorsMaxLengthMessage = 'common.validation.maxLength';
+export const stateFormErrorsCommonInvalidMessage = 'common.validation.invalid';
 
 export const formStateGenerateErrors = (
   value: StateFormPossibleValue,
@@ -31,25 +19,19 @@ export const formStateGenerateErrors = (
 ): string[] => {
   const errorLabel = validationOptions?.errorLabel || name;
 
-  const errorsToSet = []; // the array for collecting errors
+  const errorsToSet: string[] = []; // the array for collecting errors
 
-  const hasValidValue = !!validators[fieldType]?.isSet(value);
+  const hasValidValue = !!stateFormInnerValidators[fieldType]?.isSet(value);
 
   if (!hasValidValue && validationOptions?.required) {
     let setErr = false;
 
-    if (validators[fieldType]?.isSet) {
+    if (stateFormInnerValidators[fieldType]?.isSet) {
       setErr = true;
     } else {
       switch (fieldType) {
         case 'color': {
           if (!isValidColor(value as SafeAnyType)) {
-            setErr = true;
-          }
-          break;
-        }
-        case 'tags': {
-          if (!value || (value as string[])?.length === 0) {
             setErr = true;
           }
           break;
@@ -68,8 +50,8 @@ export const formStateGenerateErrors = (
   }
 
   /** check if the fields have valid values  */
-  if (hasValidValue && validators[fieldType]?.isValidPattern) {
-    const response = validators[fieldType].isValidPattern(value);
+  if (hasValidValue && stateFormInnerValidators[fieldType]?.isValidPattern) {
+    const response = stateFormInnerValidators[fieldType].isValidPattern(value);
 
     if (isString(response)) {
       return [i18next.t(response, { label: errorLabel })];
@@ -79,41 +61,68 @@ export const formStateGenerateErrors = (
     }
   }
 
-  /** minLength */
-  if (validationOptions?.minLength) {
-    let setErr = false;
+  /** below are optional validators */
 
-    if (validators[fieldType]?.minLength) {
-      setErr = !validators[fieldType].minLength(value, validationOptions.minLength);
-    } else if ((value || '').toString().length < validationOptions.minLength) {
-      setErr = true;
+  // dynamically go through validators ignoring 'isSet',
+  // check if the validate property is set to form,
+  // validate and set errors if needed
+  Object.keys(stateFormInnerValidators[fieldType] || {}).forEach((key) => {
+    // types?
+    const validatorValue = (validationOptions as SafeAnyType)[key];
+
+    if (validatorValue !== undefined) {
+      const setErr = !stateFormInnerValidators[fieldType][key](value, validatorValue);
+
+      if (setErr) {
+        errorsToSet.push(
+          (validationOptions as SafeAnyType)[`${key}Message`] ||
+            i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel }),
+        );
+      }
     }
+  });
 
-    if (setErr) {
-      errorsToSet.push(
-        validationOptions.minLengthMessage ||
-          i18next.t(stateFormErrorsMinLengthMessage, { label: errorLabel, length: validationOptions.minLength }),
-      );
-    }
-  }
+  /**
+   * minLength
+   * @deprecated
+   */
+  // if (validationOptions?.minLength) {
+  //   let setErr = false;
+  //
+  //   if (validators[fieldType]?.minLength) {
+  //     setErr = !validators[fieldType].minLength(value, validationOptions.minLength);
+  //   } else if ((value || '').toString().length < validationOptions.minLength) {
+  //     setErr = true;
+  //   }
+  //
+  //   if (setErr) {
+  //     errorsToSet.push(
+  //       validationOptions.minLengthMessage ||
+  //         i18next.t(stateFormErrorsMinLengthMessage, { label: errorLabel, length: validationOptions.minLength }),
+  //     );
+  //   }
+  // }
 
-  /** maxLength */
-  if (validationOptions?.maxLength) {
-    let setErr = false;
-
-    if (validators[fieldType]?.maxLength) {
-      setErr = !validators[fieldType].maxLength(value, validationOptions.maxLength);
-    } else if ((value || '').toString().length > validationOptions.maxLength) {
-      setErr = true;
-    }
-
-    if (setErr) {
-      errorsToSet.push(
-        validationOptions.maxLengthMessage ||
-          i18next.t(stateFormErrorsMaxLengthMessage, { label: errorLabel, length: validationOptions.maxLength }),
-      );
-    }
-  }
+  /**
+   * maxLength
+   * @deprecated
+   */
+  // if (validationOptions?.maxLength) {
+  //   let setErr = false;
+  //
+  //   if (validators[fieldType]?.maxLength) {
+  //     setErr = !validators[fieldType].maxLength(value, validationOptions.maxLength);
+  //   } else if ((value || '').toString().length > validationOptions.maxLength) {
+  //     setErr = true;
+  //   }
+  //
+  //   if (setErr) {
+  //     errorsToSet.push(
+  //       validationOptions.maxLengthMessage ||
+  //         i18next.t(stateFormErrorsMaxLengthMessage, { label: errorLabel, length: validationOptions.maxLength }),
+  //     );
+  //   }
+  // }
 
   /** custom validate */
   if (validationOptions?.validate) {

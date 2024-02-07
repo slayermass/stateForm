@@ -1,6 +1,9 @@
 import { renderHook } from '@testing-library/react';
 
-import { stateFormErrorsRequiredMessage } from '../helpers/formStateGenerateErrors';
+import {
+  stateFormErrorsCommonInvalidMessage,
+  stateFormErrorsRequiredMessage,
+} from '../helpers/formStateGenerateErrors';
 import { StateFormRegisterOptions, StateFormReturnType, useStateForm } from '../index';
 import { set } from '../outerDependencies';
 
@@ -22,7 +25,7 @@ type FormValues = {
   booleanValue: boolean;
   nullValue: null;
   undefinedValue: undefined;
-  // bigIntValue: bigint;
+  bigIntValue: bigint;
 
   optionalAnyType?: any;
 };
@@ -50,7 +53,7 @@ describe('useStateForm', () => {
     booleanValue: false,
     nullValue: null,
     undefinedValue: undefined,
-    // bigIntValue: BigInt(1e10),
+    bigIntValue: BigInt(1e10),
   };
 
   const formSetThenExpect = (fieldName: keyof FormValues, arr: any[]) => {
@@ -301,17 +304,17 @@ describe('useStateForm', () => {
       formSetThenExpect('undefinedValue', [true, false, 'A', 2, { t: 1 }, ['h', 2, null], undefined]);
     });
 
-    // it('test bigInt (number) value', () => {
-    //   formSetThenExpect('bigIntValue', [
-    //     BigInt(0),
-    //     BigInt(-0),
-    //     BigInt(-5e20),
-    //     BigInt(9590),
-    //     839824,
-    //     -325,
-    //     666_666_666_666,
-    //   ]);
-    // });
+    it('test bigInt (number) value', () => {
+      formSetThenExpect('bigIntValue', [
+        BigInt(0),
+        BigInt(-0),
+        BigInt(-5e20),
+        BigInt(9590),
+        839824,
+        -325,
+        666_666_666_666,
+      ]);
+    });
   });
 
   describe('test getErrors (string type property)', () => {
@@ -368,7 +371,7 @@ describe('useStateForm', () => {
         {
           minLength: 2,
         },
-        'common.validation.minLength',
+        stateFormErrorsCommonInvalidMessage,
         '1',
       );
     });
@@ -389,7 +392,7 @@ describe('useStateForm', () => {
         {
           maxLength: 2,
         },
-        'common.validation.maxLength',
+        stateFormErrorsCommonInvalidMessage,
         '123',
       );
     });
