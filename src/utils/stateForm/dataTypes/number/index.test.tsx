@@ -9,17 +9,23 @@ describe('number', () => {
   console.error = jest.fn();
 
   type FormValues = {
-    value0: number | null;
-    value1: number | null;
-    value2: number | null;
+    valueZero: number | null;
+    valueNull: number | null;
+    valueSet: number | null;
+    bigIntValueZero: bigint | null;
+    bigIntValueNull: bigint | null;
+    bigIntValueSet: bigint | null;
   };
 
   let formProps: StateFormReturnType<FormValues>;
 
   const initialProps: FormValues = {
-    value0: 0,
-    value1: null,
-    value2: 100,
+    valueZero: 0,
+    valueNull: null,
+    valueSet: 100,
+    bigIntValueZero: BigInt(0),
+    bigIntValueNull: null,
+    bigIntValueSet: BigInt(100),
   };
 
   const getValidateError = (message: string) => [{ type: 'validate', message: message }];
@@ -53,8 +59,8 @@ describe('number', () => {
       right(data);
     }, left)();
 
-    expect(right).toBeCalledWith(initialProps);
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith(initialProps);
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('submit changed values', () => {
@@ -62,9 +68,12 @@ describe('number', () => {
     const left = jest.fn();
 
     const newValues = {
-      value0: null,
-      value1: 100,
-      value2: 0,
+      valueZero: null,
+      valueNull: 100,
+      valueSet: 0,
+      bigIntValueZero: null,
+      bigIntValueNull: BigInt(100),
+      bigIntValueSet: BigInt(0),
     };
 
     formProps.setValue(newValues);
@@ -73,12 +82,12 @@ describe('number', () => {
       right(data);
     }, left)();
 
-    expect(right).toBeCalledWith(newValues);
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith(newValues);
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('check with Infinity', () => {
-    const propName = 'value1';
+    const propName = 'valueNull';
 
     formProps.register(propName, 'number');
 
@@ -90,12 +99,12 @@ describe('number', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled()
-    expect(left).toBeCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
   });
 
   it('check with -Infinity', () => {
-    const propName = 'value1';
+    const propName = 'valueNull';
 
     formProps.register(propName, 'number');
 
@@ -104,14 +113,14 @@ describe('number', () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    formProps.onSubmit(right, left);
+    formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled()
-    expect(left).toBeCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    expect(right).not.toHaveBeenCalled()
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
   });
 
   it('check with NaN', () => {
-    const propName = 'value1';
+    const propName = 'valueNull';
 
     formProps.register(propName, 'number');
 
@@ -120,14 +129,14 @@ describe('number', () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    formProps.onSubmit(right, left);
+    formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled()
-    expect(left).toBeCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    expect(right).not.toHaveBeenCalled()
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
   });
 
   it('required zero', () => {
-    const propName = 'value0';
+    const propName = 'valueZero';
 
     formProps.register(propName, 'number', {
       required: true,
@@ -138,12 +147,12 @@ describe('number', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith(initialProps);
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith(initialProps);
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('required', () => {
-    const propName = 'value1';
+    const propName = 'valueNull';
 
     formProps.register(propName, 'number', {
       required: true,
@@ -154,8 +163,8 @@ describe('number', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
 
     right.mockClear();
     left.mockClear();
@@ -167,12 +176,12 @@ describe('number', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
   });
 
   it('required empty', () => {
-    const propName = 'value2';
+    const propName = 'valueSet';
 
     formProps.register(propName, 'number', {
       required: true,
@@ -185,8 +194,8 @@ describe('number', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toBeCalled();
-    expect(left).toBeCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
 
     expect(formProps.getErrors(propName)).toEqual(getValidateError(stateFormErrorsRequiredMessage));
 
@@ -200,9 +209,138 @@ describe('number', () => {
 
     formProps.onSubmit((data) => right(data), left)();
 
-    expect(right).toBeCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toBeCalled();
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
   });
+
+  describe('bigInt', () => {
+    it('check with Infinity', () => {
+      const propName = 'bigIntValueNull';
+
+      formProps.register(propName, 'number');
+
+      formProps.setValue(propName, Infinity);
+
+      const right = jest.fn();
+      const left = jest.fn();
+
+
+      formProps.onSubmit(right, left)();
+
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    });
+
+    it('check with -Infinity', () => {
+      const propName = 'bigIntValueNull';
+
+      formProps.register(propName, 'number');
+
+      formProps.setValue(propName, -Infinity);
+
+      const right = jest.fn();
+      const left = jest.fn();
+
+      formProps.onSubmit(right, left)();
+
+      expect(right).not.toHaveBeenCalled()
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    });
+
+    it('check with NaN', () => {
+      const propName = 'bigIntValueNull';
+
+      formProps.register(propName, 'number');
+
+      formProps.setValue(propName, NaN);
+
+      const right = jest.fn();
+      const left = jest.fn();
+
+      formProps.onSubmit(right, left)();
+
+      expect(right).not.toHaveBeenCalled()
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    });
+
+    it('required zero', () => {
+      const propName = 'bigIntValueZero';
+
+      formProps.register(propName, 'number', {
+        required: true,
+      });
+
+      const right = jest.fn();
+      const left = jest.fn();
+
+      formProps.onSubmit((data) => right(data), left)();
+
+      expect(right).toHaveBeenCalledWith(initialProps);
+      expect(left).not.toHaveBeenCalled();
+    });
+
+    it('required', () => {
+      const propName = 'bigIntValueNull';
+
+      formProps.register(propName, 'number', {
+        required: true,
+      });
+
+      const right = jest.fn();
+      const left = jest.fn();
+
+      formProps.onSubmit(right, left)();
+
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+
+      right.mockClear();
+      left.mockClear();
+
+      // set valid value
+      const validValue = BigInt(12);
+
+      formProps.setValue(propName, validValue);
+
+      formProps.onSubmit((data) => right(data), left)();
+
+      expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+      expect(left).not.toHaveBeenCalled();
+    });
+
+    it('required empty', () => {
+      const propName = 'bigIntValueSet';
+
+      formProps.register(propName, 'number', {
+        required: true,
+      });
+
+      formProps.setValue(propName, null);
+
+      const right = jest.fn();
+      const left = jest.fn();
+
+      formProps.onSubmit(right, left)();
+
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+
+      expect(formProps.getErrors(propName)).toEqual(getValidateError(stateFormErrorsRequiredMessage));
+
+      right.mockClear();
+      left.mockClear();
+
+      // set valid value
+      const validValue = BigInt(12);
+
+      formProps.setValue(propName, validValue);
+
+      formProps.onSubmit((data) => right(data), left)();
+
+      expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+      expect(left).not.toHaveBeenCalled();
+    });
+  })
 
   it('console errors check (should be the last test)', () => {
     expect(console.error).not.toHaveBeenCalled();

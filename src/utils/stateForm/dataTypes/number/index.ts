@@ -1,15 +1,15 @@
 import { StateFormValidatorIsSetType, StateFormValidatorIsValidPatternType } from '../types';
-import { isNumber } from '../../outerDependencies';
+import { isBigInt, isNumber } from '../../outerDependencies';
 
-export type StateFormDataTypeNumberType = string;
+export type StateFormDataTypeNumberType = number | bigint;
 export type StateFormDataTypeFieldNumberType = keyof typeof stateFormDataTypeNumberValidators;
 
 const validators: {
   isSet: StateFormValidatorIsSetType;
   isValidPattern: StateFormValidatorIsValidPatternType;
 } = {
-  isSet: (value) => isNumber(value),
-  isValidPattern: (value) => Number.isFinite(value),
+  isSet: (value) => isNumber(value) || isBigInt(value),
+  isValidPattern: (value) => isBigInt(value) ? true : Number.isFinite(value),
 };
 
 export const stateFormDataTypeNumberValidators: {
