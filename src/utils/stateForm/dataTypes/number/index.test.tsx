@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react';
 
 import {
+  stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
@@ -96,11 +97,10 @@ describe('number', () => {
     const right = jest.fn();
     const left = jest.fn();
 
-
     formProps.onSubmit(right, left)();
 
     expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
   });
 
   it('check with -Infinity', () => {
@@ -115,8 +115,8 @@ describe('number', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toHaveBeenCalled()
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
   });
 
   it('check with NaN', () => {
@@ -131,8 +131,8 @@ describe('number', () => {
 
     formProps.onSubmit(right, left)();
 
-    expect(right).not.toHaveBeenCalled()
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
   });
 
   it('required zero', () => {
@@ -224,11 +224,10 @@ describe('number', () => {
       const right = jest.fn();
       const left = jest.fn();
 
-
       formProps.onSubmit(right, left)();
 
       expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
     });
 
     it('check with -Infinity', () => {
@@ -243,8 +242,8 @@ describe('number', () => {
 
       formProps.onSubmit(right, left)();
 
-      expect(right).not.toHaveBeenCalled()
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
     });
 
     it('check with NaN', () => {
@@ -259,8 +258,8 @@ describe('number', () => {
 
       formProps.onSubmit(right, left)();
 
-      expect(right).not.toHaveBeenCalled()
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
     });
 
     it('required zero', () => {
@@ -340,7 +339,7 @@ describe('number', () => {
       expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
       expect(left).not.toHaveBeenCalled();
     });
-  })
+  });
 
   it('console errors check (should be the last test)', () => {
     expect(console.error).not.toHaveBeenCalled();

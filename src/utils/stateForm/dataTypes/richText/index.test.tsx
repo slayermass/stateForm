@@ -1,6 +1,9 @@
 import { renderHook } from '@testing-library/react';
 
-import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
+import {
+  stateFormErrorsCommonInvalidMessage,
+  stateFormErrorsRequiredMessage,
+} from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
 
 describe('richText', () => {
@@ -144,7 +147,7 @@ describe('richText', () => {
 
       expect(right).not.toHaveBeenCalled();
       expect(left).toHaveBeenCalledWith({
-        [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+        [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
       });
     });
 
