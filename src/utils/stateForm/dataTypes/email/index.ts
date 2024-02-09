@@ -1,13 +1,11 @@
-import { isString, isValidEmail } from '../../outerDependencies';
-import {
-  StateFormValidatorIsValidPatternType,
-  StateFormValidatorPropertyType,
-  StateFormValidatorIsSetType,
-} from '../types';
+import { isNumber, isString, isValidEmail } from '../../outerDependencies';
+import { StateFormValidatorIsSetType, StateFormValidatorValidateType } from '../types';
 
 export type StateFormDataTypeEmailType = string;
 export type StateFormDataTypeFieldEmailType = keyof typeof stateFormDataTypeEmailValidators;
-export type StateFormDataTypeEmailSpecificProperties = Pick<typeof validators, 'minLength' | 'maxLength'> & {
+export type StateFormDataTypeEmailSpecificProperties = {
+  minLength: number;
+  maxLength: number;
   minLengthMessage: string;
   maxLengthMessage: string;
 };
@@ -16,14 +14,28 @@ export const stateFormErrorsPatternEmailMessage = 'common.validation.emailInvali
 
 const validators: {
   isSet: StateFormValidatorIsSetType;
-  minLength: StateFormValidatorPropertyType<number>;
-  maxLength: StateFormValidatorPropertyType<number>;
-  isValidPattern: StateFormValidatorIsValidPatternType;
+  validate: StateFormValidatorValidateType;
 } = {
   isSet: (value) => isString(value) && value.trim().length > 0,
-  minLength: (value, minLength) => isString(value) && value.trim().length >= minLength,
-  maxLength: (value, maxLength) => isString(value) && value.trim().length <= maxLength,
-  isValidPattern: (value) => (isValidEmail(value.trim()) ? true : stateFormErrorsPatternEmailMessage),
+  validate: (value, validationOptions, hasValidValue) => {
+    if (hasValidValue && !isValidEmail(value.trim())) {
+      return stateFormErrorsPatternEmailMessage;
+    }
+
+    if (!isString(value)) {
+      return false;
+    }
+
+    if (isNumber(validationOptions.minLength)) {
+      return value.trim().length >= validationOptions.minLength ? true : validationOptions.minLengthMessage || false;
+    }
+
+    if (isNumber(validationOptions.maxLength)) {
+      return value.trim().length <= validationOptions.maxLength ? true : validationOptions.maxLengthMessage || false;
+    }
+
+    return true;
+  },
 };
 
 export const stateFormDataTypeEmailValidators: {

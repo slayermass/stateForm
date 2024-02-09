@@ -12,6 +12,7 @@ import isArray from 'lodash/isArray';
 import isNumber from 'lodash/isNumber';
 import unset from 'lodash/unset';
 import isDate from 'lodash/isDate';
+import isBoolean from 'lodash/isBoolean';
 import { diff } from 'deep-object-diff';
 
 // types
@@ -47,6 +48,7 @@ export {
   isValidColor,
   isDate,
   isBigInt,
+  isBoolean,
 };
 
 export type { DeepPartial, SafeAnyType, ChildrenPropType, NullableUndefineable };

@@ -1,6 +1,6 @@
 import { stateFormInnerValidators, StateFormPossibleValue } from '../settings';
 import { StateFormFieldsType, StateFormInputOptionsType } from '../index';
-import { SafeAnyType, isValidColor, isString } from '../outerDependencies';
+import { SafeAnyType, isValidColor, isString, isBoolean } from '../outerDependencies';
 
 // import i18next from 'src/utils/i18n';
 const i18next = {
@@ -49,16 +49,19 @@ export const formStateGenerateErrors = (
     }
   }
 
-  /** check if the fields have valid values  */
-  if (hasValidValue && stateFormInnerValidators[fieldType]?.isValidPattern) {
-    const response = stateFormInnerValidators[fieldType].isValidPattern(value);
+  /** any other validators except isSet  */
+  const innerValidatorsResponse = stateFormInnerValidators[fieldType]?.validate(
+    value,
+    validationOptions,
+    hasValidValue,
+  );
 
-    if (isString(response)) {
-      return [i18next.t(response, { label: errorLabel })];
-    }
-    if (!response) {
-      return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
-    }
+  if (isString(innerValidatorsResponse)) {
+    return [i18next.t(innerValidatorsResponse, { label: errorLabel })];
+  }
+
+  if (!innerValidatorsResponse && isBoolean(innerValidatorsResponse)) {
+    return [i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel })];
   }
 
   /** below are optional validators */
@@ -66,21 +69,21 @@ export const formStateGenerateErrors = (
   // dynamically go through validators ignoring 'isSet',
   // check if the validate property is set to form,
   // validate and set errors if needed
-  Object.keys(stateFormInnerValidators[fieldType] || {}).forEach((key) => {
-    // types?
-    const validatorValue = (validationOptions as SafeAnyType)[key];
-
-    if (validatorValue !== undefined) {
-      const setErr = !stateFormInnerValidators[fieldType][key](value, validatorValue);
-
-      if (setErr) {
-        errorsToSet.push(
-          (validationOptions as SafeAnyType)[`${key}Message`] ||
-            i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel }),
-        );
-      }
-    }
-  });
+  // Object.keys(stateFormInnerValidators[fieldType] || {}).forEach((key) => {
+  //   // types?
+  //   const validatorValue = (validationOptions as SafeAnyType)[key];
+  //
+  //   if (validatorValue !== undefined) {
+  //     const setErr = !stateFormInnerValidators[fieldType][key](value, validatorValue);
+  //
+  //     if (setErr) {
+  //       errorsToSet.push(
+  //         (validationOptions as SafeAnyType)[`${key}Message`] ||
+  //           i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel }),
+  //       );
+  //     }
+  //   }
+  // });
 
   /**
    * minLength
