@@ -1,19 +1,18 @@
-import { StateFormValidatorIsSetType, StateFormValidatorPropertyType } from '../types';
-import { isString, SafeAnyType } from '../../outerDependencies';
-import { StateFormInputOptionsType } from '../..';
+import { StateFormValidatorIsSetType, StateFormValidatorValidateType } from '../types';
+import { isNumber, isString } from '../../outerDependencies';
 
 export type StateFormDataTypeTextType = string;
 export type StateFormDataTypeFieldTextType = keyof typeof stateFormDataTypeTextValidators;
 export type StateFormDataTypeTextSpecificProperties = {
-  minLength: StateFormValidatorPropertyType<number>;
-  maxLength: StateFormValidatorPropertyType<number>;
+  minLength: number;
+  maxLength: number;
   minLengthMessage: string;
   maxLengthMessage: string;
 };
 
 const validators: {
   isSet: StateFormValidatorIsSetType;
-  validate: (value: SafeAnyType, validationOptions: StateFormInputOptionsType) => string | boolean;
+  validate: StateFormValidatorValidateType;
 } = {
   isSet: (value) => isString(value) && value.trim().length > 0,
   validate: (value, validationOptions) => {
@@ -21,11 +20,11 @@ const validators: {
       return false;
     }
 
-    if (validationOptions.minLength) {
+    if (isNumber(validationOptions.minLength)) {
       return value.trim().length >= validationOptions.minLength ? true : validationOptions.minLengthMessage || false;
     }
 
-    if (validationOptions.maxLength) {
+    if (isNumber(validationOptions.maxLength)) {
       return value.trim().length <= validationOptions.maxLength ? true : validationOptions.maxLengthMessage || false;
     }
 

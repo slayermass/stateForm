@@ -49,6 +49,21 @@ export const formStateGenerateErrors = (
     }
   }
 
+  /** check if the fields have valid values  */
+  if (hasValidValue && stateFormInnerValidators[fieldType]?.isValidPattern) {
+    const response = stateFormInnerValidators[fieldType].isValidPattern(value);
+
+    if (isString(response)) {
+      return [i18next.t(response, { label: errorLabel })];
+    }
+    if (!response) {
+      /** TODO: required or invalid message ? */
+      // return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
+      return [i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel })];
+    }
+  }
+
+  /** any other validators except isSet and isValidPattern  */
   const innerValidatorsResponse = stateFormInnerValidators[fieldType]?.validate(value, validationOptions);
 
   if (isString(innerValidatorsResponse)) {
@@ -58,18 +73,6 @@ export const formStateGenerateErrors = (
   if (!innerValidatorsResponse && isBoolean(innerValidatorsResponse)) {
     return [i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel })];
   }
-
-  /** check if the fields have valid values  */
-  // if (hasValidValue && stateFormInnerValidators[fieldType]?.isValidPattern) {
-  //   const response = stateFormInnerValidators[fieldType].isValidPattern(value);
-  //
-  //   if (isString(response)) {
-  //     return [i18next.t(response, { label: errorLabel })];
-  //   }
-  //   if (!response) {
-  //     return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
-  //   }
-  // }
 
   /** below are optional validators */
 
