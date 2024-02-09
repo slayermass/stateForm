@@ -49,22 +49,12 @@ export const formStateGenerateErrors = (
     }
   }
 
-  /** check if the fields have valid values  */
-  if (hasValidValue && stateFormInnerValidators[fieldType]?.isValidPattern) {
-    const response = stateFormInnerValidators[fieldType].isValidPattern(value);
-
-    if (isString(response)) {
-      return [i18next.t(response, { label: errorLabel })];
-    }
-    if (!response) {
-      /** TODO: required or invalid message ? */
-      // return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
-      return [i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel })];
-    }
-  }
-
-  /** any other validators except isSet and isValidPattern  */
-  const innerValidatorsResponse = stateFormInnerValidators[fieldType]?.validate(value, validationOptions);
+  /** any other validators except isSet  */
+  const innerValidatorsResponse = stateFormInnerValidators[fieldType]?.validate(
+    value,
+    validationOptions,
+    hasValidValue,
+  );
 
   if (isString(innerValidatorsResponse)) {
     return [i18next.t(innerValidatorsResponse, { label: errorLabel })];

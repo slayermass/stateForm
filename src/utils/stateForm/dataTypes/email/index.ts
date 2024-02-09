@@ -1,9 +1,5 @@
 import { isNumber, isString, isValidEmail } from '../../outerDependencies';
-import {
-  StateFormValidatorIsSetType,
-  StateFormValidatorIsValidPatternType,
-  StateFormValidatorValidateType,
-} from '../types';
+import { StateFormValidatorIsSetType, StateFormValidatorValidateType } from '../types';
 
 export type StateFormDataTypeEmailType = string;
 export type StateFormDataTypeFieldEmailType = keyof typeof stateFormDataTypeEmailValidators;
@@ -19,11 +15,13 @@ export const stateFormErrorsPatternEmailMessage = 'common.validation.emailInvali
 const validators: {
   isSet: StateFormValidatorIsSetType;
   validate: StateFormValidatorValidateType;
-  isValidPattern: StateFormValidatorIsValidPatternType;
 } = {
   isSet: (value) => isString(value) && value.trim().length > 0,
-  isValidPattern: (value) => (isValidEmail(value.trim()) ? true : stateFormErrorsPatternEmailMessage),
-  validate: (value, validationOptions) => {
+  validate: (value, validationOptions, hasValidValue) => {
+    if (hasValidValue && !isValidEmail(value.trim())) {
+      return stateFormErrorsPatternEmailMessage;
+    }
+
     if (!isString(value)) {
       return false;
     }
