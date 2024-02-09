@@ -30,12 +30,6 @@ export const formStateGenerateErrors = (
       setErr = true;
     } else {
       switch (fieldType) {
-        case 'number': {
-          if (value !== 0 && !value) {
-            setErr = true;
-          }
-          break;
-        }
         case 'color': {
           if (!isValidColor(value as SafeAnyType)) {
             setErr = true;

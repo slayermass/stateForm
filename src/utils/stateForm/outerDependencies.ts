@@ -9,6 +9,7 @@ import has from 'lodash/has';
 import equal from 'fast-deep-equal';
 import isString from 'lodash/isString';
 import isArray from 'lodash/isArray';
+import isNumber from 'lodash/isNumber';
 import unset from 'lodash/unset';
 import isDate from 'lodash/isDate';
 import isBoolean from 'lodash/isBoolean';
@@ -24,6 +25,7 @@ import { createArrayXLength } from 'src/utils/objects';
 import { useMemoObject } from 'src/hooks/useMemoObject';
 import { isValidEmail } from 'src/utils/email';
 import { isValidColor } from 'src/utils/validators';
+import { isBigInt } from 'src/utils/numbers';
 
 export {
   getUniqueId,
@@ -37,6 +39,7 @@ export {
   equal,
   isString,
   isArray,
+  isNumber,
   diff,
   unset,
   createArrayXLength,
@@ -44,6 +47,7 @@ export {
   isValidEmail,
   isValidColor,
   isDate,
+  isBigInt,
   isBoolean,
 };
 

@@ -165,7 +165,6 @@ export type StateFormFieldsType =
   | 'radio'
   | 'color'
   | 'dropdown'
-  | 'number'
   | 'image'
   | 'timepicker'
   | 'phone'

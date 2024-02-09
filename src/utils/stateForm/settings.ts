@@ -23,6 +23,11 @@ import {
   StateFormDataTypeTextType,
   stateFormDataTypeTextValidators,
 } from './dataTypes/text';
+import {
+  StateFormDataTypeFieldNumberType,
+  StateFormDataTypeNumberType,
+  stateFormDataTypeNumberValidators
+} from './dataTypes/number';
 
 /**
  * include and customize data types here
@@ -35,6 +40,7 @@ export const stateFormInnerValidators: any = {
   ...stateFormDataTypeEmailValidators,
   ...stateFormDataTypeRichTextValidators,
   ...stateFormDataTypeDateValidators,
+  ...stateFormDataTypeNumberValidators,
 };
 
 /** possible values */
@@ -43,7 +49,7 @@ export type StateFormPossibleValue =
   | StateFormDataTypeEmailType
   | StateFormDataTypeRichTextType
   | StateFormDataTypeDateType
-  | number
+  | StateFormDataTypeNumberType
   | boolean
   | StateFormEmptyValueType
   | [string, string];
@@ -58,4 +64,5 @@ export type StateFormDataTypesFieldsType =
   | StateFormDataTypeFieldTextType
   | StateFormDataTypeFieldEmailType
   | StateFormDataTypeFieldRichTextType
-  | StateFormDataTypeFieldDateType;
+  | StateFormDataTypeFieldDateType
+  | StateFormDataTypeFieldNumberType;
