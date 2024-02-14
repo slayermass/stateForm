@@ -1,10 +1,11 @@
 import { renderHook } from '@testing-library/react';
 
+import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
+import { StateFormReturnType, useStateForm } from '../../';
 import {
-  stateFormErrorsCommonInvalidMessage,
-  stateFormErrorsRequiredMessage,
-} from '../../helpers/formStateGenerateErrors';
-import { StateFormReturnType, useStateForm } from '../../index';
+  stateFormErrorsTextMaxLengthMessage,
+  stateFormErrorsTextMinLengthMessage,
+} from 'src/utils/stateForm/dataTypes/text';
 
 describe('text + textarea', () => {
   console.error = jest.fn();
@@ -183,7 +184,7 @@ describe('text + textarea', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsTextMinLengthMessage }],
     });
 
     // set another empty value
@@ -196,7 +197,7 @@ describe('text + textarea', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsTextMinLengthMessage }],
     });
 
     // set valid value
@@ -229,7 +230,7 @@ describe('text + textarea', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsTextMaxLengthMessage }],
     });
 
     // set another invalid value
@@ -242,7 +243,7 @@ describe('text + textarea', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsTextMaxLengthMessage }],
     });
 
     // set valid value
@@ -276,7 +277,7 @@ describe('text + textarea', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsTextMaxLengthMessage }],
     });
   });
 
@@ -310,7 +311,7 @@ describe('text + textarea', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsTextMinLengthMessage }],
     });
   });
 

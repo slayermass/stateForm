@@ -10,6 +10,9 @@ export type StateFormDataTypeDateSpecificProperties = {
   maxDateMessage: string;
 };
 
+export const stateFormErrorsDateMinMessage = 'common.validation.minDate';
+export const stateFormErrorsDateMaxMessage = 'common.validation.maxDate';
+
 const validators: {
   isSet: StateFormValidatorIsSetType;
   validate: StateFormValidatorValidateType;
@@ -21,11 +24,15 @@ const validators: {
     }
 
     if (validationOptions.minDate) {
-      return value > validationOptions.minDate ? true : validationOptions.minDateMessage || false;
+      return value > validationOptions.minDate
+        ? true
+        : [validationOptions.minDateMessage || stateFormErrorsDateMinMessage, { minDate: validationOptions.minDate }];
     }
 
     if (validationOptions.maxDate) {
-      return value < validationOptions.maxDate ? true : validationOptions.maxDateMessage || false;
+      return value < validationOptions.maxDate
+        ? true
+        : [validationOptions.maxDateMessage || stateFormErrorsDateMaxMessage, { maxDate: validationOptions.maxDate }];
     }
 
     return true;

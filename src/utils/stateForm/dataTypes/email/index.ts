@@ -11,6 +11,8 @@ export type StateFormDataTypeEmailSpecificProperties = {
 };
 
 export const stateFormErrorsPatternEmailMessage = 'common.validation.emailInvalid';
+export const stateFormErrorsEmailMinLengthMessage = 'common.validation.emailMinLength';
+export const stateFormErrorsEmailMaxLengthMessage = 'common.validation.emailMaxLength';
 
 const validators: {
   isSet: StateFormValidatorIsSetType;
@@ -19,7 +21,7 @@ const validators: {
   isSet: (value) => isString(value) && value.trim().length > 0,
   validate: (value, validationOptions, hasValidValue) => {
     if (hasValidValue && !isValidEmail(value.trim())) {
-      return stateFormErrorsPatternEmailMessage;
+      return [stateFormErrorsPatternEmailMessage];
     }
 
     if (!isString(value)) {
@@ -27,11 +29,21 @@ const validators: {
     }
 
     if (isNumber(validationOptions.minLength)) {
-      return value.trim().length >= validationOptions.minLength ? true : validationOptions.minLengthMessage || false;
+      return value.trim().length >= validationOptions.minLength
+        ? true
+        : [
+            validationOptions.minLengthMessage || stateFormErrorsEmailMinLengthMessage,
+            { minLength: validationOptions.minLength },
+          ];
     }
 
     if (isNumber(validationOptions.maxLength)) {
-      return value.trim().length <= validationOptions.maxLength ? true : validationOptions.maxLengthMessage || false;
+      return value.trim().length <= validationOptions.maxLength
+        ? true
+        : [
+            validationOptions.maxLengthMessage || stateFormErrorsEmailMaxLengthMessage,
+            { maxLength: validationOptions.maxLength },
+          ];
     }
 
     return true;

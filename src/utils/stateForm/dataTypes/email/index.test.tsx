@@ -1,10 +1,11 @@
 import { renderHook } from '@testing-library/react';
 
-import { stateFormErrorsPatternEmailMessage } from './index';
 import {
-  stateFormErrorsCommonInvalidMessage,
-  stateFormErrorsRequiredMessage,
-} from '../../helpers/formStateGenerateErrors';
+  stateFormErrorsEmailMaxLengthMessage,
+  stateFormErrorsEmailMinLengthMessage,
+  stateFormErrorsPatternEmailMessage,
+} from './index';
+import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
 
 describe('email', () => {
@@ -139,7 +140,7 @@ describe('email', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsEmailMinLengthMessage }],
     });
 
     // set another empty value
@@ -152,7 +153,7 @@ describe('email', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsEmailMinLengthMessage }],
     });
 
     // set another invalid value (not email)
@@ -198,7 +199,7 @@ describe('email', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsEmailMaxLengthMessage }],
     });
 
     // set another invalid value
@@ -211,7 +212,7 @@ describe('email', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsEmailMaxLengthMessage }],
     });
 
     // set another invalid value (not email)
@@ -290,7 +291,7 @@ describe('email', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsEmailMinLengthMessage }],
     });
 
     right.mockClear();

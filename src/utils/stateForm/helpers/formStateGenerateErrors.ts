@@ -1,6 +1,6 @@
 import { stateFormInnerValidators, StateFormPossibleValue } from '../settings';
 import { StateFormFieldsType, StateFormInputOptionsType } from '../index';
-import { SafeAnyType, isValidColor, isString, isBoolean } from '../outerDependencies';
+import { isArray, isBoolean, isValidColor, SafeAnyType } from '../outerDependencies';
 
 // import i18next from 'src/utils/i18n';
 const i18next = {
@@ -56,8 +56,8 @@ export const formStateGenerateErrors = (
     hasValidValue,
   );
 
-  if (isString(innerValidatorsResponse)) {
-    return [i18next.t(innerValidatorsResponse, { label: errorLabel })];
+  if (isArray(innerValidatorsResponse)) {
+    return [i18next.t(innerValidatorsResponse[0], { label: errorLabel, ...innerValidatorsResponse[1] })];
   }
 
   if (!innerValidatorsResponse && isBoolean(innerValidatorsResponse)) {
