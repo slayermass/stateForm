@@ -25,8 +25,9 @@ import {
 } from './dataTypes/text';
 import {
   StateFormDataTypeFieldNumberType,
+  StateFormDataTypeNumberSpecificProperties,
   StateFormDataTypeNumberType,
-  stateFormDataTypeNumberValidators
+  stateFormDataTypeNumberValidators,
 } from './dataTypes/number';
 
 /**
@@ -57,7 +58,8 @@ export type StateFormPossibleValue =
 /** possible properties to each data type */
 export type StateFormDataTypesSpecificPropertiesType = NullableUndefineable<StateFormDataTypeDateSpecificProperties> &
   NullableUndefineable<StateFormDataTypeTextSpecificProperties> &
-  NullableUndefineable<StateFormDataTypeEmailSpecificProperties>;
+  NullableUndefineable<StateFormDataTypeEmailSpecificProperties> &
+  NullableUndefineable<StateFormDataTypeNumberSpecificProperties>;
 
 /** possible types of values */
 export type StateFormDataTypesFieldsType =

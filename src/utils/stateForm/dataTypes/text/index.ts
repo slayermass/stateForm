@@ -10,6 +10,9 @@ export type StateFormDataTypeTextSpecificProperties = {
   maxLengthMessage: string;
 };
 
+export const stateFormErrorsTextMinLengthMessage = 'common.validation.minLength';
+export const stateFormErrorsTextMaxLengthMessage = 'common.validation.maxLength';
+
 const validators: {
   isSet: StateFormValidatorIsSetType;
   validate: StateFormValidatorValidateType;
@@ -21,11 +24,21 @@ const validators: {
     }
 
     if (isNumber(validationOptions.minLength)) {
-      return value.trim().length >= validationOptions.minLength ? true : validationOptions.minLengthMessage || false;
+      return value.trim().length >= validationOptions.minLength
+        ? true
+        : [
+            validationOptions.minLengthMessage || stateFormErrorsTextMinLengthMessage,
+            { minLength: validationOptions.minLength },
+          ];
     }
 
     if (isNumber(validationOptions.maxLength)) {
-      return value.trim().length <= validationOptions.maxLength ? true : validationOptions.maxLengthMessage || false;
+      return value.trim().length <= validationOptions.maxLength
+        ? true
+        : [
+            validationOptions.maxLengthMessage || stateFormErrorsTextMaxLengthMessage,
+            { maxLength: validationOptions.maxLength },
+          ];
     }
 
     return true;

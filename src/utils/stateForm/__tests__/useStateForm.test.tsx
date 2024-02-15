@@ -1,11 +1,12 @@
 import { renderHook } from '@testing-library/react';
 
-import {
-  stateFormErrorsCommonInvalidMessage,
-  stateFormErrorsRequiredMessage,
-} from '../helpers/formStateGenerateErrors';
+import { stateFormErrorsRequiredMessage } from '../helpers/formStateGenerateErrors';
 import { StateFormRegisterOptions, StateFormReturnType, useStateForm } from '../index';
 import { set } from '../outerDependencies';
+import {
+  stateFormErrorsTextMaxLengthMessage,
+  stateFormErrorsTextMinLengthMessage,
+} from 'src/utils/stateForm/dataTypes/text';
 
 type FormValues = {
   strValue: string;
@@ -371,7 +372,7 @@ describe('useStateForm', () => {
         {
           minLength: 2,
         },
-        stateFormErrorsCommonInvalidMessage,
+        stateFormErrorsTextMinLengthMessage,
         '1',
       );
     });
@@ -392,7 +393,7 @@ describe('useStateForm', () => {
         {
           maxLength: 2,
         },
-        stateFormErrorsCommonInvalidMessage,
+        stateFormErrorsTextMaxLengthMessage,
         '123',
       );
     });

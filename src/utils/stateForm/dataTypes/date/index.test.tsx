@@ -1,10 +1,8 @@
 import { renderHook } from '@testing-library/react';
 
-import {
-  stateFormErrorsCommonInvalidMessage,
-  stateFormErrorsRequiredMessage,
-} from '../../helpers/formStateGenerateErrors';
+import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
 import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../index';
+import { stateFormErrorsDateMaxMessage, stateFormErrorsDateMinMessage } from 'src/utils/stateForm/dataTypes/date/index';
 
 describe('date', () => {
   console.error = jest.fn();
@@ -170,7 +168,7 @@ describe('date', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsDateMinMessage }],
     });
 
     right.mockClear();
@@ -242,7 +240,7 @@ describe('date', () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsDateMaxMessage }],
     });
 
     right.mockClear();

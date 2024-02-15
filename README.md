@@ -2,7 +2,6 @@ useStateForm
 
 # todo
 ## типы данных (модули)
-- number (Number)
 - date (string)
 - phone (string)
 - time (string)

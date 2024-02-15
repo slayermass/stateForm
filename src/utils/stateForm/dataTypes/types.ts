@@ -7,4 +7,4 @@ export type StateFormValidatorValidateType = (
   value: SafeAnyType,
   validationOptions: StateFormInputOptionsType,
   hasValidValue: boolean,
-) => string | boolean;
+) => [string, Record<string, SafeAnyType>] | [string] | boolean;

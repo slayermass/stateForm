@@ -5,6 +5,7 @@ import {
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
+import { stateFormErrorsNumberMaxMessage, stateFormErrorsNumberMinMessage } from 'src/utils/stateForm/dataTypes/number';
 
 describe('number', () => {
   console.error = jest.fn();
@@ -69,12 +70,12 @@ describe('number', () => {
     const left = jest.fn();
 
     const newValues = {
-      valueZero: null,
-      valueNull: 100,
-      valueSet: 0,
-      bigIntValueZero: null,
-      bigIntValueNull: BigInt(100),
-      bigIntValueSet: BigInt(0),
+      valueZero: 0,
+      valueNull: null,
+      valueSet: 100,
+      bigIntValueZero: BigInt(0),
+      bigIntValueNull: null,
+      bigIntValueSet: BigInt(100),
     };
 
     formProps.setValue(newValues);
@@ -213,6 +214,157 @@ describe('number', () => {
     expect(left).not.toHaveBeenCalled();
   });
 
+  it('not required + null value', () => {
+    const propName = 'valueNull';
+
+    formProps.register(propName, 'number', {
+      required: false,
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).toHaveBeenCalledWith(initialProps);
+    expect(left).not.toHaveBeenCalled();
+  });
+
+  it('min', () => {
+    const propName = 'valueZero';
+
+    formProps.register(propName, 'number', {
+      min: 10,
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMinMessage));
+
+    right.mockClear();
+    left.mockClear();
+
+    // set valid value
+    const validValue = 100;
+
+    formProps.setValue(propName, validValue);
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
+  });
+
+  it('min + required', () => {
+    const propName = 'valueNull';
+
+    formProps.register(propName, 'number', {
+      min: 10,
+      required: true,
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+
+    right.mockClear();
+    left.mockClear();
+
+    // set invalid value
+    formProps.setValue(propName, 1);
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMinMessage));
+
+    right.mockClear();
+    left.mockClear();
+
+    // set valid value
+    const validValue = 100;
+
+    formProps.setValue(propName, validValue);
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
+  });
+
+  it('min custom error message', () => {
+    const propName = 'valueZero';
+    const customMessage = 'customErrorMessage';
+
+    formProps.register(propName, 'number', {
+      min: 10,
+      minMessage: customMessage,
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, customMessage));
+  });
+
+  it('max', () => {
+    const propName = 'valueSet';
+
+    formProps.register(propName, 'number', {
+      max: 10,
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMaxMessage));
+
+    right.mockClear();
+    left.mockClear();
+
+    // set valid value
+    const validValue = 10;
+
+    formProps.setValue(propName, validValue);
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
+  });
+
+  it('max custom error message', () => {
+    const propName = 'valueSet';
+    const customMessage = 'customErrorMessage';
+
+    formProps.register(propName, 'number', {
+      max: 10,
+      maxMessage: customMessage,
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, customMessage));
+  });
+
   describe('bigInt', () => {
     it('check with Infinity', () => {
       const propName = 'bigIntValueNull';
@@ -331,6 +483,64 @@ describe('number', () => {
 
       // set valid value
       const validValue = BigInt(12);
+
+      formProps.setValue(propName, validValue);
+
+      formProps.onSubmit((data) => right(data), left)();
+
+      expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+      expect(left).not.toHaveBeenCalled();
+    });
+
+    it('min', () => {
+      const propName = 'bigIntValueZero';
+
+      formProps.register(propName, 'number', {
+        min: 10,
+      });
+
+      const right = jest.fn();
+      const left = jest.fn();
+
+      formProps.onSubmit((data) => right(data), left)();
+
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMinMessage));
+
+      right.mockClear();
+      left.mockClear();
+
+      // set valid value
+      const validValue = BigInt(100);
+
+      formProps.setValue(propName, validValue);
+
+      formProps.onSubmit((data) => right(data), left)();
+
+      expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+      expect(left).not.toHaveBeenCalled();
+    });
+
+    it('max', () => {
+      const propName = 'bigIntValueSet';
+
+      formProps.register(propName, 'number', {
+        max: 10,
+      });
+
+      const right = jest.fn();
+      const left = jest.fn();
+
+      formProps.onSubmit((data) => right(data), left)();
+
+      expect(right).not.toHaveBeenCalled();
+      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMaxMessage));
+
+      right.mockClear();
+      left.mockClear();
+
+      // set valid value
+      const validValue = BigInt(10);
 
       formProps.setValue(propName, validValue);
 
