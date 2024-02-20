@@ -306,19 +306,17 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     [getFieldOptionsValue, setFieldOptionsValue],
   );
 
-  const previousFormState = useRef<FormValues>(formStateInnerCloneDeep(initialValues.current as FormValues));
-
   const changeStateForm = useCallback(
     (name: string, value: SafeAnyType) => {
+      const previousFormState = formState.current;
+
       set(formState.current, name, value);
 
-      const diffStateValue = diff(previousFormState.current, formState.current);
+      const diffStateValue = diff(previousFormState, formState.current);
 
       if (!isEmpty(diffStateValue)) {
         const cloneObjOrArray = (value: SafeAnyType) =>
           isPlainObject(value) || isArray(value) ? formStateInnerCloneDeep(value) : value;
-
-        set(previousFormState.current, name, cloneObjOrArray(value));
 
         const getNames = (value: StateFormUnknownFormType, parentName?: string): string[] => {
           if (isPlainObject(value)) {
