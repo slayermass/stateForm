@@ -1,4 +1,4 @@
-import { SyntheticEvent, useCallback, useEffect, useMemo, useRef } from 'react';
+import { SyntheticEvent, useCallback, useMemo, useRef } from 'react';
 
 import {
   StateFormDataTypesFieldsType,
@@ -6,11 +6,11 @@ import {
   StateFormPossibleValue,
 } from './settings';
 import { formStateInnerCloneDeep } from './helpers/cloneDeep';
-import { StateFormEventType } from './eventBus/common';
-import { stateFormClearSubscriptions } from './eventBus/stateFormClearSubscriptions';
-import { stateFormEmit } from './eventBus/stateFormEmit';
-import { stateFormSubscribe } from './eventBus/stateFormSubscribe';
+// import { stateFormClearSubscriptions } from './eventBus/stateFormClearSubscriptions';
+// import { stateFormEmit } from './eventBus/stateFormEmit';
+// import { stateFormSubscribe } from './eventBus/stateFormSubscribe';
 import { formStateGenerateErrors } from './helpers/formStateGenerateErrors';
+import { EventBusReturnType, getEventBus, EventBusFieldEventType } from './eventBus';
 
 import {
   DeepPartial,
@@ -148,13 +148,13 @@ export type StateFormUnregister = (name: string) => void;
 
 export type StateFormSubscribeFn = (
   callback: (value: SafeAnyType, fieldName: string) => void,
-) => ReturnType<typeof stateFormSubscribe>[];
+) => ReturnType<EventBusReturnType['on']>[];
 
 // TODO: make dependent on eventType prop
 type StateFormSubscribeDefaultValue = SafeAnyType;
 
 export type StateFormGetSubscribeProps = (
-  eventType: StateFormEventType,
+  eventType: EventBusFieldEventType,
   names?: string | string[],
 ) => [StateFormSubscribeFn, StateFormSubscribeDefaultValue];
 
@@ -223,6 +223,20 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   mode?: 'onChange' | 'onBlur' | 'onSubmit';
 } = {}): StateFormReturnType<FormValues> => {
   const initialValues = useRef(defaultValues || ({} as FormValues));
+
+  /** form eventBus */
+  const instanceEventBus = useRef<EventBusReturnType | null>(null);
+
+  // lazy ref init
+  const eventBus = (() => {
+    if (instanceEventBus.current !== null) {
+      return instanceEventBus.current;
+    }
+
+    const newInstance = getEventBus();
+    instanceEventBus.current = newInstance;
+    return newInstance;
+  })();
 
   /** form data storage */
   const formState = useRef<FormValues>(formStateInnerCloneDeep(initialValues.current as FormValues));
@@ -340,14 +354,16 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
           return parentName ? [parentName] : [];
         };
 
-        getNames(diffStateValue).forEach((name) => {
-          stateFormEmit([id, 'change', name], cloneObjOrArray(get(formState.current, name)));
-        });
+        if (eventBus) {
+          getNames(diffStateValue).forEach((name) => {
+            eventBus.emit(name, 'change', cloneObjOrArray(get(formState.current, name)));
+          });
 
-        stateFormEmit([id, 'change', id], cloneObjOrArray(formState.current));
+          eventBus.emit(id, 'change', cloneObjOrArray(formState.current));
+        }
       }
     },
-    [id],
+    [eventBus, id],
   );
   /** end helpers */
 
@@ -388,8 +404,8 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   const emitErrors = useCallback(
     (name: string, customErrors?: DefinedErrorsType) =>
-      stateFormEmit([id, 'error', name], customErrors || getErrors(name as StateFormPath<FormValues>)),
-    [getErrors, id],
+      eventBus?.emit(name, 'error', customErrors || getErrors(name as StateFormPath<FormValues>)),
+    [eventBus, getErrors],
   );
 
   const setError: StateFormSetError<FormValues> = useCallback(
@@ -747,30 +763,55 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   /** state subscription */
 
+  // const getSubscribeProps: StateFormGetSubscribeProps = useCallback(
+  //   (eventType, names) => [
+  //     (callback: (value: SafeAnyType, fieldName: string) => void) => {
+  //       /* callback when subscribed to all form values */
+  //       if (!names) {
+  //         return [stateFormSubscribe([id, eventType, id], callback)];
+  //       }
+  //
+  //       return isString(names)
+  //         ? [stateFormSubscribe([id, eventType, names], callback)]
+  //         : names.map((name) => stateFormSubscribe([id, eventType, name], callback));
+  //     },
+  //     eventType === 'change' ? getValue(names as SafeAnyType) : getErrors(names as SafeAnyType),
+  //   ],
+  //   [getErrors, getValue, id],
+  // );
+
   const getSubscribeProps: StateFormGetSubscribeProps = useCallback(
     (eventType, names) => [
       (callback: (value: SafeAnyType, fieldName: string) => void) => {
+        if (!eventBus) {
+          return [];
+        }
+
         /* callback when subscribed to all form values */
         if (!names) {
-          return [stateFormSubscribe([id, eventType, id], callback)];
+          return [eventBus.on(id, eventType, callback)];
+          // return [stateFormSubscribe([id, eventType, id], callback)];
         }
 
         return isString(names)
-          ? [stateFormSubscribe([id, eventType, names], callback)]
-          : names.map((name) => stateFormSubscribe([id, eventType, name], callback));
+          ? [eventBus.on(names, eventType, callback)]
+          : names.map((name) => eventBus.on(name, eventType, callback));
+        // return isString(names)
+        //   ? [stateFormSubscribe([id, eventType, names], callback)]
+        //   : names.map((name) => stateFormSubscribe([id, eventType, name], callback));
       },
       eventType === 'change' ? getValue(names as SafeAnyType) : getErrors(names as SafeAnyType),
     ],
-    [getErrors, getValue, id],
+    [eventBus, getErrors, getValue, id],
   );
 
   /** clear all subscriptions current form */
-  useEffect(
-    () => () => {
-      stateFormClearSubscriptions(id);
-    },
-    [id],
-  );
+  // useEffect(
+  //   () => () => {
+  //     stateFormClearSubscriptions(id);
+  //   },
+  //   [id],
+  // );
   /** end state subscription */
 
   /** get initial value of the form */

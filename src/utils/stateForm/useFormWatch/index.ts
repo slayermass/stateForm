@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { StateFormEventType } from '../eventBus/common';
+import { EventBusFieldEventType } from '../eventBus';
 import { StateFormGetSubscribeProps } from '../index';
 
 import { isEmpty, isArray, equal, SafeAnyType, useMemoObject, diff } from '../outerDependencies';
@@ -8,7 +8,7 @@ import { isEmpty, isArray, equal, SafeAnyType, useMemoObject, diff } from '../ou
 /** the hook for subscribing to the input change (error or value) */
 export const useFormCommonWatch = <ReturnValue = SafeAnyType>(
   getSubscribeProps: StateFormGetSubscribeProps,
-  eventType: StateFormEventType,
+  eventType: EventBusFieldEventType,
   fieldNames?: string | string[],
 ): ReturnValue => {
   const memoizedNames = useMemoObject(fieldNames);
