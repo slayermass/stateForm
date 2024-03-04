@@ -322,7 +322,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   const changeStateForm = useCallback(
     (name: string, value: SafeAnyType) => {
-      const previousFormState = formState.current;
+      const previousFormState = formStateInnerCloneDeep(formState.current);
 
       set(formState.current, name, value);
 

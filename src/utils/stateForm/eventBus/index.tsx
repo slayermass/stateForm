@@ -24,23 +24,25 @@ type TestHelpersType = {
 
 export type EventBusReturnTestType = EventBusReturnType & TestHelpersType;
 
+const getNameWithType = (fieldName: string, type: EventBusFieldEventType) => `${fieldName}_${type}`;
+
 export const getEventBus: () => EventBusReturnType = () => {
   const events: Record<string, (value: SafeAnyType, name: string) => void> = {};
 
   return {
     on(fieldName, type, callback, id = getUniqueId()) {
-      set(events, [`${fieldName}_${type}`, id], callback);
+      set(events, [getNameWithType(fieldName, type), id], callback);
 
       return () => {
-        unset(events, [`${fieldName}_${type}`, id]);
+        unset(events, [getNameWithType(fieldName, type), id]);
 
-        if (!Object.values(get(events, `${fieldName}_${type}`, {})).length) {
-          unset(events, [`${fieldName}_${type}`]);
+        if (!Object.values(get(events, getNameWithType(fieldName, type), {})).length) {
+          unset(events, [getNameWithType(fieldName, type)]);
         }
       };
     },
     emit(fieldName, type, value) {
-      const callbacks = get(events, `${fieldName}_${type}`);
+      const callbacks = get(events, getNameWithType(fieldName, type));
 
       if (callbacks) {
         Object.values(callbacks).forEach((callback) => callback(value, fieldName));

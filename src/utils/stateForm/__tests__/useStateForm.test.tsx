@@ -2,11 +2,13 @@ import { renderHook } from '@testing-library/react';
 
 import { stateFormErrorsRequiredMessage } from '../helpers/formStateGenerateErrors';
 import { StateFormRegisterOptions, StateFormReturnType, useStateForm } from '../index';
-import { set } from '../outerDependencies';
+import { get, SafeAnyType, set } from '../outerDependencies';
 import {
   stateFormErrorsTextMaxLengthMessage,
   stateFormErrorsTextMinLengthMessage,
 } from 'src/utils/stateForm/dataTypes/text';
+import { StateFormPath } from 'src/utils/stateForm/types/path';
+import { formStateInnerCloneDeep } from 'src/utils/stateForm/helpers/cloneDeep';
 
 type FormValues = {
   strValue: string;
@@ -461,6 +463,117 @@ describe('useStateForm', () => {
 
   it('getAllValues', () => {
     expect(formProps.getValue()).toEqual(initialProps);
+  });
+
+  it('getSubscribeProps and changeStateForm', () => {
+    const checkSubscribeProps = (name: StateFormPath<FormValues>, value: SafeAnyType) => {
+      const errorMessage = 'Error message';
+
+      const [subscribeChangeFns, initialValues] = formProps.getSubscribeProps('change', name);
+      const [subscribeErrorsFns, initialErrors] = formProps.getSubscribeProps('error', name);
+
+      expect(formProps.getValue(name)).toEqual(initialValues);
+      expect(formProps.getErrors(name)).toEqual(initialErrors);
+
+      const changeFn = jest.fn();
+      const errorFn = jest.fn();
+
+      const unSubscribeChangeFns = subscribeChangeFns(changeFn);
+      const unSubscribeErrorFns = subscribeErrorsFns(errorFn);
+
+      expect(changeFn).not.toHaveBeenCalled();
+      expect(errorFn).not.toHaveBeenCalled();
+
+      formProps.setValue(name, value);
+      formProps.setError(name, errorMessage);
+
+      expect(changeFn).toHaveBeenCalledTimes(1);
+      expect(changeFn).toHaveBeenCalledWith(value, name);
+
+      expect(errorFn).toHaveBeenCalledTimes(1);
+      expect(errorFn).toHaveBeenCalledWith([{ message: errorMessage, type: 'validate' }], name);
+
+      changeFn.mockClear();
+      errorFn.mockClear();
+
+      unSubscribeChangeFns.forEach((fn) => fn());
+      unSubscribeErrorFns.forEach((fn) => fn());
+
+      formProps.setValue(name, value);
+      formProps.setError(name, errorMessage);
+
+      expect(changeFn).not.toHaveBeenCalled();
+      expect(errorFn).not.toHaveBeenCalled();
+    };
+
+    checkSubscribeProps('strValue', 'test value');
+    checkSubscribeProps('fieldArrayitems', [{ email: 'test', disabled: true, test: 'test' }]);
+    checkSubscribeProps('primitiveArray', ['test value']);
+    checkSubscribeProps('booleanValue', true);
+    checkSubscribeProps('bigIntValue', BigInt(1));
+
+    /** deep object */
+    const names = [
+      'objValue',
+      'objValue.pops',
+      'objValue.pops.tops',
+      'objValue.pops.tops.aleps',
+      'objValue.pops.tops.aleps.arrValue',
+      'objValue.pops.tops.aleps.arrValue.0',
+      'objValue.pops.tops.aleps.arrValue.0.oi',
+
+      // TODO: убрать после удаления квадратных скобок
+      'objValue.pops.tops.aleps.arrValue[0]',
+      'objValue.pops.tops.aleps.arrValue[0].oi',
+    ] as StateFormPath<FormValues>[];
+
+    const name = 'objValue.pops.tops.aleps.arrValue.0.oi';
+
+    const newValue = 'new value';
+    const errorMessage = 'Error message';
+
+    const [subscribeChangeFns, initialValues] = formProps.getSubscribeProps('change', names);
+    const [subscribeErrorsFns, initialErrors] = formProps.getSubscribeProps('error', names);
+
+    expect(formProps.getValue(names)).toEqual(initialValues);
+    expect(formProps.getErrors(names)).toEqual(initialErrors);
+
+    const changeFn = jest.fn();
+    const errorFn = jest.fn();
+
+    const unSubscribeChangeFns = subscribeChangeFns(changeFn);
+    const unSubscribeErrorFns = subscribeErrorsFns(errorFn);
+
+    expect(changeFn).not.toHaveBeenCalled();
+    expect(errorFn).not.toHaveBeenCalled();
+
+    /** change only the deepest prop */
+    formProps.setValue(name, newValue);
+    formProps.setError(name, errorMessage);
+
+    expect(changeFn).toHaveBeenCalledTimes(names.length);
+    expect(errorFn).toHaveBeenCalledTimes(1);
+
+    const changedObj = { objValue: formStateInnerCloneDeep(initialProps.objValue) };
+    set(changedObj, 'objValue.pops.tops.aleps.arrValue.0.oi', newValue);
+
+    names.forEach((name) => {
+      expect(changeFn).toHaveBeenCalledWith(get(changedObj, name), name);
+    });
+
+    expect(errorFn).toHaveBeenCalledWith([{ message: errorMessage, type: 'validate' }], name);
+
+    changeFn.mockClear();
+    errorFn.mockClear();
+
+    unSubscribeChangeFns.forEach((fn) => fn());
+    unSubscribeErrorFns.forEach((fn) => fn());
+
+    formProps.setValue(name, newValue);
+    formProps.setError(name, errorMessage);
+
+    expect(changeFn).not.toHaveBeenCalled();
+    expect(errorFn).not.toHaveBeenCalled();
   });
 
   it('console errors check (should be the last test)', () => {
