@@ -19,6 +19,10 @@ const validators: {
 } = {
   isSet: (value) => isString(value) && value.trim().length > 0,
   validate: (value, validationOptions) => {
+    if (validationOptions.disabled === true) {
+      return true;
+    }
+
     if (!isString(value)) {
       return false;
     }

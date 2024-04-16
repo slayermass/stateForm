@@ -62,6 +62,7 @@ export type StateFormOnSubmitType<FormValues> = (
 
 export type StateFormInputOptionsType = {
   required?: boolean;
+  disabled?: boolean;
 
   initChange?: true; // creates errors for every input when started; inner usage
 
