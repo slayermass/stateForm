@@ -120,6 +120,26 @@ describe('text + textarea', () => {
     expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
   });
 
+  it('submit disabled', () => {
+    const propName = 'strValue0';
+
+    formProps.register(propName, 'text', {
+      disabled: true,
+    });
+
+    formProps.setValue(propName, null);
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).toHaveBeenCalled();
+    expect(left).not.toHaveBeenCalled();
+
+    expect(formProps.getErrors(propName)).toEqual([]);
+  });
+
   it('required empty length', () => {
     const propName = 'strValue1';
 

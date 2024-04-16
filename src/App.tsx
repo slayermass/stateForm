@@ -1,5 +1,4 @@
 import React from 'react';
-import './App.css';
 import { useStateForm } from 'src/utils/stateForm';
 
 const App = () => {
