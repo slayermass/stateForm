@@ -10,7 +10,6 @@ useStateForm
 - files (File[])
 - image (File)
 - boolean (Boolean)
-- color
 - checkbox
 - dropdown
 
