@@ -19,7 +19,11 @@ const validators: {
 } = {
   isSet: (value) => isDate(value),
   validate: (value, validationOptions) => {
-    if (!isDate(value)) {
+    if (validationOptions.disabled === true) {
+      return true;
+    }
+
+    if (!isDate(value) && validationOptions.required) {
       return false;
     }
 

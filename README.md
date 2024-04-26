@@ -24,7 +24,7 @@ useStateForm
   EventBus.on(<fieldName>, <type>, <callback>);
   ```
 ## прочее
-- найти узкие места и улучшить их
+- тесты required и not required
 - отказаться от такого вида имен
   `arrayProp[0].name`
   и делать только такие `arrayProp.0.name`
