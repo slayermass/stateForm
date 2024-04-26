@@ -24,7 +24,6 @@ import { SafeAnyType } from 'src/utils/safeAny';
 import { createArrayXLength } from 'src/utils/objects';
 import { useMemoObject } from 'src/hooks/useMemoObject';
 import { isValidEmail } from 'src/utils/email';
-import { isValidColor } from 'src/utils/validators';
 import { isBigInt } from 'src/utils/numbers';
 
 export {
@@ -45,7 +44,6 @@ export {
   createArrayXLength,
   useMemoObject,
   isValidEmail,
-  isValidColor,
   isDate,
   isBigInt,
   isBoolean,

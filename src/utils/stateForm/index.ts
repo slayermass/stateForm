@@ -161,7 +161,6 @@ export type StateFormFieldsType =
   | 'checkbox'
   | 'checkboxGroup' // it only marks as this, but must not be used directly
   | 'radio'
-  | 'color'
   | 'dropdown'
   | 'image'
   | 'timepicker'

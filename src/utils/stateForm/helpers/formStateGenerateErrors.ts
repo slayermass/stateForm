@@ -1,6 +1,6 @@
 import { stateFormInnerValidators, StateFormPossibleValue } from '../settings';
 import { StateFormFieldsType, StateFormInputOptionsType } from '../index';
-import { isArray, isBoolean, isValidColor, SafeAnyType } from '../outerDependencies';
+import { isArray, isBoolean, SafeAnyType } from '../outerDependencies';
 
 // import i18next from 'src/utils/i18n';
 const i18next = {
@@ -30,12 +30,6 @@ export const formStateGenerateErrors = (
       setErr = true;
     } else {
       switch (fieldType) {
-        case 'color': {
-          if (!isValidColor(value as SafeAnyType)) {
-            setErr = true;
-          }
-          break;
-        }
         default: {
           if (!value) {
             setErr = true;
