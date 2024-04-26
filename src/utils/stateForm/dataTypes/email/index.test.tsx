@@ -123,6 +123,27 @@ describe('email', () => {
     ]);
   });
 
+  it('not required empty multiple', () => {
+    const propNames = ['emailValue1', 'emailValue2'];
+
+    propNames.forEach((propName) => {
+      formProps.register(propName, 'email', {
+        required: false,
+      });
+
+      formProps.setValue(propName as keyof FormValues, '                ');
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).toHaveBeenCalled();
+
+    expect(formProps.getErrors(propNames as (keyof FormValues)[])).toEqual([[], []]);
+  });
+
   it('minLength', () => {
     const propName = 'emailValue0';
 
@@ -279,6 +300,49 @@ describe('email', () => {
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+    });
+
+    right.mockClear();
+    left.mockClear();
+
+    // set invalid value
+    formProps.setValue(propName, 't@t.com');
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsEmailMinLengthMessage }],
+    });
+
+    right.mockClear();
+    left.mockClear();
+
+    // set valid value
+    const validValue = 'test@test.com';
+    formProps.setValue(propName, validValue);
+
+    formProps.onSubmit((data) => right(data), left)();
+
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: 'test@test.com' });
+    expect(left).not.toHaveBeenCalled();
+  });
+
+  it('not required + minLength', () => {
+    const propName = 'emailValue1';
+
+    formProps.register(propName, 'email', {
+      minLength: 10,
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsEmailMinLengthMessage }],
     });
 
     right.mockClear();

@@ -92,6 +92,25 @@ describe('date', () => {
     ]);
   });
 
+  it('not required empty multiple', () => {
+    const propNames = ['dateValue0', 'dateValue1'];
+
+    propNames.forEach((propName) => {
+      formProps.register(propName, 'date');
+
+      formProps.setValue(propName as keyof FormValues, null);
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).toHaveBeenCalled();
+
+    expect(formProps.getErrors(propNames as (keyof FormValues)[])).toEqual([[], []]);
+  });
+
   it('required wrong type', () => {
     const propName = 'dateValue0';
 
@@ -156,6 +175,40 @@ describe('date', () => {
 
     formProps.register(propName, 'date', {
       required: true,
+      minDate: new Date(5e7),
+    });
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.setValue(propName, new Date(3e7));
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsDateMinMessage }],
+    });
+
+    right.mockClear();
+    left.mockClear();
+
+    // valid value
+    const validValue = new Date(6e7);
+    formProps.setValue(propName, validValue);
+
+    formProps.onSubmit((data) => {
+      right(data);
+    }, left)();
+
+    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(left).not.toHaveBeenCalled();
+  });
+
+  it('not required + minDate', () => {
+    const propName = 'dateValue0';
+
+    formProps.register(propName, 'date', {
       minDate: new Date(5e7),
     });
 

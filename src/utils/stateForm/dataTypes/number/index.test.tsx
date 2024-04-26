@@ -214,6 +214,23 @@ describe('number', () => {
     expect(left).not.toHaveBeenCalled();
   });
 
+  it('not required empty', () => {
+    const propName = 'valueSet';
+
+    formProps.register(propName, 'number', {
+      required: false,
+    });
+
+    formProps.setValue(propName, null);
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).toHaveBeenCalled();
+  });
+
   it('not required + null value', () => {
     const propName = 'valueNull';
 

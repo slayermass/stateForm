@@ -120,6 +120,23 @@ describe('text + textarea', () => {
     expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
   });
 
+  it('not required empty', () => {
+    const propName = 'strValue0';
+
+    formProps.register(propName, 'text');
+
+    formProps.setValue(propName, '');
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).toHaveBeenCalled();
+
+    expect(formProps.getErrors(propName)).toEqual([]);
+  });
+
   it('submit disabled', () => {
     const propName = 'strValue0';
 
@@ -319,6 +336,39 @@ describe('text + textarea', () => {
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+    });
+
+    right.mockClear();
+    left.mockClear();
+
+    // set invalid value
+    formProps.setValue(propName, '1');
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsTextMinLengthMessage }],
+    });
+  });
+
+  it('not required + minLength', () => {
+    const propName = 'strValue1';
+
+    formProps.register(propName, 'text', {
+      minLength: 3,
+    });
+
+    formProps.onBlur(propName);
+
+    const right = jest.fn();
+    const left = jest.fn();
+
+    formProps.onSubmit(right, left)();
+
+    expect(right).not.toHaveBeenCalled();
+    expect(left).toHaveBeenCalledWith({
+      [propName]: [{ type: 'validate', message: stateFormErrorsTextMinLengthMessage }],
     });
 
     right.mockClear();

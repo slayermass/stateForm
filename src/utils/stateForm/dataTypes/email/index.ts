@@ -24,7 +24,7 @@ const validators: {
       return [stateFormErrorsPatternEmailMessage];
     }
 
-    if (!isString(value)) {
+    if (!isString(value) && validationOptions.required) {
       return false;
     }
 

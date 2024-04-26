@@ -23,7 +23,7 @@ const validators: {
       return true;
     }
 
-    if (!isString(value)) {
+    if (!isString(value) && validationOptions.required) {
       return false;
     }
 
