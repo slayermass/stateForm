@@ -8,7 +8,9 @@ import {
 import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
 
-describe('email', () => {
+const typeName = 'email';
+
+describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
@@ -49,9 +51,9 @@ describe('email', () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    const propName = 'emailValue1';
+    const propName: keyof FormValues = 'emailValue1';
 
-    formProps.register(propName, 'email', {
+    formProps.register(propName, typeName, {
       required: true,
     });
 
@@ -73,14 +75,14 @@ describe('email', () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    const newValues = {
+    const newValues: FormValues = {
       emailValue0: 'y1@y.com',
       emailValue1: 'y2@y.ru',
       emailValue2: 'y3@y.oa',
     };
 
     Object.keys(newValues).forEach((propName) => {
-      formProps.register(propName, 'email', {
+      formProps.register(propName, typeName, {
         required: true,
       });
     });
@@ -96,10 +98,10 @@ describe('email', () => {
   });
 
   it('required empty multiple', () => {
-    const propNames = ['emailValue1', 'emailValue2'];
+    const propNames: Array<keyof FormValues> = ['emailValue1', 'emailValue2'];
 
     propNames.forEach((propName) => {
-      formProps.register(propName, 'email', {
+      formProps.register(propName, typeName, {
         required: true,
       });
 
@@ -124,10 +126,10 @@ describe('email', () => {
   });
 
   it('not required empty multiple', () => {
-    const propNames = ['emailValue1', 'emailValue2'];
+    const propNames: Array<keyof FormValues> = ['emailValue1', 'emailValue2'];
 
     propNames.forEach((propName) => {
-      formProps.register(propName, 'email', {
+      formProps.register(propName, typeName, {
         required: false,
       });
 
@@ -145,9 +147,9 @@ describe('email', () => {
   });
 
   it('minLength', () => {
-    const propName = 'emailValue0';
+    const propName: keyof FormValues = 'emailValue0';
 
-    formProps.register(propName, 'email', {
+    formProps.register(propName, typeName, {
       minLength: 8,
     });
 
@@ -204,9 +206,9 @@ describe('email', () => {
   });
 
   it('maxLength', () => {
-    const propName = 'emailValue1';
+    const propName: keyof FormValues = 'emailValue1';
 
-    formProps.register(propName, 'email', {
+    formProps.register(propName, typeName, {
       maxLength: 7,
     });
 
@@ -263,9 +265,9 @@ describe('email', () => {
   });
 
   it('required + maxLength', () => {
-    const propName = 'emailValue1';
+    const propName: keyof FormValues = 'emailValue1';
 
-    formProps.register(propName, 'email', {
+    formProps.register(propName, typeName, {
       maxLength: 7,
       required: true,
     });
@@ -285,9 +287,9 @@ describe('email', () => {
   });
 
   it('required + minLength', () => {
-    const propName = 'emailValue1';
+    const propName: keyof FormValues = 'emailValue1';
 
-    formProps.register(propName, 'email', {
+    formProps.register(propName, typeName, {
       minLength: 10,
       required: true,
     });
@@ -329,9 +331,9 @@ describe('email', () => {
   });
 
   it('not required + minLength', () => {
-    const propName = 'emailValue1';
+    const propName: keyof FormValues = 'emailValue1';
 
-    formProps.register(propName, 'email', {
+    formProps.register(propName, typeName, {
       minLength: 10,
     });
 
@@ -372,9 +374,9 @@ describe('email', () => {
   });
 
   it('valid pattern', () => {
-    const propName = 'emailValue1';
+    const propName: keyof FormValues = 'emailValue1';
 
-    formProps.register(propName, 'email');
+    formProps.register(propName, typeName);
 
     const right = jest.fn();
     const left = jest.fn();
@@ -412,9 +414,9 @@ describe('email', () => {
   });
 
   it('required + pattern email', () => {
-    const propName = 'emailValue1';
+    const propName: keyof FormValues = 'emailValue1';
 
-    formProps.register(propName, 'email', {
+    formProps.register(propName, typeName, {
       required: true,
     });
 
@@ -453,6 +455,46 @@ describe('email', () => {
 
     expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
     expect(left).not.toHaveBeenCalled();
+  });
+
+  describe('getInitialValue + reset', () => {
+    it('not set values', () => {
+      expect(formProps.getInitialValue()).toEqual(initialProps);
+    });
+
+    it('set values', () => {
+      const newValues: FormValues = {
+        emailValue0: 'emailValue0',
+        emailValue1: 'emailValue1',
+        emailValue2: 'emailValue2',
+      };
+
+      Object.keys(newValues).forEach((propName) => {
+        formProps.register(propName, typeName);
+      });
+
+      formProps.setValue(newValues);
+
+      expect(formProps.getInitialValue()).toEqual(initialProps);
+    });
+
+    it('reset', () => {
+      const newValues: FormValues = {
+        emailValue0: 'emailValue0',
+        emailValue1: 'emailValue1',
+        emailValue2: 'emailValue2',
+      };
+
+      Object.keys(newValues).forEach((propName) => {
+        formProps.register(propName, typeName);
+      });
+
+      formProps.reset(newValues, {
+        resetInitialForm: true,
+      });
+
+      expect(formProps.getInitialValue()).toEqual(newValues);
+    });
   });
 
   it('console errors check (should be the last test)', () => {

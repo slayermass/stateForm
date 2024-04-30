@@ -4,7 +4,9 @@ import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateE
 import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../index';
 import { stateFormErrorsDateMaxMessage, stateFormErrorsDateMinMessage } from 'src/utils/stateForm/dataTypes/date/index';
 
-describe('date', () => {
+const typeName = 'date';
+
+describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
@@ -43,13 +45,13 @@ describe('date', () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    const newValues = {
+    const newValues: FormValues = {
       dateValue0: new Date(),
       dateValue1: new Date(),
     };
 
     Object.keys(newValues).forEach((propName) => {
-      formProps.register(propName, 'date', {
+      formProps.register(propName, typeName, {
         required: true,
       });
     });
@@ -65,10 +67,10 @@ describe('date', () => {
   });
 
   it('required empty multiple', () => {
-    const propNames = ['dateValue0', 'dateValue1'];
+    const propNames: Array<keyof FormValues> = ['dateValue0', 'dateValue1'];
 
     propNames.forEach((propName) => {
-      formProps.register(propName, 'date', {
+      formProps.register(propName, typeName, {
         required: true,
       });
 
@@ -93,10 +95,10 @@ describe('date', () => {
   });
 
   it('not required empty multiple', () => {
-    const propNames = ['dateValue0', 'dateValue1'];
+    const propNames: Array<keyof FormValues> = ['dateValue0', 'dateValue1'];
 
     propNames.forEach((propName) => {
-      formProps.register(propName, 'date');
+      formProps.register(propName, typeName);
 
       formProps.setValue(propName as keyof FormValues, null);
     });
@@ -112,9 +114,9 @@ describe('date', () => {
   });
 
   it('required wrong type', () => {
-    const propName = 'dateValue0';
+    const propName: keyof FormValues = 'dateValue0';
 
-    formProps.register(propName, 'date', {
+    formProps.register(propName, typeName, {
       required: true,
     });
 
@@ -171,9 +173,9 @@ describe('date', () => {
   });
 
   it('required + minDate', () => {
-    const propName = 'dateValue0';
+    const propName: keyof FormValues = 'dateValue0';
 
-    formProps.register(propName, 'date', {
+    formProps.register(propName, typeName, {
       required: true,
       minDate: new Date(5e7),
     });
@@ -206,9 +208,9 @@ describe('date', () => {
   });
 
   it('not required + minDate', () => {
-    const propName = 'dateValue0';
+    const propName: keyof FormValues = 'dateValue0';
 
-    formProps.register(propName, 'date', {
+    formProps.register(propName, typeName, {
       minDate: new Date(5e7),
     });
 
@@ -240,10 +242,10 @@ describe('date', () => {
   });
 
   it('required + minDate + minDateMessage', () => {
-    const propName = 'dateValue0';
+    const propName: keyof FormValues = 'dateValue0';
     const minDateMessage = 'HALU';
 
-    formProps.register(propName, 'date', {
+    formProps.register(propName, typeName, {
       required: true,
       minDate: new Date(5e7),
       minDateMessage,
@@ -277,9 +279,9 @@ describe('date', () => {
   });
 
   it('required + maxDate', () => {
-    const propName = 'dateValue0';
+    const propName: keyof FormValues = 'dateValue0';
 
-    formProps.register(propName, 'date', {
+    formProps.register(propName, typeName, {
       required: true,
       maxDate: new Date(15e9),
     });
@@ -312,10 +314,10 @@ describe('date', () => {
   });
 
   it('required + maxDate + maxDateMessage', () => {
-    const propName = 'dateValue0';
+    const propName: keyof FormValues = 'dateValue0';
     const maxDateMessage = 'wronngnsa!!@#@#!@#';
 
-    formProps.register(propName, 'date', {
+    formProps.register(propName, typeName, {
       required: true,
       maxDate: new Date(5e7),
       maxDateMessage,
@@ -346,6 +348,44 @@ describe('date', () => {
 
     expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
     expect(left).not.toHaveBeenCalled();
+  });
+
+  describe('getInitialValue + reset', () => {
+    it('not set values', () => {
+      expect(formProps.getInitialValue()).toEqual(initialProps);
+    });
+
+    it('set values', () => {
+      const newValues: FormValues = {
+        dateValue0: new Date(),
+        dateValue1: new Date(),
+      };
+
+      Object.keys(newValues).forEach((propName) => {
+        formProps.register(propName, typeName);
+      });
+
+      formProps.setValue(newValues);
+
+      expect(formProps.getInitialValue()).toEqual(initialProps);
+    });
+
+    it('reset', () => {
+      const newValues: FormValues = {
+        dateValue0: new Date(),
+        dateValue1: new Date(),
+      };
+
+      Object.keys(newValues).forEach((propName) => {
+        formProps.register(propName, typeName);
+      });
+
+      formProps.reset(newValues, {
+        resetInitialForm: true,
+      });
+
+      expect(formProps.getInitialValue()).toEqual(newValues);
+    });
   });
 
   it('console errors check (should be the last test)', () => {

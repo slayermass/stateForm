@@ -156,18 +156,7 @@ export type StateFormGetSubscribeProps = (
   names?: string | string[],
 ) => [StateFormSubscribeFn, StateFormSubscribeDefaultValue];
 
-export type StateFormFieldsType =
-  | StateFormDataTypesFieldsType
-  | 'checkbox'
-  | 'checkboxGroup' // it only marks as this, but must not be used directly
-  | 'radio'
-  | 'dropdown'
-  | 'image'
-  | 'timepicker'
-  | 'phone'
-  | 'switch'
-  | 'buttonCheckbox'
-  | 'file';
+export type StateFormFieldsType = StateFormDataTypesFieldsType;
 
 export type StateFormReset<FormValues = SafeAnyType> = (
   values?: DeepPartial<FormValues>,
@@ -271,17 +260,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     [],
   );
 
-  const getAllValues = useCallback(
-    () =>
-      Object.keys(formState.current).reduce<SafeAnyType>((acc, key) => {
-        if (getFieldOptionsValue(key, 'type') !== 'checkboxGroup') {
-          acc[key] = formState.current[key];
-        }
-
-        return acc;
-      }, {}),
-    [getFieldOptionsValue],
-  );
+  const getAllValues = useCallback(() => formStateInnerCloneDeep(formState.current), []);
 
   const setFieldOptionsValue = useCallback(
     (
@@ -470,7 +449,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
       const type = getFieldOptionsValue(name, 'type');
 
-      const omitArrayTypes: StateFormFieldsType[] = ['file'];
+      const omitArrayTypes: StateFormFieldsType[] = [];
 
       if (isArray(value) && !omitArrayTypes.includes(type)) {
         (value as Record<string, StateFormPossibleValue>[]).forEach((item, index) => {
@@ -501,11 +480,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         const isCurrentMode = method === mode;
         /** end declare variables */
 
-        if (
-          (!initialChange || isCurrentMode || needTrigger) &&
-          hasErrorsByName(name, 'validate') &&
-          fieldType !== 'phone' // it has its own errors
-        ) {
+        if ((!initialChange || isCurrentMode || needTrigger) && hasErrorsByName(name, 'validate')) {
           clearErrors(name, clearOnlyValidateError ? 'validate' : 'all');
         }
 
@@ -552,7 +527,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
       // prevent checkboxes show errors immediately after registering
       // eslint-disable-next-line no-underscore-dangle
-      if (!(options?._afterRegister && fieldsOptions.current[name].type === 'checkbox')) {
+      if (!(options?._afterRegister && fieldsOptions.current[name].type === 'checkBoxGroup')) {
         validateInput(name, 'onChange', options?.trigger);
       }
     },
@@ -607,7 +582,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       }
 
       if (!has(initialValues.current, name)) {
-        set(initialValues.current, name, fieldType === 'checkbox' ? !!value : value);
+        set(initialValues.current, name, value);
       }
 
       /** set the current value whatever it may be to have all the values registered */
@@ -633,7 +608,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         Object.keys(fieldsOptions.current).forEach((key) => {
           const value = fieldsOptions.current[key];
 
-          if (getFieldOptionsValue(key, 'type') !== 'checkboxGroup' && value.active) {
+          if (getFieldOptionsValue(key, 'type') !== 'checkBoxGroup' && value.active) {
             fields.push(key);
           }
         });
@@ -701,18 +676,19 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
           if (isPlainObject(currentValue)) {
             fn(currentValue, name);
           } else {
-            let value = get(values || initialValues.current, name);
+            const value = get(values || initialValues.current, name);
 
-            if (value === undefined) {
-              switch (fieldsOptions.current[name]?.type) {
-                case 'checkbox': {
-                  value = false;
-                  break;
-                }
-                default:
-                  break;
-              }
-            }
+            // ????
+            // if (value === undefined) {
+            //   switch (fieldsOptions.current[name]?.type) {
+            //     case 'checkBoxGroup': {
+            //       value = false;
+            //       break;
+            //     }
+            //     default:
+            //       break;
+            //   }
+            // }
 
             changeStateForm(name, value);
 
@@ -748,7 +724,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       Object.keys(fieldsOptions.current).reduce<ReturnType<StateFormGetDirtyFields>>((acc, key) => {
         const value = fieldsOptions.current[key];
 
-        if (getFieldOptionsValue(key, 'type') !== 'checkboxGroup' && value.isDirty) {
+        if (getFieldOptionsValue(key, 'type') !== 'checkBoxGroup' && value.isDirty) {
           acc.push(key);
         }
 
@@ -782,35 +758,29 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   /** end state subscription */
 
   /** get initial value of the form */
-  const getInitialValue = useCallback(
-    (names?: StateFormPath<FormValues> | StateFormPath<FormValues>[]) => {
-      const getInitialAllValues = () =>
-        Object.entries(initialValues.current)
-          .filter(([name]) => getFieldOptionsValue(name, 'type') !== 'checkboxGroup')
-          .reduce<SafeAnyType>((acc, [k, v]) => {
-            acc[k] = v;
-            return acc;
-          }, {});
+  const getInitialValue = useCallback((names?: StateFormPath<FormValues> | StateFormPath<FormValues>[]) => {
+    const getInitialAllValues = () =>
+      Object.entries(initialValues.current).reduce<SafeAnyType>((acc, [k, v]) => {
+        acc[k] = v;
+        return acc;
+      }, {});
 
-      const getInitialValue: StateFormInnerGetValue = (name) =>
-        formStateInnerCloneDeep(get(initialValues.current, name));
+    const getInitialValue: StateFormInnerGetValue = (name) => formStateInnerCloneDeep(get(initialValues.current, name));
 
-      if (!names) {
-        return getInitialAllValues();
-      }
+    if (!names) {
+      return getInitialAllValues();
+    }
 
-      if (isString(names)) {
-        return getInitialValue(names);
-      }
+    if (isString(names)) {
+      return getInitialValue(names);
+    }
 
-      if (isArray(names)) {
-        return names.map((name) => getInitialValue(name));
-      }
+    if (isArray(names)) {
+      return names.map((name) => getInitialValue(name));
+    }
 
-      return undefined;
-    },
-    [getFieldOptionsValue],
-  ) as StateFormGetValue<FormValues>;
+    return undefined;
+  }, []) as StateFormGetValue<FormValues>;
 
   return useMemo(
     () => ({

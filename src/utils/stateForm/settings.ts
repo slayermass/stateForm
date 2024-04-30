@@ -1,5 +1,11 @@
+import {
+  StateFormDataTypeCheckBoxGroupSpecificProperties,
+  StateFormDataTypeCheckBoxGroupType,
+  stateFormDataTypeCheckBoxGroupValidators,
+  StateFormDataTypeFieldCheckBoxGroupType,
+} from 'src/utils/stateForm/dataTypes/checkBoxGroup';
 import { StateFormEmptyValueType } from './index';
-import { NullableUndefineable } from './outerDependencies';
+import { NullableUndefineable, SafeAnyType } from './outerDependencies';
 import {
   StateFormDataTypeDateSpecificProperties,
   StateFormDataTypeDateType,
@@ -36,12 +42,13 @@ import {
 
 // TODO temporary until all data types are ready
 /** validators from each data type */
-export const stateFormInnerValidators: any = {
+export const stateFormInnerValidators: SafeAnyType = {
   ...stateFormDataTypeTextValidators,
   ...stateFormDataTypeEmailValidators,
   ...stateFormDataTypeRichTextValidators,
   ...stateFormDataTypeDateValidators,
   ...stateFormDataTypeNumberValidators,
+  ...stateFormDataTypeCheckBoxGroupValidators,
 };
 
 /** possible values */
@@ -51,15 +58,15 @@ export type StateFormPossibleValue =
   | StateFormDataTypeRichTextType
   | StateFormDataTypeDateType
   | StateFormDataTypeNumberType
-  | boolean
-  | StateFormEmptyValueType
-  | [string, string];
+  | StateFormDataTypeCheckBoxGroupType
+  | StateFormEmptyValueType;
 
 /** possible properties to each data type */
 export type StateFormDataTypesSpecificPropertiesType = NullableUndefineable<StateFormDataTypeDateSpecificProperties> &
   NullableUndefineable<StateFormDataTypeTextSpecificProperties> &
   NullableUndefineable<StateFormDataTypeEmailSpecificProperties> &
-  NullableUndefineable<StateFormDataTypeNumberSpecificProperties>;
+  NullableUndefineable<StateFormDataTypeNumberSpecificProperties> &
+  NullableUndefineable<StateFormDataTypeCheckBoxGroupSpecificProperties>;
 
 /** possible types of values */
 export type StateFormDataTypesFieldsType =
@@ -67,4 +74,5 @@ export type StateFormDataTypesFieldsType =
   | StateFormDataTypeFieldEmailType
   | StateFormDataTypeFieldRichTextType
   | StateFormDataTypeFieldDateType
-  | StateFormDataTypeFieldNumberType;
+  | StateFormDataTypeFieldNumberType
+  | StateFormDataTypeFieldCheckBoxGroupType;

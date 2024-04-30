@@ -7,7 +7,9 @@ import {
 import { StateFormReturnType, useStateForm } from '../../index';
 import { stateFormErrorsNumberMaxMessage, stateFormErrorsNumberMinMessage } from 'src/utils/stateForm/dataTypes/number';
 
-describe('number', () => {
+const typeName = 'number';
+
+describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
@@ -91,7 +93,7 @@ describe('number', () => {
   it('check with Infinity', () => {
     const propName = 'valueNull';
 
-    formProps.register(propName, 'number');
+    formProps.register(propName, typeName);
 
     formProps.setValue(propName, Infinity);
 
@@ -107,7 +109,7 @@ describe('number', () => {
   it('check with -Infinity', () => {
     const propName = 'valueNull';
 
-    formProps.register(propName, 'number');
+    formProps.register(propName, typeName);
 
     formProps.setValue(propName, -Infinity);
 
@@ -123,7 +125,7 @@ describe('number', () => {
   it('check with NaN', () => {
     const propName = 'valueNull';
 
-    formProps.register(propName, 'number');
+    formProps.register(propName, typeName);
 
     formProps.setValue(propName, NaN);
 
@@ -139,7 +141,7 @@ describe('number', () => {
   it('required zero', () => {
     const propName = 'valueZero';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       required: true,
     });
 
@@ -155,7 +157,7 @@ describe('number', () => {
   it('required', () => {
     const propName = 'valueNull';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       required: true,
     });
 
@@ -184,7 +186,7 @@ describe('number', () => {
   it('required empty', () => {
     const propName = 'valueSet';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       required: true,
     });
 
@@ -217,7 +219,7 @@ describe('number', () => {
   it('not required empty', () => {
     const propName = 'valueSet';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       required: false,
     });
 
@@ -234,7 +236,7 @@ describe('number', () => {
   it('not required + null value', () => {
     const propName = 'valueNull';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       required: false,
     });
 
@@ -250,7 +252,7 @@ describe('number', () => {
   it('min', () => {
     const propName = 'valueZero';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       min: 10,
     });
 
@@ -279,7 +281,7 @@ describe('number', () => {
   it('min + required', () => {
     const propName = 'valueNull';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       min: 10,
       required: true,
     });
@@ -321,7 +323,7 @@ describe('number', () => {
     const propName = 'valueZero';
     const customMessage = 'customErrorMessage';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       min: 10,
       minMessage: customMessage,
     });
@@ -338,7 +340,7 @@ describe('number', () => {
   it('max', () => {
     const propName = 'valueSet';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       max: 10,
     });
 
@@ -368,7 +370,7 @@ describe('number', () => {
     const propName = 'valueSet';
     const customMessage = 'customErrorMessage';
 
-    formProps.register(propName, 'number', {
+    formProps.register(propName, typeName, {
       max: 10,
       maxMessage: customMessage,
     });
@@ -386,7 +388,7 @@ describe('number', () => {
     it('check with Infinity', () => {
       const propName = 'bigIntValueNull';
 
-      formProps.register(propName, 'number');
+      formProps.register(propName, typeName);
 
       formProps.setValue(propName, Infinity);
 
@@ -402,7 +404,7 @@ describe('number', () => {
     it('check with -Infinity', () => {
       const propName = 'bigIntValueNull';
 
-      formProps.register(propName, 'number');
+      formProps.register(propName, typeName);
 
       formProps.setValue(propName, -Infinity);
 
@@ -418,7 +420,7 @@ describe('number', () => {
     it('check with NaN', () => {
       const propName = 'bigIntValueNull';
 
-      formProps.register(propName, 'number');
+      formProps.register(propName, typeName);
 
       formProps.setValue(propName, NaN);
 
@@ -434,7 +436,7 @@ describe('number', () => {
     it('required zero', () => {
       const propName = 'bigIntValueZero';
 
-      formProps.register(propName, 'number', {
+      formProps.register(propName, typeName, {
         required: true,
       });
 
@@ -450,7 +452,7 @@ describe('number', () => {
     it('required', () => {
       const propName = 'bigIntValueNull';
 
-      formProps.register(propName, 'number', {
+      formProps.register(propName, typeName, {
         required: true,
       });
 
@@ -479,7 +481,7 @@ describe('number', () => {
     it('required empty', () => {
       const propName = 'bigIntValueSet';
 
-      formProps.register(propName, 'number', {
+      formProps.register(propName, typeName, {
         required: true,
       });
 
@@ -512,7 +514,7 @@ describe('number', () => {
     it('min', () => {
       const propName = 'bigIntValueZero';
 
-      formProps.register(propName, 'number', {
+      formProps.register(propName, typeName, {
         min: 10,
       });
 
@@ -541,7 +543,7 @@ describe('number', () => {
     it('max', () => {
       const propName = 'bigIntValueSet';
 
-      formProps.register(propName, 'number', {
+      formProps.register(propName, typeName, {
         max: 10,
       });
 
@@ -565,6 +567,52 @@ describe('number', () => {
 
       expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
       expect(left).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getInitialValue + reset', () => {
+    it('not set values', () => {
+      expect(formProps.getInitialValue()).toEqual(initialProps);
+    });
+
+    it('set values', () => {
+      const newValues: FormValues = {
+        valueZero: 1,
+        valueNull: 1,
+        valueSet: 1,
+        bigIntValueZero: null,
+        bigIntValueNull: null,
+        bigIntValueSet: BigInt(100),
+      };
+
+      Object.keys(newValues).forEach((propName) => {
+        formProps.register(propName, typeName);
+      });
+
+      formProps.setValue(newValues);
+
+      expect(formProps.getInitialValue()).toEqual(initialProps);
+    });
+
+    it('reset', () => {
+      const newValues: FormValues = {
+        valueZero: 1,
+        valueNull: 1,
+        valueSet: 1,
+        bigIntValueZero: null,
+        bigIntValueNull: null,
+        bigIntValueSet: BigInt(100),
+      };
+
+      Object.keys(newValues).forEach((propName) => {
+        formProps.register(propName, typeName);
+      });
+
+      formProps.reset(newValues, {
+        resetInitialForm: true,
+      });
+
+      expect(formProps.getInitialValue()).toEqual(newValues);
     });
   });
 
