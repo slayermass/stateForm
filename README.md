@@ -10,8 +10,7 @@ useStateForm
 - files (File[])
 - image (File)
 - boolean (Boolean)
-- checkbox
-- dropdown
+- dropdown (select)
 
 ## внутренности
 - event bus
