@@ -7,6 +7,8 @@ import {
   stateFormErrorsTextMinLengthMessage,
 } from 'src/utils/stateForm/dataTypes/text';
 
+const typeName = 'text';
+
 describe('text + textarea', () => {
   console.error = jest.fn();
 
@@ -48,9 +50,9 @@ describe('text + textarea', () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    const propName = 'strValue0';
+    const propName: keyof FormValues = 'strValue0';
 
-    formProps.register(propName, 'text', {
+    formProps.register(propName, typeName, {
       required: true,
     });
 
@@ -84,7 +86,7 @@ describe('text + textarea', () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    const newValues = {
+    const newValues: FormValues = {
       strValue0: '0',
       strValue1: '1',
       strValue2: '2',
@@ -101,9 +103,9 @@ describe('text + textarea', () => {
   });
 
   it('required empty', () => {
-    const propName = 'strValue0';
+    const propName: keyof FormValues = 'strValue0';
 
-    formProps.register(propName, 'text', {
+    formProps.register(propName, typeName, {
       required: true,
     });
 
@@ -121,9 +123,9 @@ describe('text + textarea', () => {
   });
 
   it('not required empty', () => {
-    const propName = 'strValue0';
+    const propName: keyof FormValues = 'strValue0';
 
-    formProps.register(propName, 'text');
+    formProps.register(propName, typeName);
 
     formProps.setValue(propName, '');
 
@@ -138,9 +140,9 @@ describe('text + textarea', () => {
   });
 
   it('submit disabled', () => {
-    const propName = 'strValue0';
+    const propName: keyof FormValues = 'strValue0';
 
-    formProps.register(propName, 'text', {
+    formProps.register(propName, typeName, {
       disabled: true,
     });
 
@@ -160,7 +162,7 @@ describe('text + textarea', () => {
   it('required empty length', () => {
     const propName = 'strValue1';
 
-    formProps.register(propName, 'text', {
+    formProps.register(propName, typeName, {
       required: true,
     });
 
@@ -181,7 +183,7 @@ describe('text + textarea', () => {
     const propNames = ['strValue1', 'strValue2'];
 
     propNames.forEach((propName) => {
-      formProps.register(propName, 'text', {
+      formProps.register(propName, typeName, {
         required: true,
       });
 
@@ -205,9 +207,9 @@ describe('text + textarea', () => {
   });
 
   it('minLength', () => {
-    const propName = 'strValue0';
+    const propName: keyof FormValues = 'strValue0';
 
-    formProps.register(propName, 'text', {
+    formProps.register(propName, typeName, {
       minLength: 3,
     });
 
@@ -253,7 +255,7 @@ describe('text + textarea', () => {
   it('maxLength', () => {
     const propName = 'strValue1';
 
-    formProps.register(propName, 'text', {
+    formProps.register(propName, typeName, {
       maxLength: 5,
     });
 
@@ -299,7 +301,7 @@ describe('text + textarea', () => {
   it('required + maxLength', () => {
     const propName = 'strValue1';
 
-    formProps.register(propName, 'text', {
+    formProps.register(propName, typeName, {
       maxLength: 7,
       required: true,
     });
@@ -321,7 +323,7 @@ describe('text + textarea', () => {
   it('required + minLength', () => {
     const propName = 'strValue1';
 
-    formProps.register(propName, 'text', {
+    formProps.register(propName, typeName, {
       minLength: 3,
       required: true,
     });
@@ -355,7 +357,7 @@ describe('text + textarea', () => {
   it('not required + minLength', () => {
     const propName = 'strValue1';
 
-    formProps.register(propName, 'text', {
+    formProps.register(propName, typeName, {
       minLength: 3,
     });
 
@@ -382,6 +384,46 @@ describe('text + textarea', () => {
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsTextMinLengthMessage }],
+    });
+  });
+
+  describe('getInitialValue + reset', () => {
+    it('not set values', () => {
+      expect(formProps.getInitialValue()).toEqual(initialProps);
+    });
+
+    it('set values', () => {
+      const newValues: FormValues = {
+        strValue0: 'strValue0',
+        strValue1: 'strValue1',
+        strValue2: 'strValue2',
+      };
+
+      Object.keys(newValues).forEach((propName) => {
+        formProps.register(propName, typeName);
+      });
+
+      formProps.setValue(newValues);
+
+      expect(formProps.getInitialValue()).toEqual(initialProps);
+    });
+
+    it('reset', () => {
+      const newValues: FormValues = {
+        strValue0: 'strValue0',
+        strValue1: 'strValue1',
+        strValue2: 'strValue2',
+      };
+
+      Object.keys(newValues).forEach((propName) => {
+        formProps.register(propName, typeName);
+      });
+
+      formProps.reset(newValues, {
+        resetInitialForm: true,
+      });
+
+      expect(formProps.getInitialValue()).toEqual(newValues);
     });
   });
 

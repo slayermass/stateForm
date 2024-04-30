@@ -43,6 +43,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "prettier": "prettier --write \"src\"",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {
