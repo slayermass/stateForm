@@ -21,26 +21,14 @@ export const formStateGenerateErrors = (
 
   const errorsToSet: string[] = []; // the array for collecting errors
 
+  if (process.env.NODE_ENV === 'development' && !stateFormInnerValidators[fieldType]?.isSet) {
+    throw new Error(`Validator is not set for type "${fieldType}"`);
+  }
+
   const hasValidValue = !!stateFormInnerValidators[fieldType]?.isSet(value);
 
-  if (!hasValidValue && validationOptions?.required) {
-    let setErr = false;
-
-    if (stateFormInnerValidators[fieldType]?.isSet) {
-      setErr = true;
-    } else {
-      switch (fieldType) {
-        default: {
-          if (!value) {
-            setErr = true;
-          }
-        }
-      }
-    }
-
-    if (setErr) {
-      return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
-    }
+  if (!hasValidValue && validationOptions?.required && stateFormInnerValidators[fieldType].isSet) {
+    return [validationOptions?.requiredMessage || i18next.t(stateFormErrorsRequiredMessage, { label: errorLabel })];
   }
 
   /** any other validators except isSet  */
