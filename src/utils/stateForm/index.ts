@@ -160,7 +160,7 @@ export type StateFormFieldsType = StateFormDataTypesFieldsType;
 
 export type StateFormReset<FormValues = SafeAnyType> = (
   values?: DeepPartial<FormValues>,
-  options?: { trigger?: boolean; resetInitialForm?: boolean },
+  options?: { trigger?: boolean; resetInitialForm?: boolean; mergeWithPreviousState?: boolean },
 ) => void;
 
 export type StateFormSetRef = (name: string) => (element: HTMLElement | null) => void;
@@ -713,7 +713,11 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       fn(values || formState.current);
 
       if (options?.resetInitialForm && values) {
-        initialValues.current = formStateInnerCloneDeep(values);
+        const preparedValues = formStateInnerCloneDeep(values);
+
+        initialValues.current = options?.mergeWithPreviousState
+          ? { ...initialValues.current, ...preparedValues }
+          : preparedValues;
       }
     },
     [changeStateForm, clearErrors, getFieldOptionsValue, setFieldOptionsValue, validateInput],

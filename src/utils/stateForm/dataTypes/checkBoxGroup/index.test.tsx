@@ -108,7 +108,7 @@ describe(typeName, () => {
       expect(formProps.getInitialValue()).toEqual(initialProps);
     });
 
-    it('reset', () => {
+    it('reset resetInitialForm', () => {
       const newValues: FormValues = {
         checkValue0: true,
         checkValue1: false,
@@ -123,6 +123,43 @@ describe(typeName, () => {
       });
 
       expect(formProps.getInitialValue()).toEqual(newValues);
+    });
+
+    it('reset resetInitialForm + mergeWithPreviousState', () => {
+      const newValues: FormValues = {
+        checkValue0: true,
+        checkValue1: false,
+      };
+
+      Object.keys(newValues).forEach((propName) => {
+        formProps.register(propName, typeName);
+      });
+
+      formProps.reset(
+        {
+          checkValue0: false,
+        },
+        {
+          resetInitialForm: true,
+        },
+      );
+
+      // if later you need to add something to the initial form use mergeWithPrevious
+      // int this way it is possible to reset partially
+      formProps.reset(
+        {
+          checkValue1: false,
+        },
+        {
+          resetInitialForm: true,
+          mergeWithPreviousState: true,
+        },
+      );
+
+      expect(formProps.getInitialValue()).toEqual({
+        checkValue0: false,
+        checkValue1: false,
+      });
     });
   });
 
