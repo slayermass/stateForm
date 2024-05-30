@@ -604,6 +604,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
       if (!(options?.removeValue === false)) {
         formState.current = omit(formState.current, name) as FormValues;
+        fieldsOptions.current = omit(fieldsOptions.current, name);
       }
 
       clearErrors(name);
