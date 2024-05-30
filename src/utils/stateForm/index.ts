@@ -24,6 +24,7 @@ import {
   merge,
   SafeAnyType,
   set,
+  omit,
 } from './outerDependencies';
 import { StateFormPath, StateFormPathValue, StateFormPathValues } from './types/path';
 
@@ -142,7 +143,12 @@ export type StateFormRegisterOptions = Omit<StateFormInputOptionsType, 'initChan
 
 export type StateFormRegister = (name: string, type: StateFormFieldsType, options?: StateFormRegisterOptions) => void;
 
-export type StateFormUnregister = (name: string) => void;
+export type StateFormUnregister = (
+  name: string,
+  options?: {
+    removeValue?: boolean;
+  },
+) => void;
 
 export type StateFormSubscribeFn = (
   callback: (value: SafeAnyType, fieldName: string) => void,
@@ -592,9 +598,14 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   );
 
   const unregister: StateFormUnregister = useCallback(
-    (name) => {
+    (name, options) => {
       setFieldOptionsValue(name, false, 'active');
       setFieldOptionsValue(name, false, 'isDirty');
+
+      if (!(options?.removeValue === false)) {
+        formState.current = omit(formState.current, name) as FormValues;
+      }
+
       clearErrors(name);
     },
     [clearErrors, setFieldOptionsValue],
