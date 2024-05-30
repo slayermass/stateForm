@@ -466,10 +466,12 @@ describe('useStateForm', () => {
       const props: (keyof FormValues)[] = ['strValue', 'primitiveArray'];
 
       props.forEach((propName) => {
+        formProps.setError(propName, 'a');
         formProps.unregister(propName);
       });
 
       expect(formProps.getValue()).toEqual(omit(initialProps, props));
+      expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
     });
 
     it('removeValue = false', () => {
@@ -482,6 +484,7 @@ describe('useStateForm', () => {
       });
 
       expect(formProps.getValue()).toEqual(initialProps);
+      expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
     });
 
     it('base. nested', () => {
@@ -493,6 +496,7 @@ describe('useStateForm', () => {
 
       // remove parent if it is empty?
       expect(formProps.getValue()).toEqual(omit(initialProps, props));
+      expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
     });
 
     it('base. wrong property', () => {
@@ -503,6 +507,7 @@ describe('useStateForm', () => {
       });
 
       expect(formProps.getValue()).toEqual(initialProps);
+      expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
     });
   });
 
