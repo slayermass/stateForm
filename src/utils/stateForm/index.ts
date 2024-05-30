@@ -602,6 +602,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       setFieldOptionsValue(name, false, 'active');
       setFieldOptionsValue(name, false, 'isDirty');
 
+      // completely remove info about the field. to prevent set { removeValue = false }
       if (!(options?.removeValue === false)) {
         formState.current = omit(formState.current, name) as FormValues;
         fieldsOptions.current = omit(fieldsOptions.current, name);
