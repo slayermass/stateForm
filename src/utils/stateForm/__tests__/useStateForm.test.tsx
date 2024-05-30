@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react';
 
 import { stateFormErrorsRequiredMessage } from '../helpers/formStateGenerateErrors';
 import { StateFormRegisterOptions, StateFormReturnType, useStateForm } from '../index';
-import { get, SafeAnyType, set } from '../outerDependencies';
+import { get, SafeAnyType, set, omit } from '../outerDependencies';
 import {
   stateFormErrorsTextMaxLengthMessage,
   stateFormErrorsTextMinLengthMessage,
@@ -29,6 +29,9 @@ type FormValues = {
   nullValue: null;
   undefinedValue: undefined;
   bigIntValue: bigint;
+  nested: {
+    test: number;
+  };
 
   optionalAnyType?: any;
 };
@@ -51,6 +54,9 @@ describe('useStateForm', () => {
           },
         },
       },
+    },
+    nested: {
+      test: 1,
     },
     // dateValue: new Date(2000, 1),
     booleanValue: false,
@@ -87,7 +93,7 @@ describe('useStateForm', () => {
   });
 
   it('test reset', () => {
-    const resetData1 = {
+    const resetData1: FormValues = {
       strValue: '---*/89+5',
       fieldArrayitems: [],
       primitiveArray: [6, 78, '$4'],
@@ -105,12 +111,15 @@ describe('useStateForm', () => {
       nullValue: null,
       undefinedValue: undefined,
       bigIntValue: BigInt(4e5),
+      nested: {
+        test: 2,
+      },
     };
 
     formProps.reset(resetData1);
     expect(formProps.getValue()).toEqual(resetData1);
 
-    const resetData2 = {
+    const resetData2: FormValues = {
       strValue: '',
       fieldArrayitems: [
         { email: '2v2v', disabled: false, test: 'dbw96' },
@@ -135,6 +144,9 @@ describe('useStateForm', () => {
       nullValue: null,
       undefinedValue: undefined,
       bigIntValue: BigInt(5050),
+      nested: {
+        test: 3,
+      },
     };
 
     formProps.reset(resetData2);
@@ -446,6 +458,56 @@ describe('useStateForm', () => {
 
       expect(formProps.getInitialValue(propName)).toEqual(initialProps[propName]);
       expect(formProps.getValue(propName)).toEqual(newValue);
+    });
+  });
+
+  describe('unregister', () => {
+    it('base', () => {
+      const props: (keyof FormValues)[] = ['strValue', 'primitiveArray'];
+
+      props.forEach((propName) => {
+        formProps.setError(propName, 'a');
+        formProps.unregister(propName);
+      });
+
+      expect(formProps.getValue()).toEqual(omit(initialProps, props));
+      expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
+    });
+
+    it('removeValue = false', () => {
+      const props: (keyof FormValues)[] = ['strValue', 'primitiveArray'];
+
+      props.forEach((propName) => {
+        formProps.unregister(propName, {
+          removeValue: false,
+        });
+      });
+
+      expect(formProps.getValue()).toEqual(initialProps);
+      expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
+    });
+
+    it('base. nested', () => {
+      const props: (keyof FormValues)[] = ['nested.test' as keyof FormValues];
+
+      props.forEach((propName) => {
+        formProps.unregister(propName);
+      });
+
+      // remove parent if it is empty?
+      expect(formProps.getValue()).toEqual(omit(initialProps, props));
+      expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
+    });
+
+    it('base. wrong property', () => {
+      const props: (keyof FormValues)[] = ['opa.alo.3' as keyof FormValues];
+
+      props.forEach((propName) => {
+        formProps.unregister(propName);
+      });
+
+      expect(formProps.getValue()).toEqual(initialProps);
+      expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
     });
   });
 

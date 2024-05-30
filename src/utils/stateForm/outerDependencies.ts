@@ -1,6 +1,7 @@
 // libraries
 import merge from 'lodash/merge';
 import get from 'lodash/get';
+import omit from 'lodash/omit';
 import isEmpty from 'lodash/isEmpty';
 import isFunction from 'lodash/isFunction';
 import set from 'lodash/set';
@@ -47,6 +48,7 @@ export {
   isDate,
   isBigInt,
   isBoolean,
+  omit,
 };
 
 export type { DeepPartial, SafeAnyType, ChildrenPropType, NullableUndefineable };
