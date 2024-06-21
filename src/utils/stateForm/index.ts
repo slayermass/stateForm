@@ -74,6 +74,7 @@ export type StateFormInputOptionsType = {
   errorLabel?: string;
 
   trigger?: boolean;
+  stayAliveAfterUnregister?: boolean;
 } & StateFormDataTypesSpecificPropertiesType;
 
 export type StateFormOnChange = (
@@ -143,12 +144,7 @@ export type StateFormRegisterOptions = Omit<StateFormInputOptionsType, 'initChan
 
 export type StateFormRegister = (name: string, type: StateFormFieldsType, options?: StateFormRegisterOptions) => void;
 
-export type StateFormUnregister = (
-  name: string,
-  options?: {
-    removeValue?: boolean;
-  },
-) => void;
+export type StateFormUnregister = (name: string) => void;
 
 export type StateFormSubscribeFn = (
   callback: (value: SafeAnyType, fieldName: string) => void,
@@ -598,19 +594,20 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   );
 
   const unregister: StateFormUnregister = useCallback(
-    (name, options) => {
-      setFieldOptionsValue(name, false, 'active');
-      setFieldOptionsValue(name, false, 'isDirty');
+    (name) => {
+      const inputOptions = getFieldOptionsValue(name, 'options');
 
-      // completely remove info about the field. to prevent set { removeValue = false }
-      if (!(options?.removeValue === false)) {
+      if (!inputOptions?.stayAliveAfterUnregister) {
+        setFieldOptionsValue(name, false, 'active');
+        setFieldOptionsValue(name, false, 'isDirty');
+
         formState.current = omit(formState.current, name) as FormValues;
         fieldsOptions.current = omit(fieldsOptions.current, name);
-      }
 
-      clearErrors(name);
+        clearErrors(name);
+      }
     },
-    [clearErrors, setFieldOptionsValue],
+    [clearErrors, getFieldOptionsValue, setFieldOptionsValue],
   );
 
   const trigger: StateFormTrigger<FormValues> = useCallback(

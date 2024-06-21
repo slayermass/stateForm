@@ -472,19 +472,26 @@ describe('useStateForm', () => {
 
       expect(formProps.getValue()).toEqual(omit(initialProps, props));
       expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
+      expect(formProps.getStatus().isDirty).toEqual(false);
     });
 
-    it('removeValue = false', () => {
-      const props: (keyof FormValues)[] = ['strValue', 'primitiveArray'];
-
-      props.forEach((propName) => {
-        formProps.unregister(propName, {
-          removeValue: false,
-        });
+    it('stayAliveAfterUnregister', () => {
+      formProps.register('strValue', 'text', {
+        stayAliveAfterUnregister: true,
       });
 
-      expect(formProps.getValue()).toEqual(initialProps);
-      expect(formProps.getErrors(props)).toEqual(new Array(props.length).fill([]));
+      // formProps.setError('strValue', 'a'); // error disappears
+
+      formProps.setValue('strValue', 'form is dirty');
+
+      formProps.unregister('strValue');
+
+      expect(formProps.getStatus().isDirty).toEqual(true);
+      expect(formProps.getValue()).toEqual({
+        ...initialProps,
+        strValue: 'form is dirty',
+      });
+      // expect(formProps.getErrors('strValue')).toEqual([]);
     });
 
     it('base. nested', () => {
