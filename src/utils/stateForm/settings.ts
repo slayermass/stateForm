@@ -23,22 +23,32 @@ import {
   stateFormDataTypeEmailValidators,
   StateFormDataTypeFieldEmailType,
 } from './dataTypes/email';
-import {
-  StateFormDataTypeFieldTextType,
-  StateFormDataTypeTextSpecificProperties,
-  StateFormDataTypeTextType,
-  stateFormDataTypeTextValidators,
-} from './dataTypes/text';
-import {
-  StateFormDataTypeFieldNumberType,
-  StateFormDataTypeNumberSpecificProperties,
-  StateFormDataTypeNumberType,
-  stateFormDataTypeNumberValidators,
-} from './dataTypes/number';
+import { StateFormTextType, stateFormDataTypeTextValidators } from './dataTypes/text';
+import { StateFormNumberType, stateFormDataTypeNumberValidators } from './dataTypes/number';
 
 /**
  * include and customize data types here
  */
+
+// export interface StateFormBaseType {
+//   value: SafeAnyType;
+//   fields: SafeAnyType;
+//   specificProperties: Record<string, number | string>;
+// }
+
+export type StateFormBaseType = {
+  value: SafeAnyType;
+  fields: SafeAnyType;
+  specificProperties: Record<string, number | string>;
+};
+
+type AllTypes = StateFormNumberType | StateFormTextType;
+
+export type StateFormPossibleValueNEW = Pick<AllTypes, 'value'>['value'];
+export type StateFormDataTypesSpecificPropertiesTypeNEW = Pick<AllTypes, 'specificProperties'>['specificProperties'];
+export type StateFormDataTypesFieldsTypeNEW = Pick<AllTypes, 'fields'>['fields'];
+
+const val: StateFormPossibleValueNEW = BigInt(1);
 
 // TODO temporary until all data types are ready
 /** validators from each data type */
@@ -53,26 +63,26 @@ export const stateFormInnerValidators: SafeAnyType = {
 
 /** possible values */
 export type StateFormPossibleValue =
-  | StateFormDataTypeTextType
+  | StateFormTextType['value']
   | StateFormDataTypeEmailType
   | StateFormDataTypeRichTextType
   | StateFormDataTypeDateType
-  | StateFormDataTypeNumberType
+  | StateFormNumberType['value']
   | StateFormDataTypeCheckBoxGroupType
   | StateFormEmptyValueType;
 
 /** possible properties to each data type */
 export type StateFormDataTypesSpecificPropertiesType = NullableUndefineable<StateFormDataTypeDateSpecificProperties> &
-  NullableUndefineable<StateFormDataTypeTextSpecificProperties> &
+  NullableUndefineable<StateFormTextType['specificProperties']> &
   NullableUndefineable<StateFormDataTypeEmailSpecificProperties> &
-  NullableUndefineable<StateFormDataTypeNumberSpecificProperties> &
+  NullableUndefineable<StateFormNumberType['specificProperties']> &
   NullableUndefineable<StateFormDataTypeCheckBoxGroupSpecificProperties>;
 
 /** possible types of values */
 export type StateFormDataTypesFieldsType =
-  | StateFormDataTypeFieldTextType
+  | StateFormTextType['fields']
   | StateFormDataTypeFieldEmailType
   | StateFormDataTypeFieldRichTextType
   | StateFormDataTypeFieldDateType
-  | StateFormDataTypeFieldNumberType
+  | StateFormNumberType['fields']
   | StateFormDataTypeFieldCheckBoxGroupType;

@@ -1,14 +1,6 @@
+import { StateFormBaseType } from 'src/utils/stateForm/settings';
 import { StateFormValidatorIsSetType, StateFormValidatorValidateType } from '../types';
 import { isNumber, isString } from '../../outerDependencies';
-
-export type StateFormDataTypeTextType = string;
-export type StateFormDataTypeFieldTextType = keyof typeof stateFormDataTypeTextValidators;
-export type StateFormDataTypeTextSpecificProperties = {
-  minLength: number;
-  maxLength: number;
-  minLengthMessage: string;
-  maxLengthMessage: string;
-};
 
 export const stateFormErrorsTextMinLengthMessage = 'common.validation.minLength';
 export const stateFormErrorsTextMaxLengthMessage = 'common.validation.maxLength';
@@ -58,3 +50,25 @@ export const stateFormDataTypeTextValidators: {
   textarea: validators,
   password: validators,
 };
+
+export type StateFormTextType = {
+  value: string;
+  fields: keyof typeof stateFormDataTypeTextValidators;
+  specificProperties: {
+    minLength: number;
+    maxLength: number;
+    minLengthMessage: string;
+    maxLengthMessage: string;
+  };
+};
+
+// export interface StateFormTextType extends StateFormBaseType {
+//   value: string;
+//   fields: keyof typeof stateFormDataTypeTextValidators;
+//   specificProperties: {
+//     minLength: number;
+//     maxLength: number;
+//     minLengthMessage: string;
+//     maxLengthMessage: string;
+//   };
+// }

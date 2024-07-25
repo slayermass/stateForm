@@ -1,15 +1,6 @@
 import { StateFormValidatorIsSetType, StateFormValidatorValidateType } from '../types';
 import { isBigInt, isNumber } from '../../outerDependencies';
 
-export type StateFormDataTypeNumberType = number | bigint;
-export type StateFormDataTypeFieldNumberType = keyof typeof stateFormDataTypeNumberValidators;
-export type StateFormDataTypeNumberSpecificProperties = {
-  min: number;
-  max: number;
-  minMessage: string;
-  maxMessage: string;
-};
-
 export const stateFormErrorsNumberMinMessage = 'common.validation.min';
 export const stateFormErrorsNumberMaxMessage = 'common.validation.max';
 
@@ -43,4 +34,15 @@ export const stateFormDataTypeNumberValidators: {
   number: typeof validators;
 } = {
   number: validators,
+};
+
+export type StateFormNumberType = {
+  value: number | bigint;
+  fields: keyof typeof stateFormDataTypeNumberValidators;
+  specificProperties: {
+    min: number;
+    max: number;
+    minMessage: string;
+    maxMessage: string;
+  };
 };
