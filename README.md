@@ -1,16 +1,6 @@
 useStateForm
 
-# todo
-## типы данных (модули)
-- date (string)
-- phone (string)
-- time (string)
-- time (Date)
-- file (File)
-- files (File[])
-- image (File)
-- boolean (Boolean)
-- dropdown (select)
+data types can be easily written by example
 
 ## внутренности
 - event bus

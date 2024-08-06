@@ -140,7 +140,7 @@ export type StateFormSetValue<FormValues extends StateFormUnknownFormType = Safe
   ): void;
 };
 
-export type StateFormRegisterOptions = Omit<StateFormInputOptionsType, 'initChange'>;
+export type StateFormRegisterOptions = Exclude<StateFormInputOptionsType, 'initChange'>;
 
 export type StateFormRegister = (name: string, type: StateFormFieldsType, options?: StateFormRegisterOptions) => void;
 
