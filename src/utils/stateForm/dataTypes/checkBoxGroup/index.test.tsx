@@ -1,6 +1,6 @@
 import { renderHook } from '@testing-library/react';
 
-import { StateFormDataTypeCheckBoxGroupType } from './index';
+import { StateFormCheckBoxGroupType } from './index';
 import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../index';
 
 const typeName = 'checkBoxGroup';
@@ -9,8 +9,8 @@ describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
-    checkValue0: StateFormDataTypeCheckBoxGroupType | StateFormEmptyValueType;
-    checkValue1: StateFormDataTypeCheckBoxGroupType | StateFormEmptyValueType;
+    checkValue0: StateFormCheckBoxGroupType['value'] | StateFormEmptyValueType;
+    checkValue1: StateFormCheckBoxGroupType['value'] | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;

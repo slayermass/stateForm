@@ -1,12 +1,13 @@
 import { renderHook } from '@testing-library/react';
 
 import {
+  StateFormEmailType,
   stateFormErrorsEmailMaxLengthMessage,
   stateFormErrorsEmailMinLengthMessage,
   stateFormErrorsPatternEmailMessage,
 } from './index';
 import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
-import { StateFormReturnType, useStateForm } from '../../index';
+import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../index';
 
 const typeName = 'email';
 
@@ -14,9 +15,9 @@ describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
-    emailValue0: string;
-    emailValue1: string;
-    emailValue2: string;
+    emailValue0: StateFormEmailType['value'] | StateFormEmptyValueType;
+    emailValue1: StateFormEmailType['value'] | StateFormEmptyValueType;
+    emailValue2: StateFormEmailType['value'] | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;

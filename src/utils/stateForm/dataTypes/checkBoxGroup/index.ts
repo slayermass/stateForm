@@ -1,16 +1,10 @@
 import { isBoolean } from '../../outerDependencies';
-import { StateFormValidatorIsSetType, StateFormValidatorValidateType } from '../types';
+import { StateFormValidatorType } from '../types';
 
-export type StateFormDataTypeCheckBoxGroupType = boolean;
-export type StateFormDataTypeFieldCheckBoxGroupType = keyof typeof stateFormDataTypeCheckBoxGroupValidators;
-// {} as empty value not to break other types
-// eslint-disable-next-line
-export type StateFormDataTypeCheckBoxGroupSpecificProperties = {};
-
-const validators: {
-  isSet: StateFormValidatorIsSetType;
-  validate: StateFormValidatorValidateType;
-} = {
+const validators: StateFormValidatorType<
+  StateFormCheckBoxGroupType['value'],
+  StateFormCheckBoxGroupType['specificProperties']
+> = {
   isSet: (value) => isBoolean(value),
   validate: (value, validationOptions) => {
     if (validationOptions.disabled === true) {
@@ -29,4 +23,10 @@ export const stateFormDataTypeCheckBoxGroupValidators: {
   checkBoxGroup: typeof validators;
 } = {
   checkBoxGroup: validators,
+};
+
+export type StateFormCheckBoxGroupType = {
+  value: boolean;
+  fields: keyof typeof stateFormDataTypeCheckBoxGroupValidators;
+  specificProperties: null;
 };

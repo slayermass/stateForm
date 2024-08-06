@@ -4,7 +4,7 @@ import {
   stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
-import { StateFormReturnType, useStateForm } from '../../index';
+import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../index';
 import { stateFormErrorsNumberMaxMessage, stateFormErrorsNumberMinMessage } from 'src/utils/stateForm/dataTypes/number';
 
 const typeName = 'number';
@@ -13,12 +13,12 @@ describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
-    valueZero: number | null;
-    valueNull: number | null;
-    valueSet: number | null;
-    bigIntValueZero: bigint | null;
-    bigIntValueNull: bigint | null;
-    bigIntValueSet: bigint | null;
+    valueZero: number | StateFormEmptyValueType;
+    valueNull: number | StateFormEmptyValueType;
+    valueSet: number | StateFormEmptyValueType;
+    bigIntValueZero: bigint | StateFormEmptyValueType;
+    bigIntValueNull: bigint | StateFormEmptyValueType;
+    bigIntValueSet: bigint | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;
