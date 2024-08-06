@@ -1,3 +1,4 @@
+import { StateFormSpread } from './types/path';
 import { StateFormCheckBoxGroupType, stateFormDataTypeCheckBoxGroupValidators } from './dataTypes/checkBoxGroup';
 import { StateFormEmptyValueType } from './index';
 import { stateFormDataTypeDateValidators, StateFormDateType } from './dataTypes/date';
@@ -9,7 +10,6 @@ import { StateFormNumberType, stateFormDataTypeNumberValidators } from './dataTy
 /**
  * include and customize data types here
  */
-
 type AllTypes =
   | StateFormNumberType
   | StateFormTextType
@@ -19,8 +19,9 @@ type AllTypes =
   | StateFormCheckBoxGroupType;
 
 export type StateFormPossibleValue = Pick<AllTypes, 'value'>['value'] | StateFormEmptyValueType;
-export type StateFormDataTypesSpecificPropertiesType = Pick<AllTypes, 'specificProperties'>['specificProperties'];
-
+export type StateFormDataTypesSpecificPropertiesType = StateFormSpread<
+  NonNullable<Pick<AllTypes, 'specificProperties'>['specificProperties']>
+>;
 export type StateFormDataTypesFieldsType = Pick<AllTypes, 'fields'>['fields'];
 
 /** validators from each data type */
