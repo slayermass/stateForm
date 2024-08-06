@@ -1,16 +1,17 @@
 import { renderHook } from '@testing-library/react';
+import { StateFormRichTextType } from 'src/utils/stateForm/dataTypes/richText/index';
 
 import {
   stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
-import { StateFormReturnType, useStateForm } from '../../index';
+import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../index';
 
 describe('richText', () => {
   console.error = jest.fn();
 
   type FormValues = {
-    richTextValue: string;
+    richTextValue: StateFormRichTextType['value'] | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;

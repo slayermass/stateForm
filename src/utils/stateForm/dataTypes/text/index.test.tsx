@@ -1,10 +1,11 @@
 import { renderHook } from '@testing-library/react';
 
 import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
-import { StateFormReturnType, useStateForm } from '../../';
+import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../';
 import {
   stateFormErrorsTextMaxLengthMessage,
   stateFormErrorsTextMinLengthMessage,
+  StateFormTextType,
 } from 'src/utils/stateForm/dataTypes/text';
 
 const typeName = 'text';
@@ -13,9 +14,9 @@ describe('text + textarea', () => {
   console.error = jest.fn();
 
   type FormValues = {
-    strValue0: string;
-    strValue1: string;
-    strValue2: string;
+    strValue0: StateFormTextType['value'] | StateFormEmptyValueType;
+    strValue1: StateFormTextType['value'] | StateFormEmptyValueType;
+    strValue2: StateFormTextType['value'] | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;

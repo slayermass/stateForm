@@ -2,7 +2,11 @@ import { renderHook } from '@testing-library/react';
 
 import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
 import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../index';
-import { stateFormErrorsDateMaxMessage, stateFormErrorsDateMinMessage } from 'src/utils/stateForm/dataTypes/date/index';
+import {
+  StateFormDateType,
+  stateFormErrorsDateMaxMessage,
+  stateFormErrorsDateMinMessage,
+} from 'src/utils/stateForm/dataTypes/date/index';
 
 const typeName = 'date';
 
@@ -10,8 +14,8 @@ describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
-    dateValue0: Date | StateFormEmptyValueType;
-    dateValue1: Date | StateFormEmptyValueType;
+    dateValue0: StateFormDateType['value'] | StateFormEmptyValueType;
+    dateValue1: StateFormDateType['value'] | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;
