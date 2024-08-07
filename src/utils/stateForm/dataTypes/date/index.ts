@@ -11,7 +11,7 @@ const validators: StateFormValidatorType<StateFormDateType['value'], StateFormDa
       return true;
     }
 
-    if (!isDate(value) && validationOptions.required) {
+    if (!validators.isSet(value) && validationOptions.required) {
       return false;
     }
 

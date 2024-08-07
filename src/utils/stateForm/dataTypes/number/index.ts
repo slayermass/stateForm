@@ -1,26 +1,47 @@
+import { stateFormIsValueInnerEmpty } from '../../types';
 import { StateFormValidatorType } from '../types';
-import { isBigInt, isNumber } from '../../outerDependencies';
+import { isBigInt, isNumber, isFinite } from '../../outerDependencies';
 
 export const stateFormErrorsNumberMinMessage = 'common.validation.min';
 export const stateFormErrorsNumberMaxMessage = 'common.validation.max';
 
 const validators: StateFormValidatorType<StateFormNumberType['value'], StateFormNumberType['specificProperties']> = {
-  isSet: (value) => isNumber(value) || isBigInt(value),
-  validate: (value, validationOptions, hasValidValue) => {
-    if (hasValidValue && !isBigInt(value) && !Number.isFinite(value)) {
+  isSet: (value) => (isNumber(value) && isFinite(value)) || isBigInt(value),
+  validate: (value, validationOptions) => {
+    if (validationOptions.disabled === true) {
+      return true;
+    }
+
+    // allow only numbers
+    if (
+      (validationOptions.required && !validators.isSet(value)) ||
+      (!validators.isSet(value) && !stateFormIsValueInnerEmpty(value))
+    ) {
       return false;
     }
 
     if (isNumber(validationOptions.min)) {
-      return (isNumber(value) || isBigInt(value)) && (value as number) >= validationOptions.min
-        ? true
-        : [validationOptions.minMessage || stateFormErrorsNumberMinMessage, { min: validationOptions.min }];
+      if (validators.isSet(value)) {
+        value = value as StateFormNumberType['value'];
+
+        return value >= validationOptions.min
+          ? true
+          : [validationOptions.minMessage || stateFormErrorsNumberMinMessage, { min: validationOptions.min }];
+      }
+
+      return false;
     }
 
     if (isNumber(validationOptions.max)) {
-      return (isNumber(value) || isBigInt(value)) && (value as number) <= validationOptions.max
-        ? true
-        : [validationOptions.maxMessage || stateFormErrorsNumberMaxMessage, { max: validationOptions.max }];
+      if (validators.isSet(value)) {
+        value = value as StateFormNumberType['value'];
+
+        return value <= validationOptions.max
+          ? true
+          : [validationOptions.maxMessage || stateFormErrorsNumberMaxMessage, { max: validationOptions.max }];
+      }
+
+      return false;
     }
 
     return true;

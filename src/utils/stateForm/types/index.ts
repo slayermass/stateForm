@@ -23,6 +23,18 @@ export type StateFormSpread<T> = NullableUndefinable<{
 
 export type StateFormEmptyValueType = null | undefined;
 
+export const stateFormEmptyValues: StateFormEmptyValueType[] = [null, undefined];
+
+export const stateFormIsValueInnerEmpty = (value: SafeAnyType): boolean => {
+  for (let i = 0; i < stateFormEmptyValues.length; i += 1) {
+    if (stateFormEmptyValues[i] === value) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
 type ErrorsType = { type: StateFormErrorTypes; message: string; initChange?: boolean }[] | StateFormEmptyValueType;
 
 export type StateFormDefinedErrorsType = NonNullable<ErrorsType>;
