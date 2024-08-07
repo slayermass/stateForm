@@ -1,5 +1,5 @@
-import { stateFormInnerValidators, StateFormPossibleValue } from '../settings';
-import { StateFormFieldsType, StateFormInputOptionsType } from '../index';
+import { stateFormInnerValidators, StateFormPossibleValue } from '../setDataTypes';
+import { StateFormFieldsType, StateFormInputOptionsType } from '../types';
 import { isArray, isBoolean, SafeAnyType } from '../outerDependencies';
 
 // import i18next from 'src/utils/i18n';

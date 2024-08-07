@@ -64,15 +64,3 @@ export type StateFormPathValues<
 > = {} & {
   [K in keyof TPath]: StateFormPathValue<TFieldValues, TPath[K] & StateFormPath<TFieldValues>>;
 };
-
-type RecursiveNullable<T> = {
-  [K in keyof T]: RecursiveNullable<T[K]> | null;
-};
-
-type NullableUndefinable<T> = {
-  [K in keyof T]?: RecursiveNullable<T[K]> | null;
-};
-
-export type StateFormSpread<T> = NullableUndefinable<{
-  [Property in keyof T]: T[Property];
-}>;

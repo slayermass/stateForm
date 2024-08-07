@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EventBusFieldEventType } from '../eventBus';
-import { StateFormGetSubscribeProps } from '../index';
+import { StateFormGetSubscribeProps } from '../types';
 
 import { isEmpty, isArray, equal, SafeAnyType, useMemoObject, diff } from '../outerDependencies';
 

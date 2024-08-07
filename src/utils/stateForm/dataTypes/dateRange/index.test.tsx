@@ -1,29 +1,28 @@
 import { renderHook } from '@testing-library/react';
+import { SafeAnyType } from 'src/utils/safeAny';
+
+import { StateFormReturnType, useStateForm } from 'src/utils/stateForm';
+import {
+  StateFormDateRangeType,
+  stateFormErrorsDateRangeMaxMessage,
+  stateFormErrorsDateRangeMinMessage,
+} from 'src/utils/stateForm/dataTypes/dateRange/index';
+import { stateFormErrorsRequiredMessage } from 'src/utils/stateForm/helpers/formStateGenerateErrors';
 import { StateFormEmptyValueType } from 'src/utils/stateForm/types';
 
-import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
-import { StateFormReturnType, useStateForm } from '../../index';
-import {
-  StateFormDateType,
-  stateFormErrorsDateMaxMessage,
-  stateFormErrorsDateMinMessage,
-} from 'src/utils/stateForm/dataTypes/date/index';
-
-const typeName = 'date';
+const typeName = 'dateRange';
 
 describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
-    dateValue0: StateFormDateType['value'] | StateFormEmptyValueType;
-    dateValue1: StateFormDateType['value'] | StateFormEmptyValueType;
+    dateRangeValue0: StateFormDateRangeType['value'] | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;
 
   const initialProps: FormValues = {
-    dateValue0: null,
-    dateValue1: null,
+    dateRangeValue0: null,
   };
 
   beforeEach(() => {
@@ -51,8 +50,7 @@ describe(typeName, () => {
     const left = jest.fn();
 
     const newValues: FormValues = {
-      dateValue0: new Date(),
-      dateValue1: new Date(),
+      dateRangeValue0: [new Date(), new Date()],
     };
 
     Object.keys(newValues).forEach((propName) => {
@@ -72,7 +70,7 @@ describe(typeName, () => {
   });
 
   it('getErrors. required empty multiple', () => {
-    const propNames: Array<keyof FormValues> = ['dateValue0', 'dateValue1'];
+    const propNames: Array<keyof FormValues> = ['dateRangeValue0'];
 
     propNames.forEach((propName) => {
       formProps.register(propName, typeName, {
@@ -90,17 +88,15 @@ describe(typeName, () => {
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
       [propNames[0]]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
-      [propNames[1]]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     });
 
     expect(formProps.getErrors(propNames as (keyof FormValues)[])).toEqual([
-      [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
       [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     ]);
   });
 
   it('getErrors. not required empty multiple', () => {
-    const propNames: Array<keyof FormValues> = ['dateValue0', 'dateValue1'];
+    const propNames: Array<keyof FormValues> = ['dateRangeValue0'];
 
     propNames.forEach((propName) => {
       formProps.register(propName, typeName);
@@ -115,11 +111,11 @@ describe(typeName, () => {
 
     expect(right).toHaveBeenCalled();
 
-    expect(formProps.getErrors(propNames as (keyof FormValues)[])).toEqual([[], []]);
+    expect(formProps.getErrors(propNames as (keyof FormValues)[])).toEqual([[]]);
   });
 
-  it('required wrong type', () => {
-    const propName: keyof FormValues = 'dateValue0';
+  it('required. set only one date', () => {
+    const propName: keyof FormValues = 'dateRangeValue0';
 
     formProps.register(propName, typeName, {
       required: true,
@@ -128,18 +124,7 @@ describe(typeName, () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
-    });
-
-    right.mockClear();
-    left.mockClear();
-
-    // set invalid value 1
-    formProps.setValue(propName, 'test.com');
+    formProps.setValue(propName, new Date());
 
     formProps.onSubmit(right, left)();
 
@@ -147,38 +132,32 @@ describe(typeName, () => {
     expect(left).toHaveBeenCalledWith({
       [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
     });
+  });
 
-    right.mockClear();
-    left.mockClear();
+  it('required. set many dates', () => {
+    const propName: keyof FormValues = 'dateRangeValue0';
 
-    // set invalid value 2
-    formProps.setValue(propName, 66);
-
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
+    formProps.register(propName, typeName, {
+      required: true,
     });
 
-    // set valid value
-    right.mockClear();
-    left.mockClear();
+    const right = jest.fn();
+    const left = jest.fn();
 
-    const validValue = new Date();
+    const valueToSet = [new Date(), new Date(), new Date(), new Date()] as SafeAnyType;
 
-    formProps.setValue(propName, validValue);
+    formProps.setValue(propName, valueToSet);
 
     formProps.onSubmit((data) => {
       right(data);
     }, left)();
 
-    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
+    expect(right).toHaveBeenCalledWith({ [propName]: valueToSet });
     expect(left).not.toHaveBeenCalled();
   });
 
   it('required + minDate', () => {
-    const propName: keyof FormValues = 'dateValue0';
+    const propName: keyof FormValues = 'dateRangeValue0';
 
     formProps.register(propName, typeName, {
       required: true,
@@ -188,20 +167,20 @@ describe(typeName, () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    formProps.setValue(propName, new Date(3e7));
+    formProps.setValue(propName, [new Date(3e7), new Date(5e7)]);
 
     formProps.onSubmit(right, left)();
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsDateMinMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsDateRangeMinMessage }],
     });
 
     right.mockClear();
     left.mockClear();
 
     // valid value
-    const validValue = new Date(6e7);
+    const validValue: StateFormDateRangeType['value'] = [new Date(6e7), new Date(5e7)];
     formProps.setValue(propName, validValue);
 
     formProps.onSubmit((data) => {
@@ -213,7 +192,7 @@ describe(typeName, () => {
   });
 
   it('not required + minDate', () => {
-    const propName: keyof FormValues = 'dateValue0';
+    const propName: keyof FormValues = 'dateRangeValue0';
 
     formProps.register(propName, typeName, {
       minDate: new Date(5e7),
@@ -222,57 +201,20 @@ describe(typeName, () => {
     const right = jest.fn();
     const left = jest.fn();
 
-    formProps.setValue(propName, new Date(3e7));
+    formProps.setValue(propName, [new Date(3e7), new Date(5e7)]);
 
     formProps.onSubmit(right, left)();
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsDateMinMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsDateRangeMinMessage }],
     });
 
     right.mockClear();
     left.mockClear();
 
     // valid value
-    const validValue = new Date(6e7);
-    formProps.setValue(propName, validValue);
-
-    formProps.onSubmit((data) => {
-      right(data);
-    }, left)();
-
-    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toHaveBeenCalled();
-  });
-
-  it('required + minDate + minDateMessage', () => {
-    const propName: keyof FormValues = 'dateValue0';
-    const minDateMessage = 'HALU';
-
-    formProps.register(propName, typeName, {
-      required: true,
-      minDate: new Date(5e7),
-      minDateMessage,
-    });
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.setValue(propName, new Date(3e7));
-
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: minDateMessage }],
-    });
-
-    right.mockClear();
-    left.mockClear();
-
-    // valid value
-    const validValue = new Date(6e7);
+    const validValue: StateFormDateRangeType['value'] = [new Date(6e7), new Date(5e7)];
     formProps.setValue(propName, validValue);
 
     formProps.onSubmit((data) => {
@@ -284,30 +226,30 @@ describe(typeName, () => {
   });
 
   it('required + maxDate', () => {
-    const propName: keyof FormValues = 'dateValue0';
+    const propName: keyof FormValues = 'dateRangeValue0';
 
     formProps.register(propName, typeName, {
       required: true,
-      maxDate: new Date(15e9),
+      maxDate: new Date(1e12),
     });
 
     const right = jest.fn();
     const left = jest.fn();
 
-    formProps.setValue(propName, new Date(22e9));
+    formProps.setValue(propName, [new Date(1e13), new Date(1e12)]);
 
     formProps.onSubmit(right, left)();
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: stateFormErrorsDateMaxMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsDateRangeMaxMessage }],
     });
 
     right.mockClear();
     left.mockClear();
 
     // valid value
-    const validValue = new Date(6e7);
+    const validValue: StateFormDateRangeType['value'] = [new Date(1e12), new Date(1e10)];
     formProps.setValue(propName, validValue);
 
     formProps.onSubmit((data) => {
@@ -318,33 +260,30 @@ describe(typeName, () => {
     expect(left).not.toHaveBeenCalled();
   });
 
-  it('required + maxDate + maxDateMessage', () => {
-    const propName: keyof FormValues = 'dateValue0';
-    const maxDateMessage = 'wronngnsa!!@#@#!@#';
+  it('not required + maxDate', () => {
+    const propName: keyof FormValues = 'dateRangeValue0';
 
     formProps.register(propName, typeName, {
-      required: true,
-      maxDate: new Date(5e7),
-      maxDateMessage,
+      maxDate: new Date(1e12),
     });
 
     const right = jest.fn();
     const left = jest.fn();
 
-    formProps.setValue(propName, new Date(36e7));
+    formProps.setValue(propName, [new Date(1e13), new Date(1e12)]);
 
     formProps.onSubmit(right, left)();
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith({
-      [propName]: [{ type: 'validate', message: maxDateMessage }],
+      [propName]: [{ type: 'validate', message: stateFormErrorsDateRangeMaxMessage }],
     });
 
     right.mockClear();
     left.mockClear();
 
     // valid value
-    const validValue = new Date(2e4);
+    const validValue: StateFormDateRangeType['value'] = [new Date(1e12), new Date(1e10)];
     formProps.setValue(propName, validValue);
 
     formProps.onSubmit((data) => {
@@ -353,44 +292,6 @@ describe(typeName, () => {
 
     expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
     expect(left).not.toHaveBeenCalled();
-  });
-
-  describe('getInitialValue + reset', () => {
-    it('not set values', () => {
-      expect(formProps.getInitialValue()).toEqual(initialProps);
-    });
-
-    it('set values', () => {
-      const newValues: FormValues = {
-        dateValue0: new Date(),
-        dateValue1: new Date(),
-      };
-
-      Object.keys(newValues).forEach((propName) => {
-        formProps.register(propName, typeName);
-      });
-
-      formProps.setValue(newValues);
-
-      expect(formProps.getInitialValue()).toEqual(initialProps);
-    });
-
-    it('reset', () => {
-      const newValues: FormValues = {
-        dateValue0: new Date(),
-        dateValue1: new Date(),
-      };
-
-      Object.keys(newValues).forEach((propName) => {
-        formProps.register(propName, typeName);
-      });
-
-      formProps.reset(newValues, {
-        resetInitialForm: true,
-      });
-
-      expect(formProps.getInitialValue()).toEqual(newValues);
-    });
   });
 
   it('console errors check (should be the last test)', () => {

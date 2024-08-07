@@ -16,15 +16,27 @@ const validators: StateFormValidatorType<StateFormDateType['value'], StateFormDa
     }
 
     if (validationOptions.minDate) {
-      return isDate(value) && value > validationOptions.minDate
-        ? true
-        : [validationOptions.minDateMessage || stateFormErrorsDateMinMessage, { minDate: validationOptions.minDate }];
+      if (validators.isSet(value)) {
+        value = value as StateFormDateType['value'];
+
+        return value >= validationOptions.minDate
+          ? true
+          : [validationOptions.minDateMessage || stateFormErrorsDateMinMessage, { minDate: validationOptions.minDate }];
+      }
+
+      return false;
     }
 
     if (validationOptions.maxDate) {
-      return isDate(value) && value < validationOptions.maxDate
-        ? true
-        : [validationOptions.maxDateMessage || stateFormErrorsDateMaxMessage, { maxDate: validationOptions.maxDate }];
+      if (validators.isSet(value)) {
+        value = value as StateFormDateType['value'];
+
+        return value <= validationOptions.maxDate
+          ? true
+          : [validationOptions.maxDateMessage || stateFormErrorsDateMaxMessage, { maxDate: validationOptions.maxDate }];
+      }
+
+      return false;
     }
 
     return true;

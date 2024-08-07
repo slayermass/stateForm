@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 
-import { StateFormReturnType, StateFormUnknownFormType } from '../index';
+import { StateFormUnknownFormType } from '../types';
+import { StateFormReturnType } from '../index';
 import { StateFormContext } from './index';
 import { SafeAnyType } from '../outerDependencies';
 

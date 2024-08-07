@@ -1,5 +1,5 @@
 import { useFormCommonWatch } from './index';
-import { StateFormGetSubscribeProps } from '../index';
+import { StateFormGetSubscribeProps } from '../types';
 
 type ErrorListType = { type: string; message: string }[];
 
