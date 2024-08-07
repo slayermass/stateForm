@@ -11,7 +11,7 @@ const validators: StateFormValidatorType<StateFormTextType['value'], StateFormTe
       return true;
     }
 
-    if (!isString(value) && validationOptions.required) {
+    if (!validators.isSet(value) && validationOptions.required) {
       return false;
     }
 

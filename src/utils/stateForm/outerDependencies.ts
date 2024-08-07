@@ -4,6 +4,7 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import isEmpty from 'lodash/isEmpty';
 import isFunction from 'lodash/isFunction';
+import isFinite from 'lodash/isFinite';
 import set from 'lodash/set';
 import isPlainObject from 'lodash/isPlainObject';
 import has from 'lodash/has';
@@ -49,6 +50,7 @@ export {
   isBigInt,
   isBoolean,
   omit,
+  isFinite,
 };
 
 export type { DeepPartial, SafeAnyType, ChildrenPropType, NullableUndefineable };

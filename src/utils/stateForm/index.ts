@@ -563,19 +563,6 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
             fn(currentValue, name);
           } else {
             const value = get(values || initialValues.current, name);
-
-            // ????
-            // if (value === undefined) {
-            //   switch (fieldsOptions.current[name]?.type) {
-            //     case 'checkBoxGroup': {
-            //       value = false;
-            //       break;
-            //     }
-            //     default:
-            //       break;
-            //   }
-            // }
-
             changeStateForm(name, value);
 
             setFieldOptionsValue(

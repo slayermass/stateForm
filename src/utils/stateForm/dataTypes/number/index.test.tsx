@@ -1,12 +1,16 @@
 import { renderHook } from '@testing-library/react';
-import { StateFormEmptyValueType } from 'src/utils/stateForm/types';
 
+import { stateFormEmptyValues, StateFormEmptyValueType, stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
 import {
   stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
-import { stateFormErrorsNumberMaxMessage, stateFormErrorsNumberMinMessage } from 'src/utils/stateForm/dataTypes/number';
+import {
+  stateFormErrorsNumberMaxMessage,
+  stateFormErrorsNumberMinMessage,
+  StateFormNumberType,
+} from 'src/utils/stateForm/dataTypes/number';
 
 const typeName = 'number';
 
@@ -56,172 +60,219 @@ describe(typeName, () => {
     expect(formProps.getValue()).toEqual(initialProps);
   });
 
-  it('submit the same values', () => {
-    const right = jest.fn();
-    const left = jest.fn();
+  describe('simple validity', () => {
+    // "-0" comes "0"
+    const validValues = [
+      Number.MIN_SAFE_INTEGER,
+      Number.MAX_SAFE_INTEGER,
+      0,
+      500,
+      -1,
+      +0,
+      1e6,
+      BigInt(-1e67),
+      BigInt(0),
+      BigInt(1e67),
+      ...stateFormEmptyValues,
+    ];
 
-    formProps.onSubmit((data) => {
-      right(data);
-    }, left)();
+    const invalidValues = [Infinity, -Infinity, NaN, '']; // any not numbers
 
-    expect(right).toHaveBeenCalledWith(initialProps);
-    expect(left).not.toHaveBeenCalled();
-  });
+    it('test valid values. default', () => {
+      const right = jest.fn();
 
-  it('submit changed values', () => {
-    const right = jest.fn();
-    const left = jest.fn();
+      const propName: keyof FormValues = 'valueNull';
 
-    const newValues = {
-      valueZero: 0,
-      valueNull: null,
-      valueSet: 100,
-      bigIntValueZero: BigInt(0),
-      bigIntValueNull: null,
-      bigIntValueSet: BigInt(100),
-    };
+      formProps.register(propName, typeName);
 
-    formProps.setValue(newValues);
+      validValues.forEach((value) => {
+        formProps.setValue(propName, value);
 
-    formProps.onSubmit((data) => {
-      right(data);
-    }, left)();
+        formProps.onSubmit((data) => {
+          right(data);
+        })();
 
-    expect(right).toHaveBeenCalledWith(newValues);
-    expect(left).not.toHaveBeenCalled();
-  });
+        expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: value });
 
-  it('check with Infinity', () => {
-    const propName = 'valueNull';
-
-    formProps.register(propName, typeName);
-
-    formProps.setValue(propName, Infinity);
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
-  });
-
-  it('check with -Infinity', () => {
-    const propName = 'valueNull';
-
-    formProps.register(propName, typeName);
-
-    formProps.setValue(propName, -Infinity);
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
-  });
-
-  it('check with NaN', () => {
-    const propName = 'valueNull';
-
-    formProps.register(propName, typeName);
-
-    formProps.setValue(propName, NaN);
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
-  });
-
-  it('required zero', () => {
-    const propName = 'valueZero';
-
-    formProps.register(propName, typeName, {
-      required: true,
+        right.mockClear();
+      });
     });
 
-    const right = jest.fn();
-    const left = jest.fn();
+    it('test valid values. required', () => {
+      const right = jest.fn();
 
-    formProps.onSubmit((data) => right(data), left)();
+      const propName: keyof FormValues = 'valueNull';
 
-    expect(right).toHaveBeenCalledWith(initialProps);
-    expect(left).not.toHaveBeenCalled();
-  });
+      formProps.register(propName, typeName, {
+        required: true,
+      });
 
-  it('required', () => {
-    const propName = 'valueNull';
+      validValues
+        .filter((v) => !stateFormIsValueInnerEmpty(v))
+        .forEach((value) => {
+          formProps.setValue(propName, value);
 
-    formProps.register(propName, typeName, {
-      required: true,
+          formProps.onSubmit((data) => {
+            right(data);
+          })();
+
+          expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: value });
+
+          right.mockClear();
+        });
     });
 
-    const right = jest.fn();
-    const left = jest.fn();
+    it('test valid values. default + min + max', () => {
+      const right = jest.fn();
 
-    formProps.onSubmit(right, left)();
+      const propName: keyof FormValues = 'valueNull';
 
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+      formProps.register(propName, typeName, {
+        min: 1,
+        max: 5000,
+      });
 
-    right.mockClear();
-    left.mockClear();
+      validValues
+        .filter(
+          (v) =>
+            !stateFormIsValueInnerEmpty(v) &&
+            (v as StateFormNumberType['value']) >= 1 &&
+            (v as StateFormNumberType['value']) <= 10,
+        )
+        .forEach((value) => {
+          formProps.setValue(propName, value);
 
-    // set valid value
-    const validValue = 12;
+          formProps.onSubmit((data) => {
+            right(data);
+          })();
 
-    formProps.setValue(propName, validValue);
+          expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: value });
 
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toHaveBeenCalled();
-  });
-
-  it('required empty', () => {
-    const propName = 'valueSet';
-
-    formProps.register(propName, typeName, {
-      required: true,
+          right.mockClear();
+        });
     });
 
-    formProps.setValue(propName, null);
+    it('test valid values. required + min + max', () => {
+      const right = jest.fn();
 
-    const right = jest.fn();
-    const left = jest.fn();
+      const propName: keyof FormValues = 'valueNull';
 
-    formProps.onSubmit(right, left)();
+      formProps.register(propName, typeName, {
+        required: true,
+        min: 1,
+        max: 5000,
+      });
 
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+      validValues
+        .filter(
+          (v) =>
+            !stateFormIsValueInnerEmpty(v) &&
+            (v as StateFormNumberType['value']) >= 1 &&
+            (v as StateFormNumberType['value']) <= 10,
+        )
+        .forEach((value) => {
+          formProps.setValue(propName, value);
 
-    expect(formProps.getErrors(propName)).toEqual(getValidateError(stateFormErrorsRequiredMessage));
+          formProps.onSubmit((data) => {
+            right(data);
+          })();
 
-    right.mockClear();
-    left.mockClear();
+          expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: value });
 
-    // set valid value
-    const validValue = 12;
+          right.mockClear();
+        });
+    });
 
-    formProps.setValue(propName, validValue);
+    it('test invalid values', () => {
+      const left = jest.fn();
 
-    formProps.onSubmit((data) => right(data), left)();
+      const propName: keyof FormValues = 'valueNull';
 
-    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toHaveBeenCalled();
+      formProps.register(propName, typeName);
+
+      invalidValues.forEach((value) => {
+        formProps.setValue(propName, value);
+
+        formProps.onSubmit(() => null, left)();
+
+        expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
+
+        left.mockClear();
+      });
+    });
+
+    it('test invalid values. required', () => {
+      const left = jest.fn();
+
+      const propName: keyof FormValues = 'valueNull';
+
+      formProps.register(propName, typeName, {
+        required: true,
+      });
+
+      invalidValues.forEach((value) => {
+        formProps.setValue(propName, value);
+
+        formProps.onSubmit(() => null, left)();
+
+        expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
+
+        left.mockClear();
+      });
+    });
+
+    it('test invalid values. required + min', () => {
+      const left = jest.fn();
+
+      const propName: keyof FormValues = 'valueNull';
+
+      formProps.register(propName, typeName, {
+        required: true,
+        min: 1,
+      });
+
+      [-500, -5, 0].forEach((value) => {
+        formProps.setValue(propName, value);
+
+        formProps.onSubmit(() => null, left)();
+
+        expect(left).toHaveBeenCalledWith({
+          [propName]: [{ type: 'validate', message: stateFormErrorsNumberMinMessage }],
+        });
+
+        left.mockClear();
+      });
+    });
+
+    it('test invalid values. required + max', () => {
+      const left = jest.fn();
+
+      const propName: keyof FormValues = 'valueNull';
+
+      formProps.register(propName, typeName, {
+        required: true,
+        max: 50,
+      });
+
+      [51, 500].forEach((value) => {
+        formProps.setValue(propName, value);
+
+        formProps.onSubmit(() => null, left)();
+
+        expect(left).toHaveBeenCalledWith({
+          [propName]: [{ type: 'validate', message: stateFormErrorsNumberMaxMessage }],
+        });
+
+        left.mockClear();
+      });
+    });
   });
 
-  it('not required empty', () => {
-    const propName = 'valueSet';
+  it('submit disabled', () => {
+    const propName: keyof FormValues = 'valueSet';
 
     formProps.register(propName, typeName, {
-      required: false,
+      disabled: true,
     });
 
     formProps.setValue(propName, null);
@@ -232,92 +283,9 @@ describe(typeName, () => {
     formProps.onSubmit(right, left)();
 
     expect(right).toHaveBeenCalled();
-  });
-
-  it('not required + null value', () => {
-    const propName = 'valueNull';
-
-    formProps.register(propName, typeName, {
-      required: false,
-    });
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).toHaveBeenCalledWith(initialProps);
     expect(left).not.toHaveBeenCalled();
-  });
 
-  it('min', () => {
-    const propName = 'valueZero';
-
-    formProps.register(propName, typeName, {
-      min: 10,
-    });
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMinMessage));
-
-    right.mockClear();
-    left.mockClear();
-
-    // set valid value
-    const validValue = 100;
-
-    formProps.setValue(propName, validValue);
-
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toHaveBeenCalled();
-  });
-
-  it('min + required', () => {
-    const propName = 'valueNull';
-
-    formProps.register(propName, typeName, {
-      min: 10,
-      required: true,
-    });
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
-
-    right.mockClear();
-    left.mockClear();
-
-    // set invalid value
-    formProps.setValue(propName, 1);
-
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMinMessage));
-
-    right.mockClear();
-    left.mockClear();
-
-    // set valid value
-    const validValue = 100;
-
-    formProps.setValue(propName, validValue);
-
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toHaveBeenCalled();
+    expect(formProps.getErrors(propName)).toEqual([]);
   });
 
   it('min custom error message', () => {
@@ -338,35 +306,6 @@ describe(typeName, () => {
     expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, customMessage));
   });
 
-  it('max', () => {
-    const propName = 'valueSet';
-
-    formProps.register(propName, typeName, {
-      max: 10,
-    });
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMaxMessage));
-
-    right.mockClear();
-    left.mockClear();
-
-    // set valid value
-    const validValue = 10;
-
-    formProps.setValue(propName, validValue);
-
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-    expect(left).not.toHaveBeenCalled();
-  });
-
   it('max custom error message', () => {
     const propName = 'valueSet';
     const customMessage = 'customErrorMessage';
@@ -383,238 +322,6 @@ describe(typeName, () => {
 
     expect(right).not.toHaveBeenCalled();
     expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, customMessage));
-  });
-
-  describe('bigInt', () => {
-    it('check with Infinity', () => {
-      const propName = 'bigIntValueNull';
-
-      formProps.register(propName, typeName);
-
-      formProps.setValue(propName, Infinity);
-
-      const right = jest.fn();
-      const left = jest.fn();
-
-      formProps.onSubmit(right, left)();
-
-      expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
-    });
-
-    it('check with -Infinity', () => {
-      const propName = 'bigIntValueNull';
-
-      formProps.register(propName, typeName);
-
-      formProps.setValue(propName, -Infinity);
-
-      const right = jest.fn();
-      const left = jest.fn();
-
-      formProps.onSubmit(right, left)();
-
-      expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
-    });
-
-    it('check with NaN', () => {
-      const propName = 'bigIntValueNull';
-
-      formProps.register(propName, typeName);
-
-      formProps.setValue(propName, NaN);
-
-      const right = jest.fn();
-      const left = jest.fn();
-
-      formProps.onSubmit(right, left)();
-
-      expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsCommonInvalidMessage));
-    });
-
-    it('required zero', () => {
-      const propName = 'bigIntValueZero';
-
-      formProps.register(propName, typeName, {
-        required: true,
-      });
-
-      const right = jest.fn();
-      const left = jest.fn();
-
-      formProps.onSubmit((data) => right(data), left)();
-
-      expect(right).toHaveBeenCalledWith(initialProps);
-      expect(left).not.toHaveBeenCalled();
-    });
-
-    it('required', () => {
-      const propName = 'bigIntValueNull';
-
-      formProps.register(propName, typeName, {
-        required: true,
-      });
-
-      const right = jest.fn();
-      const left = jest.fn();
-
-      formProps.onSubmit(right, left)();
-
-      expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
-
-      right.mockClear();
-      left.mockClear();
-
-      // set valid value
-      const validValue = BigInt(12);
-
-      formProps.setValue(propName, validValue);
-
-      formProps.onSubmit((data) => right(data), left)();
-
-      expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-      expect(left).not.toHaveBeenCalled();
-    });
-
-    it('required empty', () => {
-      const propName = 'bigIntValueSet';
-
-      formProps.register(propName, typeName, {
-        required: true,
-      });
-
-      formProps.setValue(propName, null);
-
-      const right = jest.fn();
-      const left = jest.fn();
-
-      formProps.onSubmit(right, left)();
-
-      expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsRequiredMessage));
-
-      expect(formProps.getErrors(propName)).toEqual(getValidateError(stateFormErrorsRequiredMessage));
-
-      right.mockClear();
-      left.mockClear();
-
-      // set valid value
-      const validValue = BigInt(12);
-
-      formProps.setValue(propName, validValue);
-
-      formProps.onSubmit((data) => right(data), left)();
-
-      expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-      expect(left).not.toHaveBeenCalled();
-    });
-
-    it('min', () => {
-      const propName = 'bigIntValueZero';
-
-      formProps.register(propName, typeName, {
-        min: 10,
-      });
-
-      const right = jest.fn();
-      const left = jest.fn();
-
-      formProps.onSubmit((data) => right(data), left)();
-
-      expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMinMessage));
-
-      right.mockClear();
-      left.mockClear();
-
-      // set valid value
-      const validValue = BigInt(100);
-
-      formProps.setValue(propName, validValue);
-
-      formProps.onSubmit((data) => right(data), left)();
-
-      expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-      expect(left).not.toHaveBeenCalled();
-    });
-
-    it('max', () => {
-      const propName = 'bigIntValueSet';
-
-      formProps.register(propName, typeName, {
-        max: 10,
-      });
-
-      const right = jest.fn();
-      const left = jest.fn();
-
-      formProps.onSubmit((data) => right(data), left)();
-
-      expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, stateFormErrorsNumberMaxMessage));
-
-      right.mockClear();
-      left.mockClear();
-
-      // set valid value
-      const validValue = BigInt(10);
-
-      formProps.setValue(propName, validValue);
-
-      formProps.onSubmit((data) => right(data), left)();
-
-      expect(right).toHaveBeenCalledWith({ ...initialProps, [propName]: validValue });
-      expect(left).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('getInitialValue + reset', () => {
-    it('not set values', () => {
-      expect(formProps.getInitialValue()).toEqual(initialProps);
-    });
-
-    it('set values', () => {
-      const newValues: FormValues = {
-        valueZero: 1,
-        valueNull: 1,
-        valueSet: 1,
-        bigIntValueZero: null,
-        bigIntValueNull: null,
-        bigIntValueSet: BigInt(100),
-      };
-
-      Object.keys(newValues).forEach((propName) => {
-        formProps.register(propName, typeName);
-      });
-
-      formProps.setValue(newValues);
-
-      expect(formProps.getInitialValue()).toEqual(initialProps);
-    });
-
-    it('reset', () => {
-      const newValues: FormValues = {
-        valueZero: 1,
-        valueNull: 1,
-        valueSet: 1,
-        bigIntValueZero: null,
-        bigIntValueNull: null,
-        bigIntValueSet: BigInt(100),
-      };
-
-      Object.keys(newValues).forEach((propName) => {
-        formProps.register(propName, typeName);
-      });
-
-      formProps.reset(newValues, {
-        resetInitialForm: true,
-      });
-
-      expect(formProps.getInitialValue()).toEqual(newValues);
-    });
   });
 
   it('console errors check (should be the last test)', () => {
