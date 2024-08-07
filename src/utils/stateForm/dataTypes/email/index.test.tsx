@@ -1,4 +1,5 @@
 import { renderHook } from '@testing-library/react';
+import { StateFormEmptyValueType } from 'src/utils/stateForm/types';
 
 import {
   StateFormEmailType,
@@ -7,7 +8,7 @@ import {
   stateFormErrorsPatternEmailMessage,
 } from './index';
 import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
-import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../index';
+import { StateFormReturnType, useStateForm } from '../../index';
 
 const typeName = 'email';
 

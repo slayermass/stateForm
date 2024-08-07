@@ -1,7 +1,8 @@
 import { renderHook } from '@testing-library/react';
 
+import { StateFormEmptyValueType } from 'src/utils/stateForm/types';
 import { stateFormErrorsRequiredMessage } from '../../helpers/formStateGenerateErrors';
-import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../';
+import { StateFormReturnType, useStateForm } from '../../';
 import {
   stateFormErrorsTextMaxLengthMessage,
   stateFormErrorsTextMinLengthMessage,

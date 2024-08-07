@@ -1,4 +1,4 @@
-import { StateFormGetSubscribeProps, StateFormUnknownFormType } from '../index';
+import { StateFormGetSubscribeProps, StateFormUnknownFormType } from '../types';
 import { StateFormPath, StateFormPathValue, StateFormPathValues } from '../types/path';
 import { useFormCommonWatch } from './index';
 

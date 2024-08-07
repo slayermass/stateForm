@@ -1,7 +1,8 @@
 import { renderHook } from '@testing-library/react';
 
+import { StateFormRegisterOptions } from '../types';
 import { stateFormErrorsRequiredMessage } from '../helpers/formStateGenerateErrors';
-import { StateFormRegisterOptions, StateFormReturnType, useStateForm } from '../index';
+import { StateFormReturnType, useStateForm } from '../index';
 import { get, SafeAnyType, set, omit } from '../outerDependencies';
 import {
   stateFormErrorsTextMaxLengthMessage,
@@ -12,7 +13,7 @@ import { formStateInnerCloneDeep } from 'src/utils/stateForm/helpers/cloneDeep';
 
 type FormValues = {
   strValue: string;
-  fieldArrayitems: { email: string; disabled: boolean; test: string }[];
+  fieldArrayItems: { email: string; disabled: boolean; test: string }[];
   primitiveArray: (string | number | null)[];
   objValue: {
     pops: {
@@ -43,7 +44,7 @@ describe('useStateForm', () => {
 
   const initialProps: FormValues = {
     strValue: '-',
-    fieldArrayitems: [{ email: '', disabled: false, test: '' }],
+    fieldArrayItems: [{ email: '', disabled: false, test: '' }],
     primitiveArray: [],
     objValue: {
       pops: {
@@ -95,7 +96,7 @@ describe('useStateForm', () => {
   it('test reset', () => {
     const resetData1: FormValues = {
       strValue: '---*/89+5',
-      fieldArrayitems: [],
+      fieldArrayItems: [],
       primitiveArray: [6, 78, '$4'],
       objValue: {
         pops: {
@@ -121,7 +122,7 @@ describe('useStateForm', () => {
 
     const resetData2: FormValues = {
       strValue: '',
-      fieldArrayitems: [
+      fieldArrayItems: [
         { email: '2v2v', disabled: false, test: 'dbw96' },
         {
           email: 'y@Y.ru',
@@ -159,7 +160,7 @@ describe('useStateForm', () => {
     });
 
     it('test field array value', () => {
-      formSetThenExpect('fieldArrayitems', [
+      formSetThenExpect('fieldArrayItems', [
         [{ email: 'y@y.ru', disabled: false, test: 'v' }],
         [{ email: 'yv2v2v2v2v2v251b 25634y.ru', disabled: true, test: 'v-21-2-dur!!!@$%^&t9l7-' }],
         [
@@ -519,7 +520,7 @@ describe('useStateForm', () => {
   });
 
   it('getDirtyFields', () => {
-    const props: (keyof FormValues)[] = ['strValue', 'fieldArrayitems', 'primitiveArray', 'booleanValue', 'nullValue'];
+    const props: (keyof FormValues)[] = ['strValue', 'fieldArrayItems', 'primitiveArray', 'booleanValue', 'nullValue'];
 
     props.forEach((propName) => {
       formProps.register(propName, 'text');
@@ -576,7 +577,7 @@ describe('useStateForm', () => {
     };
 
     checkSubscribeProps('strValue', 'test value');
-    checkSubscribeProps('fieldArrayitems', [{ email: 'test', disabled: true, test: 'test' }]);
+    checkSubscribeProps('fieldArrayItems', [{ email: 'test', disabled: true, test: 'test' }]);
     checkSubscribeProps('primitiveArray', ['test value']);
     checkSubscribeProps('booleanValue', true);
     checkSubscribeProps('bigIntValue', BigInt(1));

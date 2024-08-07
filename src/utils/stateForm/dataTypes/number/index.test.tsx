@@ -1,10 +1,11 @@
 import { renderHook } from '@testing-library/react';
+import { StateFormEmptyValueType } from 'src/utils/stateForm/types';
 
 import {
   stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
-import { StateFormEmptyValueType, StateFormReturnType, useStateForm } from '../../index';
+import { StateFormReturnType, useStateForm } from '../../index';
 import { stateFormErrorsNumberMaxMessage, stateFormErrorsNumberMinMessage } from 'src/utils/stateForm/dataTypes/number';
 
 const typeName = 'number';
