@@ -1,7 +1,9 @@
+import { stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
 import { isDate } from '../../outerDependencies';
 import { StateFormValidatorType } from '../types';
 
 export const stateFormErrorsDateMinMessage = 'common.validation.minDate';
+
 export const stateFormErrorsDateMaxMessage = 'common.validation.maxDate';
 
 const validators: StateFormValidatorType<StateFormDateType['value'], StateFormDateType['specificProperties']> = {
@@ -11,7 +13,10 @@ const validators: StateFormValidatorType<StateFormDateType['value'], StateFormDa
       return true;
     }
 
-    if (!validators.isSet(value) && validationOptions.required) {
+    if (
+      (validationOptions.required && !validators.isSet(value)) ||
+      (!validators.isSet(value) && !stateFormIsValueInnerEmpty(value))
+    ) {
       return false;
     }
 

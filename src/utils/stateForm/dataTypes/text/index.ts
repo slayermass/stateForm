@@ -1,7 +1,9 @@
+import { stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
 import { StateFormValidatorType } from '../types';
 import { isNumber, isString } from '../../outerDependencies';
 
 export const stateFormErrorsTextMinLengthMessage = 'common.validation.minLength';
+
 export const stateFormErrorsTextMaxLengthMessage = 'common.validation.maxLength';
 
 const validators: StateFormValidatorType<StateFormTextType['value'], StateFormTextType['specificProperties']> = {
@@ -11,7 +13,10 @@ const validators: StateFormValidatorType<StateFormTextType['value'], StateFormTe
       return true;
     }
 
-    if (!validators.isSet(value) && validationOptions.required) {
+    if (
+      (validationOptions.required && !validators.isSet(value)) ||
+      (!validators.isSet(value) && !stateFormIsValueInnerEmpty(value))
+    ) {
       return false;
     }
 

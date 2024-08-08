@@ -3,6 +3,7 @@ import { StateFormValidatorType } from '../types';
 import { isBigInt, isNumber, isFinite } from '../../outerDependencies';
 
 export const stateFormErrorsNumberMinMessage = 'common.validation.min';
+
 export const stateFormErrorsNumberMaxMessage = 'common.validation.max';
 
 const validators: StateFormValidatorType<StateFormNumberType['value'], StateFormNumberType['specificProperties']> = {

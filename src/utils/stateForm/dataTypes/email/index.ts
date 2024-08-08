@@ -1,18 +1,22 @@
+import { stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
 import { isNumber, isString, isValidEmail } from '../../outerDependencies';
 import { StateFormValidatorType } from '../types';
 
-export const stateFormErrorsPatternEmailMessage = 'common.validation.emailInvalid';
 export const stateFormErrorsEmailMinLengthMessage = 'common.validation.emailMinLength';
+
 export const stateFormErrorsEmailMaxLengthMessage = 'common.validation.emailMaxLength';
 
 const validators: StateFormValidatorType<StateFormEmailType['value'], StateFormEmailType['specificProperties']> = {
-  isSet: (value) => isString(value) && value.trim().length > 0,
-  validate: (value, validationOptions, hasValidValue) => {
-    if (hasValidValue && !isValidEmail((value || '').trim())) {
-      return [stateFormErrorsPatternEmailMessage];
+  isSet: (value) => isString(value) && value.trim().length > 0 && isValidEmail(value),
+  validate: (value, validationOptions) => {
+    if (validationOptions.disabled === true) {
+      return true;
     }
 
-    if (!isString(value) && validationOptions.required) {
+    if (
+      (validationOptions.required && !validators.isSet(value)) ||
+      (!validators.isSet(value) && !stateFormIsValueInnerEmpty(value))
+    ) {
       return false;
     }
 

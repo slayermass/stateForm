@@ -41,10 +41,6 @@ describe(typeName, () => {
     formProps = current;
   });
 
-  it('init', () => {
-    expect(formProps.getValue()).toEqual(initialProps);
-  });
-
   it('submit changed values', () => {
     const right = jest.fn();
     const left = jest.fn();

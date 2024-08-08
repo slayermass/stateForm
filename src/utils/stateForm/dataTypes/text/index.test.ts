@@ -1,32 +1,31 @@
 import { renderHook } from '@testing-library/react';
-
 import { baseLeftTestChecker, baseRightTestChecker } from 'src/utils/stateForm/dataTypes/baseTests';
-import { stateFormEmptyValues, StateFormEmptyValueType, stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
 
-import {
-  StateFormEmailType,
-  stateFormErrorsEmailMaxLengthMessage,
-  stateFormErrorsEmailMinLengthMessage,
-} from './index';
+import { stateFormEmptyValues, StateFormEmptyValueType, stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
 import {
   stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
 } from '../../helpers/formStateGenerateErrors';
-import { StateFormReturnType, useStateForm } from '../../index';
+import { StateFormReturnType, useStateForm } from '../../';
+import {
+  stateFormErrorsTextMaxLengthMessage,
+  stateFormErrorsTextMinLengthMessage,
+  StateFormTextType,
+} from 'src/utils/stateForm/dataTypes/text';
 
-const typeName = 'email';
+const typeName = 'text';
 
-describe(typeName, () => {
+describe('text + textarea', () => {
   console.error = jest.fn();
 
   type FormValues = {
-    emailValue: StateFormEmailType['value'] | StateFormEmptyValueType;
+    strValue: StateFormTextType['value'] | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;
 
   const initialProps: FormValues = {
-    emailValue: null,
+    strValue: null,
   };
 
   beforeEach(() => {
@@ -46,14 +45,15 @@ describe(typeName, () => {
   });
 
   describe('simple validity', () => {
-    // "-0" comes "0"
-    const possibleValidValues = ['y@y.ru', 'vavavy@y.rub', ...stateFormEmptyValues];
+    it('warm up', () => {});
 
-    const invalidValues = ['alo', '1234@', 'y#y.eu', 'y@y.r', '1', '', Infinity, -Infinity, NaN, true]; // any not emails
+    const possibleValidValues = ['1', '!@#$%^&*()_+-=', '              1        ', 'aloALO', ...stateFormEmptyValues];
 
-    const validChecker = baseRightTestChecker<FormValues>('emailValue', typeName, initialProps);
+    const invalidValues = [Infinity, -Infinity, NaN, '', true]; // any not string
 
-    const invalidChecker = baseLeftTestChecker<FormValues>('emailValue', typeName);
+    const validChecker = baseRightTestChecker<FormValues>('strValue', typeName);
+
+    const invalidChecker = baseLeftTestChecker<FormValues>('strValue', typeName);
 
     it('test valid values. default', () => {
       validChecker({ formProps, values: possibleValidValues });
@@ -78,8 +78,8 @@ describe(typeName, () => {
         values: possibleValidValues.filter(
           (v) =>
             !stateFormIsValueInnerEmpty(v) &&
-            (v as StateFormEmailType['value']).length >= minLength &&
-            (v as StateFormEmailType['value']).length <= maxLength,
+            (v as StateFormTextType['value']).length >= minLength &&
+            (v as StateFormTextType['value']).length <= maxLength,
         ),
         registerOptions: {
           minLength,
@@ -97,8 +97,8 @@ describe(typeName, () => {
         values: possibleValidValues.filter(
           (v) =>
             !stateFormIsValueInnerEmpty(v) &&
-            (v as StateFormEmailType['value']).length >= minLength &&
-            (v as StateFormEmailType['value']).length <= maxLength,
+            (v as StateFormTextType['value']).length >= minLength &&
+            (v as StateFormTextType['value']).length <= maxLength,
         ),
         registerOptions: {
           required: true,
@@ -133,7 +133,7 @@ describe(typeName, () => {
           required: true,
           minLength,
         },
-        errorMessage: stateFormErrorsEmailMinLengthMessage,
+        errorMessage: stateFormErrorsTextMinLengthMessage,
       });
     });
 
@@ -147,13 +147,13 @@ describe(typeName, () => {
           required: true,
           maxLength,
         },
-        errorMessage: stateFormErrorsEmailMaxLengthMessage,
+        errorMessage: stateFormErrorsTextMaxLengthMessage,
       });
     });
   });
 
   it('submit disabled', () => {
-    const propName: keyof FormValues = 'emailValue';
+    const propName: keyof FormValues = 'strValue';
 
     formProps.register(propName, typeName, {
       disabled: true,
