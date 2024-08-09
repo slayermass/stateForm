@@ -32,6 +32,7 @@ export const useStateFormFieldArray = <FieldsType extends SafeAnyType[]>({
   FieldsType[0]
 > => {
   const [, changeState] = useState(0);
+
   const rerender = useCallback(() => changeState(Math.random()), []);
 
   const getFieldsValue: () => FieldsType = useCallback(() => getValue(name) || [], [getValue, name]);
@@ -53,6 +54,7 @@ export const useStateFormFieldArray = <FieldsType extends SafeAnyType[]>({
             id,
           };
         }
+
         return {
           id,
         };

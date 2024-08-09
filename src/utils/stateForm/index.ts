@@ -97,7 +97,9 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     }
 
     const newInstance = getEventBus();
+
     instanceEventBus.current = newInstance;
+
     return newInstance;
   })();
 
@@ -403,9 +405,8 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
       setFieldOptionsValue(name, checkDirtyField(name), 'isDirty');
 
-      // prevent checkboxes show errors immediately after registering
       // eslint-disable-next-line no-underscore-dangle
-      if (!(options?._afterRegister && fieldsOptions.current[name].type === 'checkBoxGroup')) {
+      if (!options?._afterRegister) {
         validateInput(name, 'onChange', options?.trigger);
       }
     },
@@ -440,6 +441,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   const register: StateFormRegister = useCallback(
     (name, fieldType, options = {}) => {
       const fieldOptions = getFieldOptionsValue(name, 'options');
+
       const fieldRef = getFieldOptionsValue(name, 'ref');
 
       setFieldOptionsValue(name, {
@@ -494,7 +496,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         Object.keys(fieldsOptions.current).forEach((key) => {
           const value = fieldsOptions.current[key];
 
-          if (getFieldOptionsValue(key, 'type') !== 'checkBoxGroup' && value.active) {
+          if (value.active) {
             fields.push(key);
           }
         });
@@ -509,7 +511,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         validateInput(name, 'onSubmit', true, true);
       });
     },
-    [getFieldOptionsValue, validateInput],
+    [validateInput],
   );
 
   const setFocus: StateFormSetFocus<FormValues> = useCallback(
@@ -563,6 +565,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
             fn(currentValue, name);
           } else {
             const value = get(values || initialValues.current, name);
+
             changeStateForm(name, value);
 
             setFieldOptionsValue(
@@ -601,13 +604,13 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       Object.keys(fieldsOptions.current).reduce<ReturnType<StateFormGetDirtyFields>>((acc, key) => {
         const value = fieldsOptions.current[key];
 
-        if (getFieldOptionsValue(key, 'type') !== 'checkBoxGroup' && value.isDirty) {
+        if (value.isDirty) {
           acc.push(key);
         }
 
         return acc;
       }, []),
-    [getFieldOptionsValue],
+    [],
   );
   /** end outer API */
 
@@ -639,6 +642,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     const getInitialAllValues = () =>
       Object.entries(initialValues.current).reduce<SafeAnyType>((acc, [k, v]) => {
         acc[k] = v;
+
         return acc;
       }, {});
 

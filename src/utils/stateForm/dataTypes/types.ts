@@ -6,7 +6,6 @@ export type StateFormValidatorType<V, P> = {
   validate: (
     value: V | StateFormEmptyValueType,
     validationOptions: P extends null ? StateFormInputOptionsType : StateFormInputOptionsType & NullableUndefineable<P>,
-    hasValidValue: boolean,
   ) => [string, Record<string, SafeAnyType>] | [string] | boolean;
 };
 

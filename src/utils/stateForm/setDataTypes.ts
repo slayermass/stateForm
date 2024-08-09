@@ -20,9 +20,11 @@ type AllTypes =
   | StateFormDateRangeType;
 
 export type StateFormPossibleValue = Pick<AllTypes, 'value'>['value'] | StateFormEmptyValueType;
+
 export type StateFormDataTypesSpecificPropertiesType = StateFormSpread<
   NonNullable<Pick<AllTypes, 'specificProperties'>['specificProperties']>
 >;
+
 export type StateFormDataTypesFieldsType = Pick<AllTypes, 'fields'>['fields'];
 // export type StateFormOmitArrayTypes = Extract<StateFormPossibleValue, SafeAnyType[]>;
 

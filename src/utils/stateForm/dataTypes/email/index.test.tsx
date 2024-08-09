@@ -46,8 +46,11 @@ describe(typeName, () => {
   });
 
   describe('simple validity', () => {
-    // "-0" comes "0"
-    const possibleValidValues = ['y@y.ru', 'vavavy@y.rub', ...stateFormEmptyValues];
+    const possibleValidValues: (StateFormEmailType['value'] | StateFormEmptyValueType)[] = [
+      'y@y.ru',
+      'vavavy@y.rub',
+      ...stateFormEmptyValues,
+    ];
 
     const invalidValues = ['alo', '1234@', 'y#y.eu', 'y@y.r', '1', '', Infinity, -Infinity, NaN, true]; // any not emails
 

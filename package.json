@@ -44,6 +44,8 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "prettier": "prettier --write \"src\"",
+    "lint": "eslint . --ext ts,tsx --max-warnings 0",
+    "lint:fix": "eslint . --ext ts,tsx --fix",
     "analyze": "source-map-explorer 'build/static/js/*.js'"
   },
   "eslintConfig": {

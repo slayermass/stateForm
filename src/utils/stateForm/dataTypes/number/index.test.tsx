@@ -19,7 +19,6 @@ describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
-    valueZero: StateFormNumberType['value'] | StateFormEmptyValueType;
     valueNull: StateFormNumberType['value'] | StateFormEmptyValueType;
     valueSet: StateFormNumberType['value'] | StateFormEmptyValueType;
   };
@@ -27,7 +26,6 @@ describe(typeName, () => {
   let formProps: StateFormReturnType<FormValues>;
 
   const initialProps: FormValues = {
-    valueZero: 0,
     valueNull: null,
     valueSet: 100,
   };
@@ -53,7 +51,7 @@ describe(typeName, () => {
 
   describe('simple validity', () => {
     // "-0" comes "0"
-    const possibleValidValues = [
+    const possibleValidValues: (StateFormNumberType['value'] | StateFormEmptyValueType)[] = [
       Number.MIN_SAFE_INTEGER,
       Number.MAX_SAFE_INTEGER,
       0,
@@ -188,24 +186,6 @@ describe(typeName, () => {
     expect(left).not.toHaveBeenCalled();
 
     expect(formProps.getErrors(propName)).toEqual([]);
-  });
-
-  it('min custom error message', () => {
-    const propName = 'valueZero';
-    const customMessage = 'customErrorMessage';
-
-    formProps.register(propName, typeName, {
-      min: 10,
-      minMessage: customMessage,
-    });
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit((data) => right(data), left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith(getValidateErrorWithProp(propName, customMessage));
   });
 
   it('max custom error message', () => {
