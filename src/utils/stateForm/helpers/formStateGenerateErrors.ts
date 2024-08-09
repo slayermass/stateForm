@@ -9,6 +9,7 @@ const i18next = {
 };
 
 export const stateFormErrorsRequiredMessage = 'common.validation.required';
+
 export const stateFormErrorsCommonInvalidMessage = 'common.validation.invalid';
 
 export const formStateGenerateErrors = (
@@ -37,7 +38,6 @@ export const formStateGenerateErrors = (
     // "as SafeAnyType" = StateFormPossibleValue -> to the specific type of the validator
     value as SafeAnyType,
     validationOptions,
-    hasValidValue,
   );
 
   if (isArray(innerValidatorsResponse)) {

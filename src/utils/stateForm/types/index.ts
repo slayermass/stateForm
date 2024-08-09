@@ -127,6 +127,7 @@ export type StateFormSetError<FormValues extends StateFormUnknownFormType = Safe
 ) => void;
 
 export type StateFormSetValueOptions = { trigger?: boolean; merge?: boolean; _afterRegister?: boolean };
+
 export type StateFormSetMultipleValueOptions = StateFormSetValueOptions & { prefix?: string };
 
 export type StateFormSetValue<FormValues extends StateFormUnknownFormType = SafeAnyType> = {
@@ -176,6 +177,7 @@ export type StateFormSetRef = (name: string) => (element: HTMLElement | null) =>
 export type StateFormGetDirtyFields = () => string[];
 
 export type StateFormGetStatusValue = { isDirty: boolean };
+
 export type StateFormGetStatus = () => StateFormGetStatusValue;
 
 export type StateFormChangeStateDirectly = (name: string, value: SafeAnyType) => void;

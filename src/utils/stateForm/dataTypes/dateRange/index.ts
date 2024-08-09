@@ -1,7 +1,9 @@
 import { StateFormValidatorType } from 'src/utils/stateForm/dataTypes/types';
+import { stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
 import { isArray, isDate } from '../../outerDependencies';
 
 export const stateFormErrorsDateRangeMinMessage = 'common.validation.minDate';
+
 export const stateFormErrorsDateRangeMaxMessage = 'common.validation.maxDate';
 
 const validators: StateFormValidatorType<
@@ -14,8 +16,17 @@ const validators: StateFormValidatorType<
       return true;
     }
 
-    if (!validators.isSet(value) && validationOptions.required) {
+    if (validationOptions.required && !validators.isSet(value)) {
       return false;
+    }
+
+    if (!validationOptions.required) {
+      if (stateFormIsValueInnerEmpty(value)) {
+        return true;
+      }
+      if (!validators.isSet(value)) {
+        return false;
+      }
     }
 
     if (validationOptions.minDate) {
@@ -29,6 +40,7 @@ const validators: StateFormValidatorType<
               { minDate: validationOptions.minDate },
             ];
       }
+
       return false;
     }
 
@@ -43,6 +55,7 @@ const validators: StateFormValidatorType<
               { maxDate: validationOptions.maxDate },
             ];
       }
+
       return false;
     }
 

@@ -19,13 +19,13 @@ describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
-    dateValue0: StateFormDateType['value'] | StateFormEmptyValueType;
+    dateValue: StateFormDateType['value'] | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;
 
   const initialProps: FormValues = {
-    dateValue0: null,
+    dateValue: null,
   };
 
   beforeEach(() => {
@@ -45,13 +45,19 @@ describe(typeName, () => {
   });
 
   describe('simple validity', () => {
-    const possibleValidValues = [new Date(), new Date(1), new Date(1e7), new Date(-5e4), ...stateFormEmptyValues];
+    const possibleValidValues: (StateFormDateType['value'] | StateFormEmptyValueType)[] = [
+      new Date(),
+      new Date(1),
+      new Date(1e7),
+      new Date(-5e4),
+      ...stateFormEmptyValues,
+    ];
 
     const invalidValues = [1, '', 'a', true]; // any not dates
 
-    const validChecker = baseRightTestChecker<FormValues>('dateValue0', typeName);
+    const validChecker = baseRightTestChecker<FormValues>('dateValue', typeName);
 
-    const invalidChecker = baseLeftTestChecker<FormValues>('dateValue0', typeName);
+    const invalidChecker = baseLeftTestChecker<FormValues>('dateValue', typeName);
 
     it('test valid values. default', () => {
       validChecker({ formProps, values: possibleValidValues });
@@ -86,7 +92,7 @@ describe(typeName, () => {
       });
     });
 
-    it('test valid values. required + min + max', () => {
+    it('test valid values. required + minDate + maxDate', () => {
       const minDate = new Date(100);
       const maxDate = new Date(1e8);
 
@@ -151,7 +157,7 @@ describe(typeName, () => {
   });
 
   it('submit disabled', () => {
-    const propName: keyof FormValues = 'dateValue0';
+    const propName: keyof FormValues = 'dateValue';
 
     formProps.register(propName, typeName, {
       disabled: true,
@@ -171,7 +177,7 @@ describe(typeName, () => {
   });
 
   it('required + minDate + minDateMessage', () => {
-    const propName: keyof FormValues = 'dateValue0';
+    const propName: keyof FormValues = 'dateValue';
     const minDateMessage = 'HALU';
 
     formProps.register(propName, typeName, {
@@ -208,7 +214,7 @@ describe(typeName, () => {
   });
 
   it('required + maxDate + maxDateMessage', () => {
-    const propName: keyof FormValues = 'dateValue0';
+    const propName: keyof FormValues = 'dateValue';
     const maxDateMessage = 'wronngnsa!!@#@#!@#';
 
     formProps.register(propName, typeName, {

@@ -17,6 +17,7 @@ export const useFormCommonWatch = <ReturnValue = SafeAnyType>(
     () => getSubscribeProps(eventType, memoizedNames),
     [eventType, getSubscribeProps, memoizedNames],
   );
+
   const [value, setValue] = useState(initialValue);
 
   const setValues = useCallback(
@@ -27,11 +28,13 @@ export const useFormCommonWatch = <ReturnValue = SafeAnyType>(
         if (~foundIndex) {
           setValue((prevState: SafeAnyType) => {
             const newState = [...prevState];
+
             newState[foundIndex] = values;
 
             return equal(prevState, newState) ? prevState : newState;
           });
         }
+
         return;
       }
 

@@ -45,9 +45,13 @@ describe('text + textarea', () => {
   });
 
   describe('simple validity', () => {
-    it('warm up', () => {});
-
-    const possibleValidValues = ['1', '!@#$%^&*()_+-=', '              1        ', 'aloALO', ...stateFormEmptyValues];
+    const possibleValidValues: (StateFormTextType['value'] | StateFormEmptyValueType)[] = [
+      '1',
+      '!@#$%^&*()_+-=',
+      '              1        ',
+      'aloALO',
+      ...stateFormEmptyValues,
+    ];
 
     const invalidValues = [Infinity, -Infinity, NaN, '', true]; // any not string
 

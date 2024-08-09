@@ -1,10 +1,11 @@
 import { SafeAnyType } from 'src/utils/safeAny';
 
+import { StateFormDataTypesFieldsType } from '../setDataTypes';
 import { StateFormReturnType } from '..';
-import { StateFormFieldsType, StateFormRegisterOptions, StateFormUnknownFormType } from '../types';
+import { StateFormRegisterOptions, StateFormUnknownFormType } from '../types';
 
 export const baseRightTestChecker =
-  <R extends StateFormUnknownFormType>(propName: keyof R, type: StateFormFieldsType, initialState?: R) =>
+  <R extends StateFormUnknownFormType>(propName: keyof R, type: StateFormDataTypesFieldsType, initialState?: R) =>
   ({
     formProps,
     values,
@@ -32,7 +33,7 @@ export const baseRightTestChecker =
   };
 
 export const baseLeftTestChecker =
-  <R extends StateFormUnknownFormType>(propName: keyof R, type: StateFormFieldsType) =>
+  <R extends StateFormUnknownFormType>(propName: keyof R, type: StateFormDataTypesFieldsType) =>
   ({
     formProps,
     values,

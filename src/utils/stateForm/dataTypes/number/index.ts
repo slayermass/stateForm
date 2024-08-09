@@ -13,12 +13,17 @@ const validators: StateFormValidatorType<StateFormNumberType['value'], StateForm
       return true;
     }
 
-    // allow only numbers
-    if (
-      (validationOptions.required && !validators.isSet(value)) ||
-      (!validators.isSet(value) && !stateFormIsValueInnerEmpty(value))
-    ) {
+    if (validationOptions.required && !validators.isSet(value)) {
       return false;
+    }
+
+    if (!validationOptions.required) {
+      if (stateFormIsValueInnerEmpty(value)) {
+        return true;
+      }
+      if (!validators.isSet(value)) {
+        return false;
+      }
     }
 
     if (isNumber(validationOptions.min)) {

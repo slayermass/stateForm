@@ -1,6 +1,8 @@
 import { renderHook } from '@testing-library/react';
+
+import { baseLeftTestChecker, baseRightTestChecker } from 'src/utils/stateForm/dataTypes/baseTests';
 import { StateFormRichTextType } from 'src/utils/stateForm/dataTypes/richText/index';
-import { StateFormEmptyValueType } from 'src/utils/stateForm/types';
+import { stateFormEmptyValues, StateFormEmptyValueType, stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
 
 import {
   stateFormErrorsCommonInvalidMessage,
@@ -8,7 +10,9 @@ import {
 } from '../../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../../index';
 
-describe('richText', () => {
+const typeName = 'richText';
+
+describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
@@ -37,137 +41,59 @@ describe('richText', () => {
     formProps = current;
   });
 
-  it('form empty values', () => {
-    const right = jest.fn();
-    const left = jest.fn();
+  describe('simple validity', () => {
+    const possibleValidValues: (StateFormRichTextType['value'] | StateFormEmptyValueType)[] = [
+      '<p>alo</p>',
+      ...stateFormEmptyValues,
+    ];
 
-    const propName = 'richTextValue';
+    const invalidValues = [Infinity, -Infinity, NaN, '', true]; // any not strings
 
-    formProps.register(propName, 'richText', {
-      required: true,
+    const invalidHtmlValues = ['<p>1<>', 'aavava</h>']; // any invalid html
+
+    const validChecker = baseRightTestChecker<FormValues>('richTextValue', typeName);
+
+    const invalidChecker = baseLeftTestChecker<FormValues>('richTextValue', typeName);
+
+    it('test valid values. default', () => {
+      validChecker({ formProps, values: possibleValidValues });
     });
 
-    [null, undefined].forEach((value) => {
-      formProps.setValue(propName, value);
-
-      formProps.onSubmit((data) => {
-        right(data);
-      }, left)();
-
-      expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith({
-        [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }],
-      });
-    });
-  });
-
-  it('submit the same values', () => {
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit((data) => {
-      right(data);
-    }, left)();
-
-    expect(right).toHaveBeenCalledWith(initialProps);
-    expect(left).not.toHaveBeenCalled();
-  });
-
-  it('submit changed values', () => {
-    const right = jest.fn();
-    const left = jest.fn();
-
-    const newValues = {
-      richTextValue: '<p>popa</p>',
-    };
-
-    formProps.setValue(newValues);
-
-    formProps.onSubmit((data) => {
-      right(data);
-    }, left)();
-
-    expect(right).toHaveBeenCalledWith(newValues);
-    expect(left).not.toHaveBeenCalled();
-  });
-
-  it('required empty', () => {
-    const propName = 'richTextValue';
-
-    formProps.register(propName, 'richText', {
-      required: true,
-    });
-
-    formProps.setValue(propName, '');
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
-
-    expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
-  });
-
-  it('required empty length', () => {
-    const propName = 'richTextValue';
-
-    formProps.register(propName, 'richText', {
-      required: true,
-    });
-
-    formProps.setValue(propName, '                ');
-
-    const right = jest.fn();
-    const left = jest.fn();
-
-    formProps.onSubmit(right, left)();
-
-    expect(right).not.toHaveBeenCalled();
-    expect(left).toHaveBeenCalledWith({ [propName]: [{ type: 'validate', message: stateFormErrorsRequiredMessage }] });
-
-    expect(formProps.getErrors(propName)).toEqual([{ type: 'validate', message: stateFormErrorsRequiredMessage }]);
-  });
-
-  it('required invalid', () => {
-    const propName = 'richTextValue';
-
-    formProps.register(propName, 'richText', {
-      required: true,
-    });
-
-    // invalid html
-    ['<h1>j</p>', '<h1>j</h1><h2>', '<p>', '1v11v<h1>', '123<p></p>34'].forEach((value) => {
-      formProps.setValue(propName, value);
-
-      const right = jest.fn();
-      const left = jest.fn();
-
-      formProps.onSubmit(right, left)();
-
-      expect(right).not.toHaveBeenCalled();
-      expect(left).toHaveBeenCalledWith({
-        [propName]: [{ type: 'validate', message: stateFormErrorsCommonInvalidMessage }],
+    it('test valid values. required', () => {
+      validChecker({
+        formProps,
+        values: possibleValidValues.filter((v) => !stateFormIsValueInnerEmpty(v)),
+        registerOptions: {
+          required: true,
+        },
       });
     });
 
-    // valid again
-    const newValues = {
-      [propName]: '<h1>j</h1>',
-    };
-    formProps.setValue(newValues);
+    it('test invalid values', () => {
+      invalidChecker({ formProps, values: invalidValues, errorMessage: stateFormErrorsCommonInvalidMessage });
+    });
 
-    const right = jest.fn();
-    const left = jest.fn();
+    it('test wrong-type values. required', () => {
+      invalidChecker({
+        formProps,
+        values: invalidValues,
+        registerOptions: {
+          required: true,
+        },
+        errorMessage: stateFormErrorsRequiredMessage,
+      });
+    });
 
-    formProps.onSubmit((data) => {
-      right(data);
-    }, left)();
-
-    expect(right).toHaveBeenCalledWith(newValues);
-    expect(left).not.toHaveBeenCalled();
+    it('test invalid html values. required', () => {
+      invalidChecker({
+        formProps,
+        values: invalidHtmlValues,
+        registerOptions: {
+          required: true,
+        },
+        errorMessage: stateFormErrorsCommonInvalidMessage,
+      });
+    });
   });
 
   it('console errors check (should be the last test)', () => {

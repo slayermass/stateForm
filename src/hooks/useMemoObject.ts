@@ -6,6 +6,7 @@ import { SafeAnyType } from 'src/utils/safeAny';
 /* Returns the previous reference to the object, if it has not changed */
 export const useMemoObject = <T = SafeAnyType>(current: T): T => {
   const previousRef = useRef<T>();
+
   const previous = previousRef.current;
 
   const isEqual = equal(previous, current);

@@ -1,5 +1,11 @@
 import { renderHook } from '@testing-library/react';
-import { StateFormEmptyValueType } from 'src/utils/stateForm/types';
+
+import { baseLeftTestChecker, baseRightTestChecker } from 'src/utils/stateForm/dataTypes/baseTests';
+import {
+  stateFormErrorsCommonInvalidMessage,
+  stateFormErrorsRequiredMessage,
+} from 'src/utils/stateForm/helpers/formStateGenerateErrors';
+import { stateFormEmptyValues, StateFormEmptyValueType, stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
 
 import { StateFormCheckBoxGroupType } from './index';
 import { StateFormReturnType, useStateForm } from '../../index';
@@ -10,15 +16,13 @@ describe(typeName, () => {
   console.error = jest.fn();
 
   type FormValues = {
-    checkValue0: StateFormCheckBoxGroupType['value'] | StateFormEmptyValueType;
-    checkValue1: StateFormCheckBoxGroupType['value'] | StateFormEmptyValueType;
+    checkValue: StateFormCheckBoxGroupType['value'] | StateFormEmptyValueType;
   };
 
   let formProps: StateFormReturnType<FormValues>;
 
   const initialProps: FormValues = {
-    checkValue0: null,
-    checkValue1: null,
+    checkValue: null,
   };
 
   beforeEach(() => {
@@ -37,127 +41,67 @@ describe(typeName, () => {
     formProps = current;
   });
 
-  it('submit values', () => {
+  describe('simple validity', () => {
+    const possibleValidValues: (StateFormCheckBoxGroupType['value'] | StateFormEmptyValueType)[] = [
+      true,
+      false,
+      ...stateFormEmptyValues,
+    ];
+
+    const invalidValues = [Infinity, -Infinity, NaN, '', 'a']; // any not boolean
+
+    const validChecker = baseRightTestChecker<FormValues>('checkValue', typeName, initialProps);
+
+    const invalidChecker = baseLeftTestChecker<FormValues>('checkValue', typeName);
+
+    it('test valid values. default', () => {
+      validChecker({ formProps, values: possibleValidValues });
+    });
+
+    it('test valid values. required', () => {
+      validChecker({
+        formProps,
+        values: possibleValidValues.filter((v) => !stateFormIsValueInnerEmpty(v)),
+        registerOptions: {
+          required: true,
+        },
+      });
+    });
+
+    it('test invalid values', () => {
+      invalidChecker({ formProps, values: invalidValues, errorMessage: stateFormErrorsCommonInvalidMessage });
+    });
+
+    it('test invalid values. required', () => {
+      invalidChecker({
+        formProps,
+        values: invalidValues,
+        registerOptions: {
+          required: true,
+        },
+        errorMessage: stateFormErrorsRequiredMessage,
+      });
+    });
+  });
+
+  it('submit disabled', () => {
+    const propName: keyof FormValues = 'checkValue';
+
+    formProps.register(propName, typeName, {
+      disabled: true,
+    });
+
+    formProps.setValue(propName, null);
+
     const right = jest.fn();
     const left = jest.fn();
 
-    const newValues: FormValues = {
-      checkValue0: true,
-      checkValue1: false,
-    };
+    formProps.onSubmit(right, left)();
 
-    Object.keys(newValues).forEach((propName) => {
-      formProps.register(propName, typeName, {
-        required: true,
-      });
-    });
-
-    formProps.setValue(newValues);
-
-    formProps.onSubmit((data) => {
-      right(data);
-    }, left)();
-
-    expect(right).toHaveBeenCalledWith(newValues);
+    expect(right).toHaveBeenCalled();
     expect(left).not.toHaveBeenCalled();
-  });
 
-  it('submit empty values', () => {
-    const right = jest.fn();
-    const left = jest.fn();
-
-    const newValues: FormValues = {
-      checkValue0: null,
-      checkValue1: null,
-    };
-
-    Object.keys(newValues).forEach((propName) => {
-      formProps.register(propName, typeName, {
-        required: true,
-      });
-    });
-
-    formProps.onSubmit((data) => {
-      right(data);
-    }, left)();
-
-    expect(right).toHaveBeenCalledWith(newValues);
-    expect(left).not.toHaveBeenCalled();
-  });
-
-  describe('getInitialValue + reset', () => {
-    it('not set values', () => {
-      expect(formProps.getInitialValue()).toEqual(initialProps);
-    });
-
-    it('set values', () => {
-      const newValues: FormValues = {
-        checkValue0: true,
-        checkValue1: false,
-      };
-
-      Object.keys(newValues).forEach((propName) => {
-        formProps.register(propName, typeName);
-      });
-
-      formProps.setValue(newValues);
-
-      expect(formProps.getInitialValue()).toEqual(initialProps);
-    });
-
-    it('reset resetInitialForm', () => {
-      const newValues: FormValues = {
-        checkValue0: true,
-        checkValue1: false,
-      };
-
-      Object.keys(newValues).forEach((propName) => {
-        formProps.register(propName, typeName);
-      });
-
-      formProps.reset(newValues, {
-        resetInitialForm: true,
-      });
-
-      expect(formProps.getInitialValue()).toEqual(newValues);
-    });
-
-    it('reset resetInitialForm + mergeWithPreviousState', () => {
-      const newValues: FormValues = {
-        checkValue0: true,
-        checkValue1: false,
-      };
-
-      Object.keys(newValues).forEach((propName) => {
-        formProps.register(propName, typeName);
-      });
-
-      formProps.reset(
-        {
-          checkValue0: false,
-        },
-        {
-          resetInitialForm: true,
-        },
-      );
-
-      // if later you need to add something to the initial form use mergeWithPrevious
-      // int this way it is possible to reset partially
-      formProps.reset(
-        {
-          checkValue1: false,
-        },
-        {
-          resetInitialForm: true,
-          mergeWithPreviousState: true,
-        },
-      );
-
-      expect(formProps.getInitialValue()).toEqual({
-        checkValue0: false,
-        checkValue1: false,
-      });
-    });
+    expect(formProps.getErrors(propName)).toEqual([]);
   });
 
   it('console errors check (should be the last test)', () => {
