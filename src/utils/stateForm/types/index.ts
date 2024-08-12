@@ -187,3 +187,9 @@ export type StateFormSetFocus<FormValues extends StateFormUnknownFormType = Safe
 >(
   fieldName: FieldName,
 ) => void;
+
+export type StateFormOptionsType<FormValues extends StateFormUnknownFormType> = {
+  defaultValues?: DeepPartial<FormValues>;
+  mode?: 'onChange' | 'onBlur' | 'onSubmit';
+  typeCheckOnSetValue?: boolean;
+};

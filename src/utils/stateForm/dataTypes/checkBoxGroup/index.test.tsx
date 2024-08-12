@@ -32,6 +32,7 @@ describe(typeName, () => {
       (defaultValues) =>
         useStateForm<FormValues>({
           defaultValues,
+          typeCheckOnSetValue: false,
         }),
       {
         initialProps,

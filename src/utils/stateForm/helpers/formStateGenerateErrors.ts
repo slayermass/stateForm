@@ -22,7 +22,7 @@ export const formStateGenerateErrors = (
 
   const errorsToSet: string[] = []; // the array for collecting errors
 
-  if (process.env.NODE_ENV === 'development' && !stateFormInnerValidators[fieldType]?.isSet) {
+  if (process.env.NODE_ENV !== 'production' && !stateFormInnerValidators[fieldType]?.isSet) {
     throw new Error(`Validator is not set for type "${fieldType}"`);
   }
 

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef } from 'react';
 
-import { StateFormPossibleValue, stateFormValuesOfArrayType } from './setDataTypes';
+import { stateFormInnerValidators, StateFormPossibleValue, stateFormValuesOfArrayType } from './setDataTypes';
 import {
   StateFormChangeStateDirectly,
   StateFormClearTypes,
@@ -16,9 +16,11 @@ import {
   StateFormGetSubscribeProps,
   StateFormGetValue,
   StateFormInnerGetValue,
+  stateFormIsValueInnerEmpty,
   StateFormOnBlur,
   StateFormOnChange,
   StateFormOnSubmitType,
+  StateFormOptionsType,
   StateFormRegister,
   StateFormReset,
   StateFormSetError,
@@ -36,7 +38,6 @@ import { formStateGenerateErrors } from './helpers/formStateGenerateErrors';
 import { EventBusReturnType, getEventBus } from './eventBus';
 
 import {
-  DeepPartial,
   diff,
   equal,
   get,
@@ -81,10 +82,8 @@ export type StateFormReturnType<FormValues extends StateFormUnknownFormType = Sa
 export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   defaultValues,
   mode = 'onBlur',
-}: {
-  defaultValues?: DeepPartial<FormValues>;
-  mode?: 'onChange' | 'onBlur' | 'onSubmit';
-} = {}): StateFormReturnType<FormValues> => {
+  typeCheckOnSetValue = true,
+}: StateFormOptionsType<FormValues> = {}): StateFormReturnType<FormValues> => {
   const initialValues = useRef(defaultValues || ({} as FormValues));
 
   /** form eventBus */
@@ -423,6 +422,16 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   const setValue: StateFormSetValue<FormValues> = useCallback(
     (...args) => {
       const changeFn = (name: string, value: SafeAnyType, options?: StateFormSetMultipleValueOptions) => {
+        if (typeCheckOnSetValue && process.env.NODE_ENV !== 'production') {
+          const isRequired = !!getFieldOptionsValue(name, 'options').required;
+
+          const fieldType = getFieldOptionsValue(name, 'type');
+
+          if (isRequired && !stateFormIsValueInnerEmpty(value) && !stateFormInnerValidators[fieldType].isSet(value)) {
+            throw new Error(`Trying to set wrong value "${value}" of type "${typeof value}" to type "${fieldType}"`);
+          }
+        }
+
         onChange(options?.prefix ? `${options.prefix}.${name}` : name, value, {
           trigger: !(options?.trigger === false || options?.trigger === undefined),
           merge: options?.merge,
@@ -435,7 +444,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         changeFn(args[0] as string, args[1], args[2] as StateFormSetValueOptions);
       }
     },
-    [onChange],
+    [getFieldOptionsValue, onChange, typeCheckOnSetValue],
   );
 
   const register: StateFormRegister = useCallback(
