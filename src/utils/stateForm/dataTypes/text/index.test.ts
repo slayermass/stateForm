@@ -35,6 +35,7 @@ describe('text + textarea', () => {
       (defaultValues) =>
         useStateForm<FormValues>({
           defaultValues,
+          typeCheckOnSetValue: false,
         }),
       {
         initialProps,
