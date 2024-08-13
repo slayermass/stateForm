@@ -23,7 +23,9 @@ const validators: StateFormValidatorType<StateFormRichTextType['value'], StateFo
         }
       }
 
-      return !new DOMParser().parseFromString(value || '', 'application/xml').querySelector('parsererror');
+      return !new DOMParser()
+        .parseFromString((value || '').replace(/&nbsp;/gm, '').replace(/<br>/gm, '<br />'), 'application/xml')
+        .querySelector('parsererror');
     },
   };
 
