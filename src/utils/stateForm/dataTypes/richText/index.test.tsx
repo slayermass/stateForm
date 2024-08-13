@@ -45,6 +45,8 @@ describe(typeName, () => {
   describe('simple validity', () => {
     const possibleValidValues: (StateFormRichTextType['value'] | StateFormEmptyValueType)[] = [
       '<p>alo</p>',
+      '<p><br></p>',
+      '<p>&nbsp;</p>',
       ...stateFormEmptyValues,
     ];
 
