@@ -18,7 +18,7 @@ import isBoolean from 'lodash/isBoolean';
 import { diff } from 'deep-object-diff';
 
 // types
-import { DeepPartial, ChildrenPropType, NullableUndefineable } from 'src/utils/types';
+import { DeepPartial, ChildrenPropType } from 'src/utils/types';
 import { getUniqueId } from 'src/utils/getUniqueId';
 import { SafeAnyType } from 'src/utils/safeAny';
 
@@ -53,4 +53,4 @@ export {
   isFinite,
 };
 
-export type { DeepPartial, SafeAnyType, ChildrenPropType, NullableUndefineable };
+export type { DeepPartial, SafeAnyType, ChildrenPropType };

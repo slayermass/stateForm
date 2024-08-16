@@ -9,17 +9,22 @@ import {
 import { StateFormPath, StateFormPathValue, StateFormPathValues } from 'src/utils/stateForm/types/path';
 import { DeepPartial } from 'src/utils/types';
 
-type RecursiveNullable<T> = {
-  [K in keyof T]: RecursiveNullable<T[K]> | null;
-};
-
-type NullableUndefinable<T> = {
-  [K in keyof T]?: RecursiveNullable<T[K]> | null;
+export type NullableUndefinable<T> = {
+  [K in keyof T]?: NullableUndefinable<T[K]> | null;
 };
 
 export type StateFormSpread<T> = NullableUndefinable<{
   [Property in keyof T]: T[Property];
 }>;
+
+/**
+ * @example
+ *
+ * type FormValues = StateFormFormType<{
+ *   test: string;
+ * }>;
+ */
+export type StateFormFormType<T> = StateFormSpread<T>;
 
 export type StateFormEmptyValueType = null | undefined;
 

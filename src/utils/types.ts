@@ -15,11 +15,6 @@ export type RecursiveNullable<T> = {
 type RecursiveNonNullable1<T> = { [K in keyof T]: RecursiveNonNullable<T[K]> };
 export type RecursiveNonNullable<T> = RecursiveNonNullable1<NonNullable<T>>;
 
-/** makes all properties to be set or not  */
-export type NullableUndefineable<T> = {
-  [K in keyof T]?: RecursiveNullable<T[K]> | null;
-};
-
 /** any children passing in components */
 export type ChildrenPropType = React.ReactNode | React.ReactNode[];
 
