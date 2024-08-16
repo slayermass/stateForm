@@ -1,11 +1,11 @@
-import { NullableUndefineable, SafeAnyType } from '../outerDependencies';
-import { StateFormEmptyValueType, StateFormInputOptionsType } from '../types';
+import { SafeAnyType } from '../outerDependencies';
+import { NullableUndefinable, StateFormEmptyValueType, StateFormInputOptionsType } from '../types';
 
 export type StateFormValidatorType<V, P> = {
   isSet: (value: V | StateFormEmptyValueType) => boolean;
   validate: (
     value: V | StateFormEmptyValueType,
-    validationOptions: P extends null ? StateFormInputOptionsType : StateFormInputOptionsType & NullableUndefineable<P>,
+    validationOptions: P extends null ? StateFormInputOptionsType : StateFormInputOptionsType & NullableUndefinable<P>,
   ) => [string, Record<string, SafeAnyType>] | [string] | boolean;
 };
 
