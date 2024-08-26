@@ -325,7 +325,11 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   );
 
   const validateInput = useCallback(
-    (name: string, method: typeof mode, needTrigger = false, clearOnlyValidateError = false) => {
+    (
+      name: string,
+      method: typeof mode,
+      { needTrigger = false, clearOnlyValidateError = false, fromFormFieldArrayHook = false },
+    ) => {
       const value = innerGetValue(name);
 
       const type = getFieldOptionsValue(name, 'type');
@@ -334,12 +338,17 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         (value as Record<string, StateFormPossibleValue>[]).forEach((item, index) => {
           if (isPlainObject()) {
             Object.keys(item).forEach((key) => {
-              validateInput(`${name}[${index}].${key}`, method, true, clearOnlyValidateError);
+              validateInput(`${name}[${index}].${key}`, method, { needTrigger: true, clearOnlyValidateError });
             });
-          } else {
+          } else if (!fromFormFieldArrayHook) {
+            // fromFormFieldArrayHook - ignore validating nested key when appending array value by useStateFormFieldArray
+
             // primitive arrays are not commonly used
             value.forEach((_, innerIndex) => {
-              validateInput(`${name}[${index}][${innerIndex}]`, method, true, clearOnlyValidateError);
+              validateInput(`${name}[${index}][${innerIndex}]`, method, {
+                needTrigger: true,
+                clearOnlyValidateError,
+              });
             });
           }
         });
@@ -378,11 +387,16 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   );
 
   const changeStateDirectly: StateFormChangeStateDirectly = useCallback(
-    (name, value) => {
-      changeStateForm(name, formStateInnerCloneDeep(value));
+    (name, value, options) =>
+      new Promise<boolean>((resolve) => {
+        changeStateForm(name, formStateInnerCloneDeep(value));
 
-      validateInput(name, 'onChange', true);
-    },
+        validateInput(name, 'onChange', { needTrigger: true, fromFormFieldArrayHook: options?.fromFormFieldArrayHook });
+
+        setTimeout(() => {
+          resolve(true);
+        }, 0);
+      }),
     [changeStateForm, validateInput],
   );
 
@@ -406,7 +420,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
       // eslint-disable-next-line no-underscore-dangle
       if (!options?._afterRegister) {
-        validateInput(name, 'onChange', options?.trigger);
+        validateInput(name, 'onChange', { needTrigger: options?.trigger });
       }
     },
     [changeStateForm, checkDirtyField, getFieldOptionsValue, setFieldOptionsValue, validateInput],
@@ -414,7 +428,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   const onBlur: StateFormOnBlur = useCallback(
     (name) => {
-      validateInput(name, 'onBlur', true);
+      validateInput(name, 'onBlur', { needTrigger: true });
     },
     [validateInput],
   );
@@ -517,7 +531,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
       /** trigger all values but only by validate type */
       fields.forEach((name) => {
-        validateInput(name, 'onSubmit', true, true);
+        validateInput(name, 'onSubmit', { needTrigger: true, clearOnlyValidateError: true });
       });
     },
     [validateInput],
@@ -590,7 +604,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
             clearErrors(name);
 
             if (options?.trigger) {
-              validateInput(name, 'onChange', true);
+              validateInput(name, 'onChange', { needTrigger: true });
             }
           }
         });
