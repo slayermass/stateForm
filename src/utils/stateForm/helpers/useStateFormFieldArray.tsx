@@ -1,12 +1,18 @@
 import { useCallback, useRef, useState } from 'react';
 
-import { StateFormReturnType } from './index';
+import { StateFormReturnType } from 'src/utils/stateForm/index';
 
-import { createArrayXLength, isPlainObject, isArray, SafeAnyType, getUniqueId } from './outerDependencies';
+import {
+  createArrayXLength,
+  isPlainObject,
+  isArray,
+  SafeAnyType,
+  getUniqueId,
+} from 'src/utils/stateForm/outerDependencies';
 
 type DefaultFieldType = Record<string, SafeAnyType>;
 
-type RemoveType = (value: number | number[]) => void;
+type RemoveType = (index: number | number[]) => void;
 type AppendType<FieldType = DefaultFieldType> = (value: FieldType) => string;
 
 type ReturnType<FieldsType extends DefaultFieldType[], FieldType = DefaultFieldType> = {
@@ -23,14 +29,16 @@ type Props = {
   rerenderAllFieldsAfterRemove?: boolean;
 };
 
+export type StateFormFieldArrayReturnType<FieldsType extends SafeAnyType[]> = ReturnType<
+  Array<FieldsType[0] extends DefaultFieldType ? FieldsType[0] & { getId: () => string } : { getId: () => string }>,
+  FieldsType[0]
+>;
+
 export const useStateFormFieldArray = <FieldsType extends SafeAnyType[]>({
   formProps: { getValue, changeStateDirectly },
   name,
   rerenderAllFieldsAfterRemove = true,
-}: Props): ReturnType<
-  Array<FieldsType[0] extends DefaultFieldType ? FieldsType[0] & { id: string } : { id: string }>,
-  FieldsType[0]
-> => {
+}: Props): StateFormFieldArrayReturnType<FieldsType> => {
   const [, changeState] = useState(0);
 
   const rerender = useCallback(() => changeState(Math.random()), []);
@@ -46,17 +54,15 @@ export const useStateFormFieldArray = <FieldsType extends SafeAnyType[]>({
           keys.current[index] = getUniqueId();
         }
 
-        const id = keys.current[index];
-
         if (isPlainObject(item)) {
           return {
             ...(item as Record<string, SafeAnyType>),
-            id,
+            getId: () => keys.current[index],
           };
         }
 
         return {
-          id,
+          getId: () => keys.current[index],
         };
       }),
     [getFieldsValue],
@@ -65,13 +71,13 @@ export const useStateFormFieldArray = <FieldsType extends SafeAnyType[]>({
   const append: AppendType<FieldsType[0]> = useCallback(
     (value) => {
       /**
-       * values is always an array
+       * value is always an array
        * add the appending value to the end of the array
        * name must not be changed to replace the updating array correctly
        */
-      changeStateDirectly(name, [...getFieldsValue(), value]);
-
-      rerender();
+      changeStateDirectly(name, [...getFieldsValue(), value], {
+        fromFormFieldArrayHook: true,
+      }).then(rerender);
 
       const key = getUniqueId();
 
@@ -79,7 +85,7 @@ export const useStateFormFieldArray = <FieldsType extends SafeAnyType[]>({
 
       return key;
     },
-    [changeStateDirectly, getFieldsValue, name, rerender],
+    [rerender, changeStateDirectly, getFieldsValue, name],
   );
 
   const remove: RemoveType = useCallback(
@@ -96,9 +102,9 @@ export const useStateFormFieldArray = <FieldsType extends SafeAnyType[]>({
           keys.current = keys.current.filter((_, index) => !indices.includes(index));
         }
 
-        changeStateDirectly(name, arr);
-
-        rerender();
+        changeStateDirectly(name, arr, {
+          fromFormFieldArrayHook: true,
+        }).then(rerender);
       }
     },
     [changeStateDirectly, getFieldsValue, name, rerender, rerenderAllFieldsAfterRemove],

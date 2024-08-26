@@ -185,7 +185,13 @@ export type StateFormGetStatusValue = { isDirty: boolean };
 
 export type StateFormGetStatus = () => StateFormGetStatusValue;
 
-export type StateFormChangeStateDirectly = (name: string, value: SafeAnyType) => void;
+export type StateFormChangeStateDirectly = (
+  name: string,
+  value: SafeAnyType,
+  options?: {
+    fromFormFieldArrayHook?: boolean;
+  },
+) => Promise<boolean>;
 
 export type StateFormSetFocus<FormValues extends StateFormUnknownFormType = SafeAnyType> = <
   FieldName extends StateFormPath<FormValues>,
