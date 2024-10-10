@@ -39,7 +39,7 @@ export const useStateFormFieldArray = <FieldsType extends SafeAnyType[]>({
   name,
   rerenderAllFieldsAfterRemove = true,
 }: Props): StateFormFieldArrayReturnType<FieldsType> => {
-  const [, changeState] = useState(0);
+  const { 1: changeState } = useState(0);
 
   const rerender = useCallback(() => changeState(Math.random()), []);
 
