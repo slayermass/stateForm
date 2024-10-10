@@ -192,7 +192,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         const getNames = (value: StateFormUnknownFormType, parentName?: string): string[] => {
           if (isPlainObject(value)) {
             return Object.entries(value).reduce<string[]>(
-              (acc, [propName, propValue]) => {
+              (acc, { 0: propName, 1: propValue }) => {
                 const name = parentName ? `${parentName}.${propName}` : propName;
 
                 /* there are two ways to subscribe to array values.
@@ -453,7 +453,9 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       };
 
       if (isPlainObject(args[0])) {
-        Object.entries(args[0]).forEach(([name, value]) => changeFn(name, value, args[1] as StateFormSetValueOptions));
+        Object.entries(args[0]).forEach(({ 0: name, 1: value }) =>
+          changeFn(name, value, args[1] as StateFormSetValueOptions),
+        );
       } else {
         changeFn(args[0] as string, args[1], args[2] as StateFormSetValueOptions);
       }
@@ -517,9 +519,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
       if (!names) {
         Object.keys(fieldsOptions.current).forEach((key) => {
-          const value = fieldsOptions.current[key];
-
-          if (value.active) {
+          if (fieldsOptions.current[key].active) {
             fields.push(key);
           }
         });
@@ -581,8 +581,10 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   const reset: StateFormReset = useCallback(
     (values, options) => {
       const fn = (obj: StateFormUnknownFormType, path?: string) =>
-        Object.entries(obj).forEach(([key, currentValue]) => {
+        Object.keys(obj).forEach((key) => {
           const name = path ? `${path}.${key}` : key;
+
+          const currentValue = obj[key];
 
           if (isPlainObject(currentValue)) {
             fn(currentValue, name);
@@ -662,18 +664,18 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   /** get initial value of the form */
   const getInitialValue = useCallback((names?: StateFormPath<FormValues> | StateFormPath<FormValues>[]) => {
-    const getInitialAllValues = () =>
-      Object.entries(initialValues.current).reduce<SafeAnyType>((acc, [k, v]) => {
-        acc[k] = v;
+    if (!names) {
+      const getAllInitialValues = () =>
+        Object.keys(initialValues.current).reduce<SafeAnyType>((acc, key) => {
+          acc[key] = initialValues.current[key];
 
-        return acc;
-      }, {});
+          return acc;
+        }, {});
+
+      return getAllInitialValues();
+    }
 
     const getInitialValue: StateFormInnerGetValue = (name) => formStateInnerCloneDeep(get(initialValues.current, name));
-
-    if (!names) {
-      return getInitialAllValues();
-    }
 
     if (isString(names)) {
       return getInitialValue(names);
