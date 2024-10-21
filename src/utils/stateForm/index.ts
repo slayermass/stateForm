@@ -29,6 +29,8 @@ import {
   StateFormSetRef,
   StateFormSetValue,
   StateFormSetValueOptions,
+  StateFormSubscribeMultipleType,
+  StateFormSubscribeType,
   StateFormTrigger,
   StateFormUnknownFormType,
   StateFormUnregister,
@@ -49,9 +51,10 @@ import {
   isPlainObject,
   isString,
   merge,
+  omit,
   SafeAnyType,
   set,
-  omit,
+  isNumber,
 } from './outerDependencies';
 import { StateFormPath } from './types/path';
 
@@ -69,6 +72,8 @@ export type StateFormReturnType<FormValues extends StateFormUnknownFormType = Sa
   register: StateFormRegister;
   unregister: StateFormUnregister;
   getSubscribeProps: StateFormGetSubscribeProps;
+  subscribe: StateFormSubscribeType<FormValues>;
+  subscribeMultiple: StateFormSubscribeMultipleType<FormValues>;
   reset: StateFormReset<FormValues>;
   getDirtyFields: StateFormGetDirtyFields;
   getStatus: StateFormGetStatus;
@@ -112,7 +117,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   const fieldsOptions = useRef<StateFormFieldsOptions>({});
 
   /** form unique id */
-  const id = useRef(getUniqueId()).current;
+  const FORM_ID = useRef(getUniqueId()).current;
 
   /** helpers */
   const getErrorsByNameInner = useCallback(
@@ -216,11 +221,11 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
             eventBus.emit(name, 'change', cloneObjOrArray(get(formState.current, name)));
           });
 
-          eventBus.emit(id, 'change', cloneObjOrArray(formState.current));
+          eventBus.emit(FORM_ID, 'change', cloneObjOrArray(formState.current));
         }
       }
     },
-    [eventBus, id],
+    [eventBus, FORM_ID],
   );
   /** end helpers */
 
@@ -437,7 +442,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     (...args) => {
       const changeFn = (name: string, value: SafeAnyType, options?: StateFormSetMultipleValueOptions) => {
         if (typeCheckOnSetValue && process.env.NODE_ENV !== 'production') {
-          const isRequired = !!getFieldOptionsValue(name, 'options').required;
+          const isRequired = !!getFieldOptionsValue(name, 'options')?.required;
 
           const fieldType = getFieldOptionsValue(name, 'type');
 
@@ -640,6 +645,78 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   /** end outer API */
 
   /** state subscription */
+  const subscribe = useCallback<StateFormSubscribeType<FormValues>>(
+    (fieldName) => ({
+      on: (callback) => eventBus.on(fieldName || FORM_ID, 'change', callback),
+      onError: (callback) => eventBus.on(fieldName || FORM_ID, 'error', callback),
+    }),
+    [FORM_ID, eventBus],
+  );
+
+  const subscribeMultiple = useCallback<StateFormSubscribeMultipleType<FormValues>>(
+    (fieldNames) => {
+      const fieldsPositions: Record<string, number> = fieldNames.reduce(
+        (acc, name, index) => ({ ...acc, [name]: index }),
+        {},
+      );
+
+      const localErrors = getErrors(fieldNames);
+
+      const localValues = getValue(fieldNames);
+
+      let timer: SafeAnyType;
+
+      const handleEmit =
+        (callback: (values: SafeAnyType) => void, type: 'change' | 'error') => (value: SafeAnyType, name: string) => {
+          const index = fieldsPositions[name];
+
+          if (isNumber(index)) {
+            const valuesVariable = type === 'change' ? localValues : localErrors;
+
+            valuesVariable[index] = value;
+
+            /** it should be called only at the end of all changes
+             *
+             * example case:
+             *
+             *  obj0: {
+             *    obj1: {
+             *      obj2: {
+             *        val: string
+             *      }
+             *    }
+             *  }
+             *
+             *  subscribeMultiple(['obj0', 'obj0.obj1', 'obj0.obj1.obj2.val']).on(<callback>);
+             *
+             *  such a value change will call handleEmit function more than once without timeout:
+             *  setValue('obj0.obj1.obj2.val', 'lol');
+             * */
+            clearTimeout(timer);
+            timer = setTimeout(() => callback([...valuesVariable]));
+          }
+        };
+
+      return {
+        on: (callback) => {
+          const unsubscribeFns = fieldNames.map((fieldName) =>
+            eventBus.on(fieldName, 'change', handleEmit(callback, 'change')),
+          );
+
+          return () => unsubscribeFns.forEach((fn) => fn());
+        },
+        onError: (callback) => {
+          const unsubscribeFns = fieldNames.map((fieldName) =>
+            eventBus.on(fieldName, 'error', handleEmit(callback, 'error')),
+          );
+
+          return () => unsubscribeFns.forEach((fn) => fn());
+        },
+      };
+    },
+    [eventBus, getErrors, getValue],
+  );
+
   const getSubscribeProps: StateFormGetSubscribeProps = useCallback(
     (eventType, names) => [
       (callback: (value: SafeAnyType, fieldName: string) => void) => {
@@ -649,7 +726,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
         /* callback when subscribed to all form values */
         if (!names) {
-          return [eventBus.on(id, eventType, callback)];
+          return [eventBus.on(FORM_ID, eventType, callback)];
         }
 
         return isString(names)
@@ -658,7 +735,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       },
       eventType === 'change' ? getValue(names as SafeAnyType) : getErrors(names as SafeAnyType),
     ],
-    [eventBus, getErrors, getValue, id],
+    [eventBus, getErrors, getValue, FORM_ID],
   );
   /** end state subscription */
 
@@ -708,6 +785,8 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       unregister,
 
       getSubscribeProps,
+      subscribe,
+      subscribeMultiple,
 
       reset,
 
@@ -734,6 +813,8 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       register,
       unregister,
       getSubscribeProps,
+      subscribe,
+      subscribeMultiple,
       reset,
       getDirtyFields,
       getStatus,
