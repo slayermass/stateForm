@@ -55,7 +55,7 @@ import {
   set,
   isNumber,
 } from './outerDependencies';
-import { StateFormPath } from './types/path';
+import { StateFormPath, StateFormPathValues } from './types/path';
 
 /** --- end return types --- */
 
@@ -647,7 +647,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     (fieldNames?: StateFormPath<FormValues> | StateFormPath<FormValues>[]) => {
       if (!fieldNames || isString(fieldNames)) {
         return {
-          on: (callback: SafeAnyType) => eventBus.on(fieldNames || FORM_ID, 'change', (value) => callback(value)),
+          onChange: (callback: SafeAnyType) => eventBus.on(fieldNames || FORM_ID, 'change', (value) => callback(value)),
           onError: (callback: SafeAnyType) => eventBus.on(fieldNames || FORM_ID, 'error', (value) => callback(value)),
         };
       }
@@ -657,17 +657,25 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         {},
       );
 
-      const localErrors = getErrors(fieldNames);
+      let localErrors: StateFormDefinedErrorsType[] = [];
 
-      const localValues = getValue(fieldNames);
+      let localValues: StateFormPathValues<FormValues, StateFormPath<FormValues>[]>[] = [];
 
-      let timer: SafeAnyType;
+      let timer: number;
 
       const handleEmit =
         (callback: (value: SafeAnyType) => void, type: 'change' | 'error') => (value: SafeAnyType, name: string) => {
           const index = fieldsPositions[name];
 
           if (isNumber(index)) {
+            if (type === 'change' && !localValues.length) {
+              localValues = getValue(fieldNames);
+            }
+
+            if (type === 'error' && !localErrors.length) {
+              localErrors = getErrors(fieldNames);
+            }
+
             const valuesVariable = type === 'change' ? localValues : localErrors;
 
             valuesVariable[index] = value;
@@ -690,12 +698,12 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
              *  setValue('obj0.obj1.obj2.val', 'lol');
              * */
             clearTimeout(timer);
-            timer = setTimeout(() => callback([...valuesVariable]));
+            timer = window.setTimeout(() => callback([...valuesVariable]));
           }
         };
 
       return {
-        on: (callback: SafeAnyType) => {
+        onChange: (callback: SafeAnyType) => {
           const unsubscribeFns = fieldNames.map((fieldName) =>
             eventBus.on(fieldName, 'change', handleEmit(callback, 'change')),
           );

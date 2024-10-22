@@ -172,20 +172,22 @@ export type StateFormGetSubscribeProps = (
 
 export type StateFormSubscribeType<FormValues extends StateFormUnknownFormType = SafeAnyType> = {
   (): {
-    on: (callback: (value: FormValues) => void) => ReturnType<EventBusReturnType['on']>;
+    onChange: (callback: (value: FormValues) => void) => ReturnType<EventBusReturnType['on']>;
   };
 
   <FieldName extends StateFormPath<FormValues>>(
     fieldName: FieldName,
   ): {
-    on: (callback: (value: StateFormPathValue<FormValues, FieldName>) => void) => ReturnType<EventBusReturnType['on']>;
+    onChange: (
+      callback: (value: StateFormPathValue<FormValues, FieldName>) => void,
+    ) => ReturnType<EventBusReturnType['on']>;
     onError: (callback: (error: StateFormDefinedErrorsType) => void) => ReturnType<EventBusReturnType['on']>;
   };
 
   <FieldNames extends StateFormPath<FormValues>[]>(
     fieldNames: [...FieldNames],
   ): {
-    on: (
+    onChange: (
       callback: (values: [...StateFormPathValues<FormValues, FieldNames>]) => void,
     ) => ReturnType<EventBusReturnType['on']>;
     onError: (callback: (error: StateFormDefinedErrorsType[]) => void) => ReturnType<EventBusReturnType['on']>;

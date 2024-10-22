@@ -536,11 +536,11 @@ describe('useStateForm', () => {
   });
 
   describe('subscribe', () => {
-    describe('"on" method', () => {
+    describe('"onChange" method', () => {
       it('without names', () => {
         const testFn = jest.fn();
 
-        const unsub = formProps.subscribe().on(testFn);
+        const unsub = formProps.subscribe().onChange(testFn);
 
         formProps.setValue('strValue', 'val1');
         formProps.setValue('nested.test', 'val1');
@@ -562,7 +562,7 @@ describe('useStateForm', () => {
 
         const fieldName = 'strValue';
 
-        const unsub = formProps.subscribe(fieldName).on(testFn);
+        const unsub = formProps.subscribe(fieldName).onChange(testFn);
 
         formProps.setValue(fieldName, 'val1');
 
@@ -584,7 +584,7 @@ describe('useStateForm', () => {
 
         const testFn = jest.fn();
 
-        const unsub = formProps.subscribe(['strValue', 'nested']).on(testFn);
+        const unsub = formProps.subscribe(['strValue', 'nested']).onChange(testFn);
 
         formProps.setValue('strValue', 'val1');
         formProps.setValue('nested.test', 'valNested1');
