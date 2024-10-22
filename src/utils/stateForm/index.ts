@@ -29,7 +29,6 @@ import {
   StateFormSetRef,
   StateFormSetValue,
   StateFormSetValueOptions,
-  StateFormSubscribeMultipleType,
   StateFormSubscribeType,
   StateFormTrigger,
   StateFormUnknownFormType,
@@ -73,7 +72,6 @@ export type StateFormReturnType<FormValues extends StateFormUnknownFormType = Sa
   unregister: StateFormUnregister;
   getSubscribeProps: StateFormGetSubscribeProps;
   subscribe: StateFormSubscribeType<FormValues>;
-  subscribeMultiple: StateFormSubscribeMultipleType<FormValues>;
   reset: StateFormReset<FormValues>;
   getDirtyFields: StateFormGetDirtyFields;
   getStatus: StateFormGetStatus;
@@ -645,16 +643,15 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   /** end outer API */
 
   /** state subscription */
-  const subscribe = useCallback<StateFormSubscribeType<FormValues>>(
-    (fieldName) => ({
-      on: (callback) => eventBus.on(fieldName || FORM_ID, 'change', callback),
-      onError: (callback) => eventBus.on(fieldName || FORM_ID, 'error', callback),
-    }),
-    [FORM_ID, eventBus],
-  );
+  const subscribe: StateFormSubscribeType<FormValues> = useCallback(
+    (fieldNames?: StateFormPath<FormValues> | StateFormPath<FormValues>[]) => {
+      if (!fieldNames || isString(fieldNames)) {
+        return {
+          on: (callback: SafeAnyType) => eventBus.on(fieldNames || FORM_ID, 'change', (value) => callback(value)),
+          onError: (callback: SafeAnyType) => eventBus.on(fieldNames || FORM_ID, 'error', (value) => callback(value)),
+        };
+      }
 
-  const subscribeMultiple = useCallback<StateFormSubscribeMultipleType<FormValues>>(
-    (fieldNames) => {
       const fieldsPositions: Record<string, number> = fieldNames.reduce(
         (acc, name, index) => ({ ...acc, [name]: index }),
         {},
@@ -667,7 +664,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       let timer: SafeAnyType;
 
       const handleEmit =
-        (callback: (values: SafeAnyType) => void, type: 'change' | 'error') => (value: SafeAnyType, name: string) => {
+        (callback: (value: SafeAnyType) => void, type: 'change' | 'error') => (value: SafeAnyType, name: string) => {
           const index = fieldsPositions[name];
 
           if (isNumber(index)) {
@@ -698,14 +695,14 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         };
 
       return {
-        on: (callback) => {
+        on: (callback: SafeAnyType) => {
           const unsubscribeFns = fieldNames.map((fieldName) =>
             eventBus.on(fieldName, 'change', handleEmit(callback, 'change')),
           );
 
           return () => unsubscribeFns.forEach((fn) => fn());
         },
-        onError: (callback) => {
+        onError: (callback: SafeAnyType) => {
           const unsubscribeFns = fieldNames.map((fieldName) =>
             eventBus.on(fieldName, 'error', handleEmit(callback, 'error')),
           );
@@ -714,7 +711,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         },
       };
     },
-    [eventBus, getErrors, getValue],
+    [FORM_ID, eventBus, getErrors, getValue],
   );
 
   const getSubscribeProps: StateFormGetSubscribeProps = useCallback(
@@ -786,7 +783,6 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
       getSubscribeProps,
       subscribe,
-      subscribeMultiple,
 
       reset,
 
@@ -814,7 +810,6 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       unregister,
       getSubscribeProps,
       subscribe,
-      subscribeMultiple,
       reset,
       getDirtyFields,
       getStatus,

@@ -535,6 +535,131 @@ describe('useStateForm', () => {
     expect(formProps.getValue()).toEqual(initialProps);
   });
 
+  describe('subscribe', () => {
+    describe('"on" method', () => {
+      it('without names', () => {
+        const testFn = jest.fn();
+
+        const unsub = formProps.subscribe().on(testFn);
+
+        formProps.setValue('strValue', 'val1');
+        formProps.setValue('nested.test', 'val1');
+
+        expect(testFn).toHaveBeenNthCalledWith(1, { ...initialProps, strValue: 'val1' });
+        expect(testFn).toHaveBeenNthCalledWith(2, { ...initialProps, strValue: 'val1', nested: { test: 'val1' } });
+        expect(testFn).toHaveBeenCalledTimes(2);
+
+        unsub();
+        testFn.mockClear();
+
+        formProps.setValue('strValue', 'val2');
+
+        expect(testFn).not.toHaveBeenCalled();
+      });
+
+      it('single name', () => {
+        const testFn = jest.fn();
+
+        const fieldName = 'strValue';
+
+        const unsub = formProps.subscribe(fieldName).on(testFn);
+
+        formProps.setValue(fieldName, 'val1');
+
+        formProps.setValue('booleanValue', true);
+
+        expect(testFn).toHaveBeenCalledWith('val1');
+        expect(testFn).toHaveBeenCalledTimes(1);
+
+        unsub();
+        testFn.mockClear();
+
+        formProps.setValue(fieldName, 'val2');
+
+        expect(testFn).toHaveBeenCalledTimes(0);
+      });
+
+      it('multiple names', () => {
+        jest.useFakeTimers();
+
+        const testFn = jest.fn();
+
+        const unsub = formProps.subscribe(['strValue', 'nested']).on(testFn);
+
+        formProps.setValue('strValue', 'val1');
+        formProps.setValue('nested.test', 'valNested1');
+
+        formProps.setValue('booleanValue', true);
+
+        jest.runAllTimers();
+
+        expect(testFn).toHaveBeenCalledWith(['val1', { test: 'valNested1' }]);
+        expect(testFn).toHaveBeenCalledTimes(1);
+
+        unsub();
+        testFn.mockClear();
+
+        formProps.setValue('strValue', 'val2');
+        formProps.setValue('nested.test', 'valNested2');
+
+        expect(testFn).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('"onError" method', () => {
+      it('single name', () => {
+        const testFn = jest.fn();
+
+        const fieldName = 'strValue';
+
+        const unsub = formProps.subscribe(fieldName).onError(testFn);
+
+        formProps.setError(fieldName, 'error');
+
+        formProps.setError('booleanValue', 'error2');
+
+        expect(testFn).toHaveBeenCalledWith([{ message: 'error', type: 'validate' }]);
+        expect(testFn).toHaveBeenCalledTimes(1);
+
+        unsub();
+        testFn.mockClear();
+
+        formProps.setError(fieldName, 'error2');
+
+        expect(testFn).toHaveBeenCalledTimes(0);
+      });
+
+      it('multiple names', () => {
+        jest.useFakeTimers();
+
+        const testFn = jest.fn();
+
+        const unsub = formProps.subscribe(['strValue', 'nested.test']).onError(testFn);
+
+        formProps.setError('strValue', 'error');
+        formProps.setError('nested.test', 'error2');
+
+        formProps.setError('booleanValue', 'error3');
+
+        jest.runAllTimers();
+
+        expect(testFn).toHaveBeenCalledWith([
+          [{ message: 'error', type: 'validate' }],
+          [{ message: 'error2', type: 'validate' }],
+        ]);
+        expect(testFn).toHaveBeenCalledTimes(1);
+
+        unsub();
+        testFn.mockClear();
+
+        formProps.setError('strValue', 'val2');
+        formProps.setError('nested.test', 'valNested2');
+
+        expect(testFn).not.toHaveBeenCalled();
+      });
+    });
+  });
+
   // it('getSubscribeProps and changeStateForm', () => {
   //   const checkSubscribeProps = (name: StateFormPath<FormValues>, value: SafeAnyType) => {
   //     const errorMessage = 'Error message';
