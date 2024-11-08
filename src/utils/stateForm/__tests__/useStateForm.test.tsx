@@ -65,6 +65,8 @@ describe('useStateForm', () => {
     bigIntValue: BigInt(1e10),
   };
 
+  let unmountHook: () => void;
+
   const formSetThenExpect = (fieldName: keyof FormValues, arr: any[]) => {
     arr.forEach((value) => {
       formProps.setValue(fieldName, value);
@@ -75,6 +77,7 @@ describe('useStateForm', () => {
   beforeEach(() => {
     const {
       result: { current },
+      unmount,
     } = renderHook(
       (defaultValues) =>
         useStateForm<FormValues>({
@@ -87,6 +90,7 @@ describe('useStateForm', () => {
     );
 
     formProps = current;
+    unmountHook = unmount;
   });
 
   it('test initial values', () => {
@@ -536,6 +540,27 @@ describe('useStateForm', () => {
   });
 
   describe('subscribe', () => {
+    it('unmount', () => {
+      const testFn = jest.fn();
+
+      const subscribeFn = formProps.subscribe('strValue');
+      const subscribeMultipleFn = formProps.subscribe(['strValue', 'nested']);
+
+      subscribeFn.onChange(testFn);
+      subscribeFn.onError(testFn);
+      subscribeMultipleFn.onChange(testFn);
+      subscribeMultipleFn.onError(testFn);
+
+      unmountHook();
+
+      formProps.setValue('strValue', 'testValue');
+      formProps.setError('strValue', 'testValue');
+      formProps.setValue('nested', { test: 2 });
+      formProps.setError('nested', 'testValue');
+
+      expect(testFn).not.toHaveBeenCalled();
+    });
+
     describe('"onChange" method', () => {
       it('without names', () => {
         const testFn = jest.fn();
@@ -604,6 +629,270 @@ describe('useStateForm', () => {
 
         expect(testFn).not.toHaveBeenCalled();
       });
+
+      it('check subscriptions', () => {
+        const TEST_ITEMS_COUNT = 100;
+        const TEST_ITEMS = Array(TEST_ITEMS_COUNT).fill(1);
+        const testIndex = Math.floor(Math.random() * TEST_ITEMS_COUNT);
+
+        let testFns: jest.Mock[] = [];
+        let unsubFns: (() => void)[] = [];
+
+        const clearVariables = () => {
+          testFns = [];
+          unsubFns = [];
+          formProps.setValue('optionalAnyType', []);
+        };
+
+        /** many subscriptions to the same name */
+        clearVariables();
+
+        TEST_ITEMS.forEach(() => {
+          const testFn = jest.fn();
+
+          const unsub = formProps.subscribe('optionalAnyType.0').onChange(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        formProps.setValue('optionalAnyType.0', 'testValue');
+
+        TEST_ITEMS.forEach((_, index) => {
+          expect(testFns[index]).toHaveBeenCalledTimes(1);
+          expect(testFns[index]).toHaveBeenCalledWith('testValue');
+
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+        });
+
+        formProps.setValue('optionalAnyType.0', 'testValue1');
+
+        TEST_ITEMS.forEach((_, index) => {
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+
+        /** change a single value */
+        TEST_ITEMS.forEach((_, index) => {
+          const testFn = jest.fn();
+
+          const unsub = formProps.subscribe(`optionalAnyType.${index}`).onChange(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        formProps.setValue(`optionalAnyType.${testIndex}`, 'testValue');
+
+        TEST_ITEMS.forEach((_, index) => {
+          if (index === testIndex) {
+            expect(testFns[testIndex]).toHaveBeenCalledTimes(1);
+            expect(testFns[testIndex]).toHaveBeenCalledWith('testValue');
+          } else {
+            expect(testFns[index]).not.toHaveBeenCalled();
+          }
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+
+          formProps.setValue(`optionalAnyType.${index}`, 'testValue1');
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+
+        /** the only unsubscription */
+        TEST_ITEMS.forEach((_, index) => {
+          const testFn = jest.fn();
+
+          const unsub = formProps.subscribe(`optionalAnyType.${index}`).onChange(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        unsubFns[testIndex]();
+
+        TEST_ITEMS.forEach((_, index) => {
+          formProps.setValue(`optionalAnyType.${index}`, 'testValue');
+
+          if (index === testIndex) {
+            expect(testFns[index]).not.toHaveBeenCalled();
+          } else {
+            expect(testFns[index]).toHaveBeenCalledTimes(1);
+            expect(testFns[index]).toHaveBeenCalledWith('testValue');
+          }
+
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+
+          formProps.setValue(`optionalAnyType.${index}`, 'testValue1');
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+      });
+
+      it('check multiple subscriptions', () => {
+        const TEST_ITEMS_COUNT = 100;
+        const TEST_ITEMS = Array(TEST_ITEMS_COUNT).fill(1);
+        const testIndex = Math.floor(Math.random() * TEST_ITEMS_COUNT);
+
+        let testFns: jest.Mock[] = [];
+        let unsubFns: (() => void)[] = [];
+
+        const clearVariables = () => {
+          testFns = [];
+          unsubFns = [];
+          formProps.setValue('optionalAnyType', { test1: TEST_ITEMS.map(() => '1'), test2: TEST_ITEMS.map(() => '1') });
+          jest.useRealTimers();
+        };
+
+        /** many subscriptions to the same name */
+        clearVariables();
+
+        TEST_ITEMS.forEach(() => {
+          const testFn = jest.fn();
+
+          const unsub = formProps.subscribe(['optionalAnyType.test1.0', 'optionalAnyType.test2.0']).onChange(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        jest.useFakeTimers();
+
+        formProps.setValue('optionalAnyType.test1.0', 'test1Value');
+        formProps.setValue('optionalAnyType.test2.0', 'test2Value');
+
+        jest.runAllTimers();
+
+        TEST_ITEMS.forEach((_, index) => {
+          expect(testFns[index]).toHaveBeenCalledTimes(1);
+          expect(testFns[index]).toHaveBeenCalledWith(['test1Value', 'test2Value']);
+
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+        });
+
+        jest.useFakeTimers();
+
+        formProps.setValue('optionalAnyType.test1.0', 'test1Value1');
+        formProps.setValue('optionalAnyType.test2.0', 'test2Value1');
+
+        jest.runAllTimers();
+
+        TEST_ITEMS.forEach((_, index) => {
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+
+        /** change a single value */
+        clearVariables();
+
+        TEST_ITEMS.forEach((_, index) => {
+          const testFn = jest.fn();
+
+          const unsub = formProps
+            .subscribe([`optionalAnyType.test1.${index}`, `optionalAnyType.test2.${index}`])
+            .onChange(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        jest.useFakeTimers();
+
+        formProps.setValue(`optionalAnyType.test1.${testIndex}`, 'test1Value');
+        formProps.setValue(`optionalAnyType.test2.${testIndex}`, 'test2Value');
+
+        jest.runAllTimers();
+
+        TEST_ITEMS.forEach((_, index) => {
+          if (index === testIndex) {
+            expect(testFns[testIndex]).toHaveBeenCalledTimes(1);
+            // expect(testFns[testIndex]).toHaveBeenCalledWith(['test1Value', 'test2Value']);
+          } else {
+            expect(testFns[index]).not.toHaveBeenCalled();
+          }
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+
+          formProps.setValue(`optionalAnyType.test1.${index}`, 'test1Value1');
+          formProps.setValue(`optionalAnyType.test2.${index}`, 'test2Value1');
+
+          jest.runAllTimers();
+
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+
+        /** the only unsubscription */
+
+        TEST_ITEMS.forEach((_, index) => {
+          const testFn = jest.fn();
+
+          const unsub = formProps
+            .subscribe([`optionalAnyType.test1.${index}`, `optionalAnyType.test2.${index}`])
+            .onChange(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        unsubFns[testIndex]();
+
+        TEST_ITEMS.forEach((_, index) => {
+          jest.useFakeTimers();
+
+          formProps.setValue(`optionalAnyType.test1.${index}`, 'test1Value');
+          formProps.setValue(`optionalAnyType.test2.${index}`, 'test2Value');
+
+          jest.runAllTimers();
+
+          if (index === testIndex) {
+            expect(testFns[index]).not.toHaveBeenCalled();
+          } else {
+            expect(testFns[index]).toHaveBeenCalledTimes(1);
+            expect(testFns[index]).toHaveBeenCalledWith(['test1Value', 'test2Value']);
+          }
+
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+
+          jest.useFakeTimers();
+
+          formProps.setValue(`optionalAnyType.test1.${index}`, 'test1Value1');
+          formProps.setValue(`optionalAnyType.test2.${index}`, 'test2Value1');
+
+          jest.runAllTimers();
+
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+      });
     });
 
     describe('"onError" method', () => {
@@ -656,6 +945,278 @@ describe('useStateForm', () => {
         formProps.setError('nested.test', 'valNested2');
 
         expect(testFn).not.toHaveBeenCalled();
+      });
+
+      it('check subscriptions', () => {
+        const TEST_ITEMS_COUNT = 100;
+        const TEST_ITEMS = Array(TEST_ITEMS_COUNT).fill(1);
+        const testIndex = Math.floor(Math.random() * TEST_ITEMS_COUNT);
+
+        let testFns: jest.Mock[] = [];
+        let unsubFns: (() => void)[] = [];
+
+        const clearVariables = () => {
+          testFns = [];
+          unsubFns = [];
+          TEST_ITEMS.forEach((_, index) => {
+            formProps.clearErrors(`optionalAnyType.${index}`);
+          });
+        };
+
+        /** many subscriptions to the same name */
+        clearVariables();
+
+        TEST_ITEMS.forEach(() => {
+          const testFn = jest.fn();
+
+          const unsub = formProps.subscribe('optionalAnyType.0').onError(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        formProps.setError('optionalAnyType.0', 'testValue');
+
+        TEST_ITEMS.forEach((_, index) => {
+          expect(testFns[index]).toHaveBeenCalledTimes(1);
+          expect(testFns[index]).toHaveBeenCalledWith([{ message: 'testValue', type: 'validate' }]);
+
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+        });
+
+        formProps.setError('optionalAnyType.0', 'testValue1');
+
+        TEST_ITEMS.forEach((_, index) => {
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+
+        /** change a single value */
+        TEST_ITEMS.forEach((_, index) => {
+          const testFn = jest.fn();
+
+          const unsub = formProps.subscribe(`optionalAnyType.${index}`).onError(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        formProps.setError(`optionalAnyType.${testIndex}`, 'testValue');
+
+        TEST_ITEMS.forEach((_, index) => {
+          if (index === testIndex) {
+            expect(testFns[testIndex]).toHaveBeenCalledTimes(1);
+            expect(testFns[testIndex]).toHaveBeenCalledWith([{ message: 'testValue', type: 'validate' }]);
+          } else {
+            expect(testFns[index]).not.toHaveBeenCalled();
+          }
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+
+          formProps.setError(`optionalAnyType.${index}`, 'testValue1');
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+
+        /** the only unsubscription */
+        TEST_ITEMS.forEach((_, index) => {
+          const testFn = jest.fn();
+
+          const unsub = formProps.subscribe(`optionalAnyType.${index}`).onError(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        unsubFns[testIndex]();
+
+        TEST_ITEMS.forEach((_, index) => {
+          formProps.setError(`optionalAnyType.${index}`, 'testValue');
+
+          if (index === testIndex) {
+            expect(testFns[index]).not.toHaveBeenCalled();
+          } else {
+            expect(testFns[index]).toHaveBeenCalledTimes(1);
+            expect(testFns[index]).toHaveBeenCalledWith([{ message: 'testValue', type: 'validate' }]);
+          }
+
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+
+          formProps.setError(`optionalAnyType.${index}`, 'testValue1');
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+      });
+
+      it('check multiple subscriptions', () => {
+        const TEST_ITEMS_COUNT = 100;
+        const TEST_ITEMS = Array(TEST_ITEMS_COUNT).fill(1);
+        const testIndex = Math.floor(Math.random() * TEST_ITEMS_COUNT);
+
+        let testFns: jest.Mock[] = [];
+        let unsubFns: (() => void)[] = [];
+
+        const clearVariables = () => {
+          testFns = [];
+          unsubFns = [];
+          TEST_ITEMS.forEach((_, index) => {
+            formProps.clearErrors(`optionalAnyType.test1.${index}`);
+            formProps.clearErrors(`optionalAnyType.test2.${index}`);
+          });
+          jest.useRealTimers();
+        };
+
+        /** many subscriptions to the same name */
+        clearVariables();
+
+        TEST_ITEMS.forEach(() => {
+          const testFn = jest.fn();
+
+          const unsub = formProps.subscribe(['optionalAnyType.test1.0', 'optionalAnyType.test2.0']).onError(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        jest.useFakeTimers();
+
+        formProps.setError('optionalAnyType.test1.0', 'test1Value');
+        formProps.setError('optionalAnyType.test2.0', 'test2Value');
+
+        jest.runAllTimers();
+
+        TEST_ITEMS.forEach((_, index) => {
+          expect(testFns[index]).toHaveBeenCalledTimes(1);
+          expect(testFns[index]).toHaveBeenCalledWith([
+            [{ message: 'test1Value', type: 'validate' }],
+            [{ message: 'test2Value', type: 'validate' }],
+          ]);
+
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+        });
+
+        jest.useFakeTimers();
+
+        formProps.setError('optionalAnyType.test1.0', 'test1Value1');
+        formProps.setError('optionalAnyType.test2.0', 'test2Value1');
+
+        jest.runAllTimers();
+
+        TEST_ITEMS.forEach((_, index) => {
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+
+        /** change a single value */
+        TEST_ITEMS.forEach((_, index) => {
+          const testFn = jest.fn();
+
+          const unsub = formProps
+            .subscribe([`optionalAnyType.test1.${index}`, `optionalAnyType.test2.${index}`])
+            .onError(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        jest.useFakeTimers();
+
+        formProps.setError(`optionalAnyType.test1.${testIndex}`, 'test1Value');
+        formProps.setError(`optionalAnyType.test2.${testIndex}`, 'test2Value');
+
+        jest.runAllTimers();
+
+        TEST_ITEMS.forEach((_, index) => {
+          if (index === testIndex) {
+            expect(testFns[testIndex]).toHaveBeenCalledTimes(1);
+            expect(testFns[testIndex]).toHaveBeenCalledWith([
+              [{ message: 'test1Value', type: 'validate' }],
+              [{ message: 'test2Value', type: 'validate' }],
+            ]);
+          } else {
+            expect(testFns[index]).not.toHaveBeenCalled();
+          }
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+
+          formProps.setError(`optionalAnyType.test1.${index}`, 'test1Value1');
+          formProps.setError(`optionalAnyType.test2.${index}`, 'test2Value1');
+
+          jest.runAllTimers();
+
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
+
+        /** the only unsubscription */
+        TEST_ITEMS.forEach((_, index) => {
+          const testFn = jest.fn();
+
+          const unsub = formProps
+            .subscribe([`optionalAnyType.test1.${index}`, `optionalAnyType.test2.${index}`])
+            .onError(testFn);
+
+          testFns.push(testFn);
+          unsubFns.push(unsub);
+        });
+
+        unsubFns[testIndex]();
+
+        TEST_ITEMS.forEach((_, index) => {
+          jest.useFakeTimers();
+
+          formProps.setError(`optionalAnyType.test1.${index}`, 'test1Value');
+          formProps.setError(`optionalAnyType.test2.${index}`, 'test2Value');
+
+          jest.runAllTimers();
+
+          if (index === testIndex) {
+            expect(testFns[index]).not.toHaveBeenCalled();
+          } else {
+            expect(testFns[index]).toHaveBeenCalledTimes(1);
+            expect(testFns[index]).toHaveBeenCalledWith([
+              [{ message: 'test1Value', type: 'validate' }],
+              [{ message: 'test2Value', type: 'validate' }],
+            ]);
+          }
+
+          unsubFns[index]();
+        });
+
+        TEST_ITEMS.forEach((_, index) => {
+          testFns[index].mockClear();
+
+          formProps.setError(`optionalAnyType.test1.${index}`, 'test1Value1');
+          formProps.setError(`optionalAnyType.test2.${index}`, 'test2Value1');
+
+          jest.runAllTimers();
+          expect(testFns[index]).not.toHaveBeenCalled();
+        });
+
+        clearVariables();
       });
     });
   });

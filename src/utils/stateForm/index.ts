@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { stateFormInnerValidators, StateFormPossibleValue, stateFormValuesOfArrayType } from './setDataTypes';
 import {
@@ -657,62 +657,77 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         {},
       );
 
-      let localErrors: StateFormDefinedErrorsType[] = [];
+      let allErrors: StateFormDefinedErrorsType[] = [];
 
-      let localValues: StateFormPathValues<FormValues, StateFormPath<FormValues>[]>[] = [];
+      let allValues: StateFormPathValues<FormValues, StateFormPath<FormValues>[]>[] = [];
 
       let timer: number;
 
-      const handleEmit =
-        (callback: (value: SafeAnyType) => void, type: 'change' | 'error') => (value: SafeAnyType, name: string) => {
-          const index = fieldsPositions[name];
+      const handleEmit = (
+        callback: (value: SafeAnyType) => void,
+        type: 'change' | 'error',
+        localTimer: number,
+        localValues: StateFormPathValues<FormValues, StateFormPath<FormValues>[]>[],
+        localErrors: StateFormDefinedErrorsType[],
+        value: SafeAnyType,
+        name: string,
+      ) => {
+        const index = fieldsPositions[name];
 
-          if (isNumber(index)) {
-            if (type === 'change' && !localValues.length) {
-              localValues = getValue(fieldNames);
-            }
-
-            if (type === 'error' && !localErrors.length) {
-              localErrors = getErrors(fieldNames);
-            }
-
-            const valuesVariable = type === 'change' ? localValues : localErrors;
-
-            valuesVariable[index] = value;
-
-            /** it should be called only at the end of all changes
-             *
-             * example case:
-             *
-             *  obj0: {
-             *    obj1: {
-             *      obj2: {
-             *        val: string
-             *      }
-             *    }
-             *  }
-             *
-             *  subscribeMultiple(['obj0', 'obj0.obj1', 'obj0.obj1.obj2.val']).on(<callback>);
-             *
-             *  such a value change will call handleEmit function more than once without timeout:
-             *  setValue('obj0.obj1.obj2.val', 'lol');
-             * */
-            clearTimeout(timer);
-            timer = window.setTimeout(() => callback([...valuesVariable]));
+        if (isNumber(index)) {
+          /** only the first call for each type should request initial values */
+          if (type === 'change' && !localValues.length) {
+            localValues = getValue(fieldNames);
+          } else if (type === 'error' && !localErrors.length) {
+            localErrors = getErrors(fieldNames);
           }
-        };
+
+          const valuesVariable = type === 'change' ? localValues : localErrors;
+
+          valuesVariable[index] = value;
+
+          allValues = localValues;
+          allErrors = localErrors;
+
+          /** it should be called only at the end of all changes
+           *
+           * example case:
+           *
+           *  obj0: {
+           *    obj1: {
+           *      obj2: {
+           *        val: string
+           *      }
+           *    }
+           *  }
+           *
+           *  subscribeMultiple(['obj0', 'obj0.obj1', 'obj0.obj1.obj2.val']).on(<callback>);
+           *
+           *  such a value change will call handleEmit function more than once without timeout:
+           *  setValue('obj0.obj1.obj2.val', 'lol');
+           * */
+          clearTimeout(localTimer);
+          localTimer = window.setTimeout(() => callback([...valuesVariable]));
+
+          timer = localTimer;
+        }
+      };
 
       return {
         onChange: (callback: SafeAnyType) => {
           const unsubscribeFns = fieldNames.map((fieldName) =>
-            eventBus.on(fieldName, 'change', handleEmit(callback, 'change')),
+            eventBus.on(fieldName, 'change', (value, name) =>
+              handleEmit(callback, 'change', timer, allValues, allErrors, value, name),
+            ),
           );
 
           return () => unsubscribeFns.forEach((fn) => fn());
         },
         onError: (callback: SafeAnyType) => {
           const unsubscribeFns = fieldNames.map((fieldName) =>
-            eventBus.on(fieldName, 'error', handleEmit(callback, 'error')),
+            eventBus.on(fieldName, 'error', (value, name) =>
+              handleEmit(callback, 'error', timer, allValues, allErrors, value, name),
+            ),
           );
 
           return () => unsubscribeFns.forEach((fn) => fn());
@@ -769,6 +784,8 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
     return undefined;
   }, []) as StateFormGetValue<FormValues>;
+
+  useEffect(() => () => eventBus.clear(), [eventBus]);
 
   return useMemo(
     () => ({
