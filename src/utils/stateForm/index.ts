@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { stateFormInnerValidators, StateFormPossibleValue, stateFormValuesOfArrayType } from './setDataTypes';
 import {
@@ -29,6 +29,7 @@ import {
   StateFormSetRef,
   StateFormSetValue,
   StateFormSetValueOptions,
+  StateFormSubscribeType,
   StateFormTrigger,
   StateFormUnknownFormType,
   StateFormUnregister,
@@ -49,11 +50,12 @@ import {
   isPlainObject,
   isString,
   merge,
+  omit,
   SafeAnyType,
   set,
-  omit,
+  isNumber,
 } from './outerDependencies';
-import { StateFormPath } from './types/path';
+import { StateFormPath, StateFormPathValues } from './types/path';
 
 /** --- end return types --- */
 
@@ -69,6 +71,7 @@ export type StateFormReturnType<FormValues extends StateFormUnknownFormType = Sa
   register: StateFormRegister;
   unregister: StateFormUnregister;
   getSubscribeProps: StateFormGetSubscribeProps;
+  subscribe: StateFormSubscribeType<FormValues>;
   reset: StateFormReset<FormValues>;
   getDirtyFields: StateFormGetDirtyFields;
   getStatus: StateFormGetStatus;
@@ -112,7 +115,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   const fieldsOptions = useRef<StateFormFieldsOptions>({});
 
   /** form unique id */
-  const id = useRef(getUniqueId()).current;
+  const FORM_ID = useRef(getUniqueId()).current;
 
   /** helpers */
   const getErrorsByNameInner = useCallback(
@@ -216,11 +219,11 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
             eventBus.emit(name, 'change', cloneObjOrArray(get(formState.current, name)));
           });
 
-          eventBus.emit(id, 'change', cloneObjOrArray(formState.current));
+          eventBus.emit(FORM_ID, 'change', cloneObjOrArray(formState.current));
         }
       }
     },
-    [eventBus, id],
+    [eventBus, FORM_ID],
   );
   /** end helpers */
 
@@ -437,7 +440,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     (...args) => {
       const changeFn = (name: string, value: SafeAnyType, options?: StateFormSetMultipleValueOptions) => {
         if (typeCheckOnSetValue && process.env.NODE_ENV !== 'production') {
-          const isRequired = !!getFieldOptionsValue(name, 'options').required;
+          const isRequired = !!getFieldOptionsValue(name, 'options')?.required;
 
           const fieldType = getFieldOptionsValue(name, 'type');
 
@@ -640,6 +643,100 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   /** end outer API */
 
   /** state subscription */
+  const subscribe: StateFormSubscribeType<FormValues> = useCallback(
+    (fieldNames?: StateFormPath<FormValues> | StateFormPath<FormValues>[]) => {
+      if (!fieldNames || isString(fieldNames)) {
+        return {
+          onChange: (callback: SafeAnyType) => eventBus.on(fieldNames || FORM_ID, 'change', (value) => callback(value)),
+          onError: (callback: SafeAnyType) => eventBus.on(fieldNames || FORM_ID, 'error', (value) => callback(value)),
+        };
+      }
+
+      const fieldsPositions: Record<string, number> = fieldNames.reduce(
+        (acc, name, index) => ({ ...acc, [name]: index }),
+        {},
+      );
+
+      let allErrors: StateFormDefinedErrorsType[] = [];
+
+      let allValues: StateFormPathValues<FormValues, StateFormPath<FormValues>[]>[] = [];
+
+      let timer: number;
+
+      const handleEmit = (
+        callback: (value: SafeAnyType) => void,
+        type: 'change' | 'error',
+        localTimer: number,
+        localValues: StateFormPathValues<FormValues, StateFormPath<FormValues>[]>[],
+        localErrors: StateFormDefinedErrorsType[],
+        value: SafeAnyType,
+        name: string,
+      ) => {
+        const index = fieldsPositions[name];
+
+        if (isNumber(index)) {
+          /** only the first call for each type should request initial values */
+          if (type === 'change' && !localValues.length) {
+            localValues = getValue(fieldNames);
+          } else if (type === 'error' && !localErrors.length) {
+            localErrors = getErrors(fieldNames);
+          }
+
+          const valuesVariable = type === 'change' ? localValues : localErrors;
+
+          valuesVariable[index] = value;
+
+          allValues = localValues;
+          allErrors = localErrors;
+
+          /** it should be called only at the end of all changes
+           *
+           * example case:
+           *
+           *  obj0: {
+           *    obj1: {
+           *      obj2: {
+           *        val: string
+           *      }
+           *    }
+           *  }
+           *
+           *  subscribeMultiple(['obj0', 'obj0.obj1', 'obj0.obj1.obj2.val']).on(<callback>);
+           *
+           *  such a value change will call handleEmit function more than once without timeout:
+           *  setValue('obj0.obj1.obj2.val', 'lol');
+           * */
+          clearTimeout(localTimer);
+          localTimer = window.setTimeout(() => callback([...valuesVariable]));
+
+          timer = localTimer;
+        }
+      };
+
+      return {
+        onChange: (callback: SafeAnyType) => {
+          const unsubscribeFns = fieldNames.map((fieldName) =>
+            eventBus.on(fieldName, 'change', (value, name) =>
+              handleEmit(callback, 'change', timer, allValues, allErrors, value, name),
+            ),
+          );
+
+          return () => unsubscribeFns.forEach((fn) => fn());
+        },
+        onError: (callback: SafeAnyType) => {
+          const unsubscribeFns = fieldNames.map((fieldName) =>
+            eventBus.on(fieldName, 'error', (value, name) =>
+              handleEmit(callback, 'error', timer, allValues, allErrors, value, name),
+            ),
+          );
+
+          return () => unsubscribeFns.forEach((fn) => fn());
+        },
+      };
+    },
+    [FORM_ID, eventBus, getErrors, getValue],
+  );
+
   const getSubscribeProps: StateFormGetSubscribeProps = useCallback(
     (eventType, names) => [
       (callback: (value: SafeAnyType, fieldName: string) => void) => {
@@ -649,7 +746,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
         /* callback when subscribed to all form values */
         if (!names) {
-          return [eventBus.on(id, eventType, callback)];
+          return [eventBus.on(FORM_ID, eventType, callback)];
         }
 
         return isString(names)
@@ -658,7 +755,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       },
       eventType === 'change' ? getValue(names as SafeAnyType) : getErrors(names as SafeAnyType),
     ],
-    [eventBus, getErrors, getValue, id],
+    [eventBus, getErrors, getValue, FORM_ID],
   );
   /** end state subscription */
 
@@ -688,6 +785,8 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     return undefined;
   }, []) as StateFormGetValue<FormValues>;
 
+  useEffect(() => () => eventBus.clear(), [eventBus]);
+
   return useMemo(
     () => ({
       onSubmit,
@@ -708,6 +807,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       unregister,
 
       getSubscribeProps,
+      subscribe,
 
       reset,
 
@@ -734,6 +834,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       register,
       unregister,
       getSubscribeProps,
+      subscribe,
       reset,
       getDirtyFields,
       getStatus,

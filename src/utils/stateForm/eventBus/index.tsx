@@ -15,6 +15,7 @@ export type EventBusReturnType = {
     id?: string,
   ) => () => void;
   emit: (fieldName: string, type: EventBusFieldEventType, value: SafeAnyType) => void;
+  clear: () => void;
 };
 
 type TestHelpersType = {
@@ -27,7 +28,7 @@ export type EventBusReturnTestType = EventBusReturnType & TestHelpersType;
 const getNameWithType = (fieldName: string, type: EventBusFieldEventType) => `${fieldName}_${type}`;
 
 export const getEventBus: () => EventBusReturnType = () => {
-  const events: Record<string, (value: SafeAnyType, name: string) => void> = {};
+  let events: Record<string, (value: SafeAnyType, name: string) => void> = {};
 
   return {
     on(fieldName, type, callback, id = getUniqueId()) {
@@ -47,6 +48,9 @@ export const getEventBus: () => EventBusReturnType = () => {
       if (callbacks) {
         Object.values(callbacks).forEach((callback) => callback(value, fieldName));
       }
+    },
+    clear() {
+      events = {};
     },
 
     ...(process.env.NODE_ENV === 'test'

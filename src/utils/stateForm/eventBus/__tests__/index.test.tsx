@@ -35,6 +35,16 @@ describe('eventBus', () => {
       expect(callback).not.toHaveBeenCalled();
     });
 
+    it('clear', () => {
+      const [id] = eventBus.testOn(fieldName, type, callback);
+
+      expect(eventBus.getEvents()).toEqual({ [`${fieldName}_${type}`]: { [id]: callback } });
+
+      eventBus.clear();
+
+      expect(eventBus.getEvents()).toEqual({});
+    });
+
     it('detach', () => {
       const [id, detach] = eventBus.testOn(fieldName, type, callback);
 
