@@ -64,7 +64,6 @@ export type StateFormErrorTypes = 'hover' | 'validate' | 'all' | string;
 
 /** --- return types --- */
 
-// export type StateFormErrors = { [s: string]: StateFormDefinedErrorsType };
 export type StateFormErrors = Record<string, StateFormDefinedErrorsType>;
 
 export type StateFormOnSubmitType<FormValues> = (
@@ -87,6 +86,11 @@ export type StateFormInputOptionsType = {
   trigger?: boolean;
   stayAliveAfterUnregister?: boolean;
 } & StateFormDataTypesSpecificPropertiesType;
+
+export type StateFormInputCommonProps = Pick<
+  StateFormInputOptionsType,
+  'errorLabel' | 'disabled' | 'required' | 'stayAliveAfterUnregister'
+>;
 
 export type StateFormOnChange = (
   name: string,
