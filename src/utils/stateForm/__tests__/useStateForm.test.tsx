@@ -3,13 +3,11 @@ import { renderHook } from '@testing-library/react';
 import { StateFormRegisterOptions } from '../types';
 import { stateFormErrorsRequiredMessage } from '../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../index';
-import { get, SafeAnyType, set, omit } from '../outerDependencies';
+import { omit } from '../outerDependencies';
 import {
   stateFormErrorsTextMaxLengthMessage,
   stateFormErrorsTextMinLengthMessage,
 } from 'src/utils/stateForm/dataTypes/text';
-import { StateFormPath } from 'src/utils/stateForm/types/path';
-import { formStateInnerCloneDeep } from 'src/utils/stateForm/helpers/cloneDeep';
 
 type FormValues = {
   strValue: string;

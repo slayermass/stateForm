@@ -1,68 +1,27 @@
 import React from 'react';
-import { useStateForm } from 'src/utils/stateForm';
-import { useStateFormFieldArray } from 'src/utils/stateForm/helpers/useStateFormFieldArray';
 
-type FormValues = {
-  nested: { id: number; label: string }[];
-};
+import { TestForm } from 'src/TestComponents';
 
 const App = () => {
-  const formProps = useStateForm<FormValues>({
-    defaultValues: {
-      nested: [],
-    },
-  });
-
-  const { fields, append, remove } = useStateFormFieldArray<FormValues['nested']>({
-    formProps,
-    name: 'nested',
-  });
+  const [showMoreForms, setShowMoreForms] = React.useState(false);
 
   return (
     <div className="App">
-      <form
-        onSubmit={formProps.onSubmit(
-          (data) => {
-            // eslint-disable-next-line no-console
-            console.log('OK', data);
-          },
-          (data) => {
-            // eslint-disable-next-line no-console
-            console.log('ERROR', data);
-          },
-        )}
-      >
-        <input type="text" name="testText" />
+      <TestForm index={1} />
+      <TestForm index={2} />
+      <TestForm index={3} />
 
-        {fields.map((item, index) => (
-          // eslint-disable-next-line no-underscore-dangle
-          <div key={item.getId()} style={{ display: 'flex', alignItems: 'center' }}>
-            <div>{item.label}</div>
-            <button
-              type="button"
-              onClick={() => {
-                remove(index);
-              }}
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          onClick={() => {
-            const id = Math.random();
+      <button type="button" onClick={() => setShowMoreForms(!showMoreForms)}>
+        Toggle more
+      </button>
 
-            append({
-              id,
-              label: `label_${id}`,
-            });
-          }}
-        >
-          Append
-        </button>
-        <button type="submit">Submit</button>
-      </form>
+      {showMoreForms && (
+        <>
+          <TestForm index={4} />
+          <TestForm index={5} />
+          <TestForm index={6} />
+        </>
+      )}
     </div>
   );
 };

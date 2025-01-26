@@ -82,12 +82,42 @@ export type StateFormReturnType<FormValues extends StateFormUnknownFormType = Sa
   getInitialValue: StateFormGetValue<FormValues>;
 };
 
+/** initialValues */
+let initialValues: StateFormUnknownFormType = {};
+
+const setInitialValues = <D extends StateFormUnknownFormType>(data?: D) => {
+  if (typeof data === 'object' && data !== null) {
+    initialValues = data;
+  }
+};
+/** end initialValues */
+
+/** formState */
+let formState: StateFormUnknownFormType = {};
+
+const setFormState = <D extends StateFormUnknownFormType>(data?: D) => {
+  if (typeof data === 'object' && data !== null) {
+    formState = formStateInnerCloneDeep(data);
+  }
+};
+/** end formState */
+
 export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   defaultValues,
   mode = 'onBlur',
   typeCheckOnSetValue = true,
 }: StateFormOptionsType<FormValues> = {}): StateFormReturnType<FormValues> => {
-  const initialValues = useRef(defaultValues || ({} as FormValues));
+  // set initial and form values at start
+  useEffect(() => {
+    setInitialValues<FormValues>(defaultValues as FormValues);
+    setFormState<FormValues>(initialValues as FormValues);
+
+    return () => {
+      setInitialValues<FormValues>({} as FormValues);
+      setFormState<FormValues>({} as FormValues);
+    };
+    // eslint-disable-next-line
+  }, []);
 
   /** form eventBus */
   const instanceEventBus = useRef<EventBusReturnType | null>(null);
@@ -106,7 +136,6 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   })();
 
   /** form data storage */
-  const formState = useRef<FormValues>(formStateInnerCloneDeep(initialValues.current as FormValues));
 
   /** form errors storage */
   const errors = useRef<StateFormErrors>({});
@@ -144,7 +173,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     [],
   );
 
-  const getAllValues = useCallback(() => formStateInnerCloneDeep(formState.current), []);
+  const getAllValues = useCallback(() => formStateInnerCloneDeep(formState), []);
 
   const setFieldOptionsValue = useCallback(
     (
@@ -159,13 +188,10 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
     [],
   );
 
-  const checkDirtyField = useCallback(
-    (name: string) => !equal(get(initialValues.current, name), get(formState.current, name)),
-    [],
-  );
+  const checkDirtyField = useCallback((name: string) => !equal(get(initialValues, name), get(formState, name)), []);
 
   const innerGetValue: StateFormInnerGetValue = useCallback(
-    (name) => formStateInnerCloneDeep(get(formState.current, name)),
+    (name) => formStateInnerCloneDeep(get(formState, name)),
     [],
   );
 
@@ -182,11 +208,11 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   const changeStateForm = useCallback(
     (name: string, value: SafeAnyType) => {
-      const previousFormState = formStateInnerCloneDeep(formState.current);
+      const previousFormState = formStateInnerCloneDeep(formState);
 
-      set(formState.current, name, value);
+      set(formState, name, value);
 
-      const diffStateValue = diff(previousFormState, formState.current);
+      const diffStateValue = diff(previousFormState, formState);
 
       if (!isEmpty(diffStateValue)) {
         const cloneObjOrArray = (value: SafeAnyType) =>
@@ -216,10 +242,10 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
         if (eventBus) {
           getNames(diffStateValue).forEach((name) => {
-            eventBus.emit(name, 'change', cloneObjOrArray(get(formState.current, name)));
+            eventBus.emit(name, 'change', cloneObjOrArray(get(formState, name)));
           });
 
-          eventBus.emit(FORM_ID, 'change', cloneObjOrArray(formState.current));
+          eventBus.emit(FORM_ID, 'change', cloneObjOrArray(formState));
         }
       }
     },
@@ -405,8 +431,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   const onChange: StateFormOnChange = useCallback(
     (name, value, options) => {
-      const newValue =
-        options?.merge === true ? formStateInnerCloneDeep(merge(get(formState.current, name), value)) : value;
+      const newValue = options?.merge === true ? formStateInnerCloneDeep(merge(get(formState, name), value)) : value;
 
       changeStateForm(name, newValue);
 
@@ -489,8 +514,8 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         value = options.changedInitialValue(value);
       }
 
-      if (!has(initialValues.current, name)) {
-        set(initialValues.current, name, value);
+      if (!has(initialValues, name)) {
+        set(initialValues, name, value);
       }
 
       /** set the current value whatever it may be to have all the values registered */
@@ -507,7 +532,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
         setFieldOptionsValue(name, false, 'active');
         setFieldOptionsValue(name, false, 'isDirty');
 
-        formState.current = omit(formState.current, name) as FormValues;
+        setFormState(omit(formState, name) as FormValues);
         fieldsOptions.current = omit(fieldsOptions.current, name);
 
         clearErrors(name);
@@ -592,7 +617,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
           if (isPlainObject(currentValue)) {
             fn(currentValue, name);
           } else {
-            const value = get(values || initialValues.current, name);
+            const value = get(values || initialValues, name);
 
             changeStateForm(name, value);
 
@@ -614,14 +639,12 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
           }
         });
 
-      fn(values || formState.current);
+      fn(values || formState);
 
       if (options?.resetInitialForm && values) {
         const preparedValues = formStateInnerCloneDeep(values);
 
-        initialValues.current = options?.mergeWithPreviousState
-          ? { ...initialValues.current, ...preparedValues }
-          : preparedValues;
+        setInitialValues(options?.mergeWithPreviousState ? { ...initialValues, ...preparedValues } : preparedValues);
       }
     },
     [changeStateForm, clearErrors, getFieldOptionsValue, setFieldOptionsValue, validateInput],
@@ -763,8 +786,8 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   const getInitialValue = useCallback((names?: StateFormPath<FormValues> | StateFormPath<FormValues>[]) => {
     if (!names) {
       const getAllInitialValues = () =>
-        Object.keys(initialValues.current).reduce<SafeAnyType>((acc, key) => {
-          acc[key] = initialValues.current[key];
+        Object.keys(initialValues).reduce<SafeAnyType>((acc, key) => {
+          acc[key] = initialValues[key];
 
           return acc;
         }, {});
@@ -772,7 +795,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
       return getAllInitialValues();
     }
 
-    const getInitialValue: StateFormInnerGetValue = (name) => formStateInnerCloneDeep(get(initialValues.current, name));
+    const getInitialValue: StateFormInnerGetValue = (name) => formStateInnerCloneDeep(get(initialValues, name));
 
     if (isString(names)) {
       return getInitialValue(names);
