@@ -501,10 +501,9 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   const unregister: StateFormUnregister = useCallback(
     (name) => {
-      const inputOptions = getFieldOptionsValue(name, 'options');
+      const stayAliveAfterUnmount = getFieldOptionsValue(name, 'options')?.stayAliveAfterUnmount;
 
-      if (!inputOptions?.stayAliveAfterUnregister) {
-        setFieldOptionsValue(name, false, 'active');
+      if (!stayAliveAfterUnmount) {
         setFieldOptionsValue(name, false, 'isDirty');
 
         formState.current = omit(formState.current, name) as FormValues;
@@ -512,6 +511,10 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
         clearErrors(name);
       }
+
+      // the field is not active anyway
+      // disables the validation
+      setFieldOptionsValue(name, false, 'active');
     },
     [clearErrors, getFieldOptionsValue, setFieldOptionsValue],
   );

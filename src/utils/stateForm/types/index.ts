@@ -85,7 +85,7 @@ export type StateFormInputOptionsType = {
   errorLabel?: string;
 
   trigger?: boolean;
-  stayAliveAfterUnregister?: boolean;
+  stayAliveAfterUnmount?: boolean;
 } & StateFormDataTypesSpecificPropertiesType;
 
 export type StateFormOnChange = (
