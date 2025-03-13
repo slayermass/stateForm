@@ -480,9 +480,9 @@ describe('useStateForm', () => {
       expect(formProps.getStatus().isDirty).toEqual(false);
     });
 
-    it('stayAliveAfterUnregister', () => {
+    it('stayAliveAfterUnmount', () => {
       formProps.register('strValue', 'text', {
-        stayAliveAfterUnregister: true,
+        stayAliveAfterUnmount: true,
       });
 
       // formProps.setError('strValue', 'a'); // error disappears
