@@ -18,13 +18,11 @@ export const formStateGenerateErrors = (
   fieldType: StateFormFieldsType,
   name: string,
 ): string[] => {
-  const errorLabel = validationOptions?.errorLabel || name;
-
-  const errorsToSet: string[] = []; // the array to collect errors
-
   if (process.env.NODE_ENV !== 'production' && !stateFormInnerValidators[fieldType]?.isSet) {
     throw new Error(`Validator is not set for type "${fieldType}"`);
   }
+
+  const errorLabel = validationOptions?.errorLabel || name;
 
   // "as SafeAnyType" = StateFormPossibleValue -> to the specific type of the validator
   const hasValidValue = !!stateFormInnerValidators[fieldType]?.isSet(value as SafeAnyType);
@@ -47,6 +45,8 @@ export const formStateGenerateErrors = (
   if (!innerValidatorsResponse && isBoolean(innerValidatorsResponse)) {
     return [i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel })];
   }
+
+  const errorsToSet: string[] = []; // the array to collect errors
 
   /** custom validate */
   if (validationOptions?.validate) {
