@@ -1,5 +1,7 @@
 import { SyntheticEvent } from 'react';
+
 import { SafeAnyType } from 'src/utils/safeAny';
+import { StateFormReturnType } from 'src/utils/stateForm';
 import { EventBusFieldEventType, EventBusReturnType } from 'src/utils/stateForm/eventBus';
 import {
   StateFormDataTypesFieldsType,
@@ -30,7 +32,7 @@ export type StateFormEmptyValueType = null | undefined;
 
 export const stateFormEmptyValues: StateFormEmptyValueType[] = [null, undefined];
 
-export const stateFormIsValueInnerEmpty = (value: SafeAnyType): boolean => {
+export const isStateFormValueEmpty = (value: StateFormPossibleValue): boolean => {
   for (let i = 0; i < stateFormEmptyValues.length; i += 1) {
     if (stateFormEmptyValues[i] === value) {
       return true;
@@ -80,13 +82,22 @@ export type StateFormInputOptionsType = {
 
   requiredMessage?: string;
   // true is OK, false is a validate error; string is a custom error
-  validate?: (value: StateFormPossibleValue) => boolean | string;
+  // if set, disables basic validation. e.g. manual error handling
+  validate?: (value: StateFormPossibleValue, name: string) => boolean | string;
   changedInitialValue?: (value: StateFormPossibleValue) => StateFormPossibleValue;
   errorLabel?: string;
 
   trigger?: boolean;
   stayAliveAfterUnmount?: boolean;
 } & StateFormDataTypesSpecificPropertiesType;
+
+export type StateFormInputCommonProps = Pick<
+  StateFormInputOptionsType,
+  'errorLabel' | 'disabled' | 'required' | 'stayAliveAfterUnmount' | 'validate'
+> & {
+  formProps: StateFormReturnType;
+  name: string;
+};
 
 export type StateFormOnChange = (
   name: string,

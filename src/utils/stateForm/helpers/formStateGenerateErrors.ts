@@ -12,6 +12,8 @@ export const stateFormErrorsRequiredMessage = 'common.validation.required';
 
 export const stateFormErrorsCommonInvalidMessage = 'common.validation.invalid';
 
+export const stateFormErrorsCommonValidateMessage = 'common.validation.validate';
+
 export const formStateGenerateErrors = (
   value: StateFormPossibleValue,
   validationOptions: StateFormInputOptionsType,
@@ -23,6 +25,22 @@ export const formStateGenerateErrors = (
   }
 
   const errorLabel = validationOptions?.errorLabel || name;
+
+  /**
+   * report the validated errors first if set
+   * otherwise do the common validation
+   */
+  if (validationOptions?.validate) {
+    const validateResponse = validationOptions.validate(value, name);
+
+    if (validateResponse === false) {
+      return [i18next.t(stateFormErrorsCommonValidateMessage, { label: errorLabel })];
+    }
+
+    if (typeof validateResponse === 'string') {
+      return [validateResponse];
+    }
+  }
 
   // "as SafeAnyType" = StateFormPossibleValue -> to the specific type of the validator
   const hasValidValue = !!stateFormInnerValidators[fieldType]?.isSet(value as SafeAnyType);
@@ -46,18 +64,5 @@ export const formStateGenerateErrors = (
     return [i18next.t(stateFormErrorsCommonInvalidMessage, { label: errorLabel })];
   }
 
-  const errorsToSet: string[] = []; // the array to collect errors
-
-  /** custom validate */
-  if (validationOptions?.validate) {
-    const validateResponse = validationOptions.validate(value);
-
-    if (validateResponse === false) {
-      errorsToSet.push(i18next.t('common.validation.validate', { label: errorLabel }));
-    } else if (typeof validateResponse === 'string') {
-      errorsToSet.push(validateResponse);
-    }
-  }
-
-  return errorsToSet;
+  return [];
 };

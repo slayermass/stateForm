@@ -5,7 +5,7 @@ import {
   stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
 } from 'src/utils/stateForm/helpers/formStateGenerateErrors';
-import { stateFormEmptyValues, StateFormEmptyValueType, stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
+import { stateFormEmptyValues, StateFormEmptyValueType, isStateFormValueEmpty } from 'src/utils/stateForm/types';
 
 import { StateFormCheckBoxGroupType } from './index';
 import { StateFormReturnType, useStateForm } from '../../index';
@@ -62,7 +62,7 @@ describe(typeName, () => {
     it('test valid values. required', () => {
       validChecker({
         formProps,
-        values: possibleValidValues.filter((v) => !stateFormIsValueInnerEmpty(v)),
+        values: possibleValidValues.filter((v) => !isStateFormValueEmpty(v)),
         registerOptions: {
           required: true,
         },

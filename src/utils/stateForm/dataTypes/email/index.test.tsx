@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 
 import { baseLeftTestChecker, baseRightTestChecker } from 'src/utils/stateForm/dataTypes/baseTests';
-import { stateFormEmptyValues, StateFormEmptyValueType, stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
+import { stateFormEmptyValues, StateFormEmptyValueType, isStateFormValueEmpty } from 'src/utils/stateForm/types';
 
 import {
   StateFormEmailType,
@@ -66,7 +66,7 @@ describe(typeName, () => {
     it('test valid values. required', () => {
       validChecker({
         formProps,
-        values: possibleValidValues.filter((v) => !stateFormIsValueInnerEmpty(v)),
+        values: possibleValidValues.filter((v) => !isStateFormValueEmpty(v)),
         registerOptions: {
           required: true,
         },
@@ -81,7 +81,7 @@ describe(typeName, () => {
         formProps,
         values: possibleValidValues.filter(
           (v) =>
-            !stateFormIsValueInnerEmpty(v) &&
+            !isStateFormValueEmpty(v) &&
             (v as StateFormEmailType['value']).length >= minLength &&
             (v as StateFormEmailType['value']).length <= maxLength,
         ),
@@ -100,7 +100,7 @@ describe(typeName, () => {
         formProps,
         values: possibleValidValues.filter(
           (v) =>
-            !stateFormIsValueInnerEmpty(v) &&
+            !isStateFormValueEmpty(v) &&
             (v as StateFormEmailType['value']).length >= minLength &&
             (v as StateFormEmailType['value']).length <= maxLength,
         ),

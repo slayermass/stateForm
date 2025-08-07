@@ -2,7 +2,7 @@ import { renderHook } from '@testing-library/react';
 
 import { baseLeftTestChecker, baseRightTestChecker } from 'src/utils/stateForm/dataTypes/baseTests';
 import { StateFormRichTextType } from 'src/utils/stateForm/dataTypes/richText/index';
-import { stateFormEmptyValues, StateFormEmptyValueType, stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
+import { stateFormEmptyValues, StateFormEmptyValueType, isStateFormValueEmpty } from 'src/utils/stateForm/types';
 
 import {
   stateFormErrorsCommonInvalidMessage,
@@ -65,7 +65,7 @@ describe(typeName, () => {
     it('test valid values. required', () => {
       validChecker({
         formProps,
-        values: possibleValidValues.filter((v) => !stateFormIsValueInnerEmpty(v)),
+        values: possibleValidValues.filter((v) => !isStateFormValueEmpty(v)),
         registerOptions: {
           required: true,
         },

@@ -1,4 +1,25 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { EventBusReturnType, getEventBus } from './eventBus';
+import { formStateInnerCloneDeep } from './helpers/cloneDeep';
+import { formStateGenerateErrors } from './helpers/formStateGenerateErrors';
+
+import {
+  diff,
+  equal,
+  get,
+  getUniqueId,
+  has,
+  isArray,
+  isEmpty,
+  isFunction,
+  isNumber,
+  isPlainObject,
+  isString,
+  merge,
+  omit,
+  SafeAnyType,
+  set,
+} from './outerDependencies';
 
 import { stateFormInnerValidators, StateFormPossibleValue, stateFormValuesOfArrayType } from './setDataTypes';
 import {
@@ -16,7 +37,7 @@ import {
   StateFormGetSubscribeProps,
   StateFormGetValue,
   StateFormInnerGetValue,
-  stateFormIsValueInnerEmpty,
+  isStateFormValueEmpty,
   StateFormOnBlur,
   StateFormOnChange,
   StateFormOnSubmitType,
@@ -34,27 +55,6 @@ import {
   StateFormUnknownFormType,
   StateFormUnregister,
 } from './types';
-import { formStateInnerCloneDeep } from './helpers/cloneDeep';
-import { formStateGenerateErrors } from './helpers/formStateGenerateErrors';
-import { EventBusReturnType, getEventBus } from './eventBus';
-
-import {
-  diff,
-  equal,
-  get,
-  getUniqueId,
-  has,
-  isArray,
-  isEmpty,
-  isFunction,
-  isPlainObject,
-  isString,
-  merge,
-  omit,
-  SafeAnyType,
-  set,
-  isNumber,
-} from './outerDependencies';
 import { StateFormPath, StateFormPathValues } from './types/path';
 
 /** --- end return types --- */
@@ -94,15 +94,11 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   // lazy ref init
   const eventBus = (() => {
-    if (instanceEventBus.current !== null) {
-      return instanceEventBus.current;
+    if (instanceEventBus.current === null) {
+      instanceEventBus.current = getEventBus();
     }
 
-    const newInstance = getEventBus();
-
-    instanceEventBus.current = newInstance;
-
-    return newInstance;
+    return instanceEventBus.current;
   })();
 
   /** form data storage */
@@ -214,13 +210,11 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
           return parentName ? [parentName] : [];
         };
 
-        if (eventBus) {
-          getNames(diffStateValue).forEach((name) => {
-            eventBus.emit(name, 'change', cloneObjOrArray(get(formState.current, name)));
-          });
+        getNames(diffStateValue).forEach((name) => {
+          eventBus.emit(name, 'change', cloneObjOrArray(get(formState.current, name)));
+        });
 
-          eventBus.emit(FORM_ID, 'change', cloneObjOrArray(formState.current));
-        }
+        eventBus.emit(FORM_ID, 'change', cloneObjOrArray(formState.current));
       }
     },
     [eventBus, FORM_ID],
@@ -264,7 +258,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
   const emitErrors = useCallback(
     (name: string, customErrors?: StateFormDefinedErrorsType) =>
-      eventBus?.emit(name, 'error', customErrors || getErrors(name as StateFormPath<FormValues>)),
+      eventBus.emit(name, 'error', customErrors || getErrors(name as StateFormPath<FormValues>)),
     [eventBus, getErrors],
   );
 
@@ -444,7 +438,7 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
 
           const fieldType = getFieldOptionsValue(name, 'type');
 
-          if (isRequired && !stateFormIsValueInnerEmpty(value) && !stateFormInnerValidators[fieldType].isSet(value)) {
+          if (isRequired && !isStateFormValueEmpty(value) && !stateFormInnerValidators[fieldType].isSet(value)) {
             throw new Error(`Trying to set wrong value "${value}" of type "${typeof value}" to type "${fieldType}"`);
           }
         }
@@ -743,10 +737,6 @@ export const useStateForm = <FormValues extends StateFormUnknownFormType>({
   const getSubscribeProps: StateFormGetSubscribeProps = useCallback(
     (eventType, names) => [
       (callback: (value: SafeAnyType, fieldName: string) => void) => {
-        if (!eventBus) {
-          return [];
-        }
-
         /* callback when subscribed to all form values */
         if (!names) {
           return [eventBus.on(FORM_ID, eventType, callback)];
