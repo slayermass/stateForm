@@ -1,7 +1,10 @@
 import { renderHook } from '@testing-library/react';
 
 import { StateFormRegisterOptions } from '../types';
-import { stateFormErrorsRequiredMessage } from '../helpers/formStateGenerateErrors';
+import {
+  stateFormErrorsCommonValidateMessage,
+  stateFormErrorsRequiredMessage,
+} from '../helpers/formStateGenerateErrors';
 import { StateFormReturnType, useStateForm } from '../index';
 import { get, SafeAnyType, set, omit } from '../outerDependencies';
 import {
@@ -428,15 +431,27 @@ describe('useStateForm', () => {
       );
     });
 
+    // validate returns false - return a validation error
     it('required + validate (false)', () => {
       checkerFn(
         {
           validate: () => false,
         },
+        stateFormErrorsCommonValidateMessage,
+      );
+    });
+
+    // validate returns true - common validation works
+    it('required + validate (true)', () => {
+      checkerFn(
+        {
+          validate: () => true,
+        },
         stateFormErrorsRequiredMessage,
       );
     });
 
+    // validate returns string - return the string
     it('required + validate (string)', () => {
       checkerFn(
         {

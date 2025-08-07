@@ -1,5 +1,5 @@
 import { StateFormValidatorType } from 'src/utils/stateForm/dataTypes/types';
-import { stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
+import { isStateFormValueEmpty } from 'src/utils/stateForm/types';
 import { isArray, isDate } from '../../outerDependencies';
 
 export const stateFormErrorsDateRangeMinMessage = 'common.validation.minDate';
@@ -21,7 +21,7 @@ const validators: StateFormValidatorType<
     }
 
     if (!validationOptions.required) {
-      if (stateFormIsValueInnerEmpty(value)) {
+      if (isStateFormValueEmpty(value)) {
         return true;
       }
       if (!validators.isSet(value)) {

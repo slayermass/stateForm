@@ -1,4 +1,4 @@
-import { stateFormIsValueInnerEmpty } from '../../types';
+import { isStateFormValueEmpty } from '../../types';
 import { isBoolean } from '../../outerDependencies';
 import { StateFormValidatorType } from '../types';
 
@@ -17,7 +17,7 @@ const validators: StateFormValidatorType<
     }
 
     if (!validationOptions.required) {
-      if (stateFormIsValueInnerEmpty(value)) {
+      if (isStateFormValueEmpty(value)) {
         return true;
       }
       if (!validators.isSet(value)) {

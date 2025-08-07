@@ -1,7 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { baseLeftTestChecker, baseRightTestChecker } from 'src/utils/stateForm/dataTypes/baseTests';
 
-import { stateFormEmptyValues, StateFormEmptyValueType, stateFormIsValueInnerEmpty } from 'src/utils/stateForm/types';
+import { stateFormEmptyValues, StateFormEmptyValueType, isStateFormValueEmpty } from 'src/utils/stateForm/types';
 import {
   stateFormErrorsCommonInvalidMessage,
   stateFormErrorsRequiredMessage,
@@ -67,7 +67,7 @@ describe('text + textarea', () => {
     it('test valid values. required', () => {
       validChecker({
         formProps,
-        values: possibleValidValues.filter((v) => !stateFormIsValueInnerEmpty(v)),
+        values: possibleValidValues.filter((v) => !isStateFormValueEmpty(v)),
         registerOptions: {
           required: true,
         },
@@ -82,7 +82,7 @@ describe('text + textarea', () => {
         formProps,
         values: possibleValidValues.filter(
           (v) =>
-            !stateFormIsValueInnerEmpty(v) &&
+            !isStateFormValueEmpty(v) &&
             (v as StateFormTextType['value']).length >= minLength &&
             (v as StateFormTextType['value']).length <= maxLength,
         ),
@@ -101,7 +101,7 @@ describe('text + textarea', () => {
         formProps,
         values: possibleValidValues.filter(
           (v) =>
-            !stateFormIsValueInnerEmpty(v) &&
+            !isStateFormValueEmpty(v) &&
             (v as StateFormTextType['value']).length >= minLength &&
             (v as StateFormTextType['value']).length <= maxLength,
         ),
